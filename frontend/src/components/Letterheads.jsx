@@ -1724,15 +1724,15 @@ function callerInitials(name) {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
+const VOICEMAIL_SPEEDS = [0.75, 1, 1.25];
+
 function VoicemailCard({ letterhead, replayNonce = 0 }) {
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [showTranscript, setShowTranscript] = useState(false);
-  const [speedIdx, setSpeedIdx] = useState(1); // index into SPEEDS
-
-  const SPEEDS = [0.75, 1, 1.25];
+  const [speedIdx, setSpeedIdx] = useState(1); // index into VOICEMAIL_SPEEDS
 
   const accent = letterhead.avatar_color || "#4F46E5";
   const hasAudio = Boolean(letterhead.audio_url);
@@ -1766,8 +1766,8 @@ function VoicemailCard({ letterhead, replayNonce = 0 }) {
 
   // Apply playback rate
   useEffect(() => {
-    if (audioRef.current) audioRef.current.playbackRate = SPEEDS[speedIdx];
-  }, [speedIdx, SPEEDS]);
+    if (audioRef.current) audioRef.current.playbackRate = VOICEMAIL_SPEEDS[speedIdx];
+  }, [speedIdx]);
 
   // External replay trigger (e.g. user pressed the "hear options again" keypad key)
   useEffect(() => {
@@ -1778,7 +1778,7 @@ function VoicemailCard({ letterhead, replayNonce = 0 }) {
     a.play().catch(() => {});
   }, [replayNonce]);
 
-  const cycleSpeed = () => setSpeedIdx((i) => (i + 1) % SPEEDS.length);
+  const cycleSpeed = () => setSpeedIdx((i) => (i + 1) % VOICEMAIL_SPEEDS.length);
 
   const togglePlay = () => {
     const a = audioRef.current;
