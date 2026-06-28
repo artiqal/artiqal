@@ -2,11 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "@/lib/api";
 import { getActivityHref } from "@/lib/activityIndex";
-import { getDomainTheme } from "@/lib/domainThemes";
+import { DOMAIN_NAV_ITEMS, getDomainTheme } from "@/lib/domainThemes";
 import { Header } from "@/components/Header";
 import {
   ArrowLeft,
   ArrowRight,
+  Brain,
   ChevronDown,
   ChevronRight,
   Clock,
@@ -42,6 +43,9 @@ const CATEGORY_VISUALS = {
   },
   "functional-communication": {
     icon: MessageCircle,
+  },
+  "cognitive-communication": {
+    icon: Brain,
   },
   "sfa-therapy": {
     icon: Target,
@@ -90,10 +94,31 @@ export default function CategoryPage() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([api.get("/categories"), api.get(`/categories/${slug}/activities`)])
+    Promise.all([
+      api.get("/categories").catch(() => ({ data: [] })),
+      api.get(`/categories/${slug}/activities`).catch(() => ({ data: [] })),
+    ])
       .then(([c, a]) => {
         if (cancelled) return;
-        setCategory(c.data.find((x) => x.slug === slug) || null);
+        const apiCategory = c.data.find((x) => x.slug === slug) || null;
+        const sharedCategory = DOMAIN_NAV_ITEMS.find((x) => x.slug === slug) || null;
+        const normalizeCategory = (item) =>
+          item
+            ? {
+                ...item,
+                title: item.title || item.name,
+                name: item.name || item.title,
+                description: item.description || item.fallback,
+              }
+            : null;
+        const fallbackCategory = sharedCategory
+          ? {
+              ...sharedCategory,
+              title: sharedCategory.name,
+              description: sharedCategory.description || sharedCategory.fallback,
+            }
+          : null;
+        setCategory(normalizeCategory(apiCategory) || fallbackCategory);
         setActivities(a.data);
       })
       .catch(() => setError("Could not load this category."));
@@ -288,11 +313,12 @@ export default function CategoryPage() {
         </div>
 
         {/* Activity cards */}
-        <ul
-          className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
-          data-testid="activity-list"
-        >
-          {sortedActivities.map((a, idx) => {
+        {sortedActivities.length ? (
+          <ul
+            className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+            data-testid="activity-list"
+          >
+            {sortedActivities.map((a, idx) => {
             const spec = ACTIVITY_ICONS[a.slug] || FALLBACK_ICON;
             const IconCmp = spec.icon;
             return (
@@ -367,8 +393,23 @@ export default function CategoryPage() {
                 </Link>
               </li>
             );
-          })}
-        </ul>
+            })}
+          </ul>
+        ) : (
+          <div
+            className="mt-8 rounded-3xl bg-white p-8 sm:p-10 text-center"
+            style={{
+              border: "1px solid #F0F0F4",
+              boxShadow: "0 18px 55px rgba(31,28,85,0.07)",
+            }}
+            data-testid="category-empty-state"
+          >
+            <h3 className="font-display text-xl font-bold text-zinc-950">No activities yet.</h3>
+            <p className="mt-2 text-sm text-zinc-500">
+              New {category?.name || "category"} activities will appear here when they are added.
+            </p>
+          </div>
+        )}
       </main>
     </div>
   );

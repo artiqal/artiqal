@@ -3,15 +3,29 @@ import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
 import { Header } from "@/components/Header";
 import { DOMAIN_NAV_ITEMS, getDomainTheme } from "@/lib/domainThemes";
+import { useActivitySort } from "@/contexts/ActivitySortContext";
+import aiPracticeIllustration from "@/assets/domain-ai-practice.png";
+import auditoryComprehensionIllustration from "@/assets/domain-auditory-comprehension.png";
+import cognitiveCommunicationIllustration from "@/assets/domain-cognitive-communication.png";
+import dysphagiaIllustration from "@/assets/domain-dysphagia.png";
+import functionalCommunicationIllustration from "@/assets/domain-functional-communication.png";
+import gamesIllustration from "@/assets/domain-games.png";
+import motorSpeechIllustration from "@/assets/domain-motor-speech.png";
+import readingIllustration from "@/assets/domain-reading.png";
+import voiceIllustration from "@/assets/domain-voice.png";
+import wordFindingIllustration from "@/assets/domain-word-finding.png";
+import writingIllustration from "@/assets/domain-writing.png";
 import {
   ArrowUpRight,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Lightbulb,
   Search,
-  SlidersHorizontal,
   Type,
 } from "lucide-react";
 import { buildActivityIndex, getActivityHref, normalizeSearchQuery, searchActivityIndex } from "@/lib/activityIndex";
+import { getActivitySortCapabilities, getActivitySortOptions, sortActivities } from "@/lib/activitySort";
 
 const GRADIENTS = {
   reading: "linear-gradient(135deg,#0EA5E9 0%,#6366F1 60%,#8B5CF6 100%)",
@@ -25,53 +39,71 @@ const GRADIENTS = {
 
 const DEFAULT_CARD_ICON = Type;
 
-const HUB_CATEGORIES = DOMAIN_NAV_ITEMS.map((category) => {
+const DOMAIN_CARD_ILLUSTRATIONS = {
+  "ai-practice": aiPracticeIllustration,
+  "auditory-comprehension": auditoryComprehensionIllustration,
+  "cognitive-communication": cognitiveCommunicationIllustration,
+  dysphagia: dysphagiaIllustration,
+  "functional-communication": functionalCommunicationIllustration,
+  games: gamesIllustration,
+  "motor-speech": motorSpeechIllustration,
+  reading: readingIllustration,
+  voice: voiceIllustration,
+  "word-finding": wordFindingIllustration,
+  writing: writingIllustration,
+};
+
+const DOMAIN_CARD_DESCRIPTIONS = {
+  "ai-practice": "AI-powered activities",
+  "auditory-comprehension": "Instructions and spoken information",
+  "cognitive-communication": "Memory, attention, and planning",
+  dysphagia: "Swallowing support resources",
+  "functional-communication": "Real-world communication practice",
+  games: "Playful clinical practice",
+  "motor-speech": "Speech clarity and control",
+  reading: "Functional reading practice",
+  voice: "Voice and resonance practice",
+  "word-finding": "Naming, cueing, and associations",
+  writing: "Messages, forms, and sentences",
+};
+
+const ACTIVITY_LIBRARY_TIPS = [
+  "Tip: Click a domain once to filter, then click it again to reset.",
+  "Tip: Use Sort by to quickly organise your session options.",
+  "Tip: Search by activity, goal, or skill.",
+  "Tip: Sort activities A–Z or by duration.",
+  "Tip: Use domains to narrow your session plan.",
+  "Tip: Favourite activities you use often.",
+];
+
+const DOMAIN_CARD_LABELS = {
+  "auditory-comprehension": "Listening",
+};
+
+const EXTRA_HUB_CATEGORIES = [
+  {
+    slug: "ai-practice",
+    name: "AI Practice",
+    route: "/activity/reading/ai-scenario",
+    fallback: "AI-powered activities",
+  },
+];
+
+const HUB_CATEGORIES = [...DOMAIN_NAV_ITEMS, ...EXTRA_HUB_CATEGORIES].map((category) => {
   const theme = getDomainTheme(category.slug);
   return {
     slug: category.slug,
     label: category.name,
     href: category.route,
-    icon: category.hubCardIcon,
+    icon: category.hubCardIcon || DEFAULT_CARD_ICON,
     accent: theme.accent,
+    hoverGlow: theme.hoverGlow || theme.accent,
     tint: theme.iconTint,
+    blob: theme.blobGradient || theme.bannerGradient,
+    illustration: DOMAIN_CARD_ILLUSTRATIONS[category.slug],
     fallback: category.fallback,
   };
 });
-
-const getActivityTitle = (activity) => activity.title || "";
-
-const getActivityDuration = (activity) => {
-  const value =
-    activity.duration_min ??
-    activity.durationMin ??
-    activity.estimated_minutes ??
-    activity.estimatedMinutes;
-  const duration = Number(value);
-  return Number.isFinite(duration) ? duration : null;
-};
-
-const getActivityDate = (activity) => {
-  const value =
-    activity.created_at ??
-    activity.createdAt ??
-    activity.added_at ??
-    activity.addedAt;
-  if (!value) return null;
-  const timestamp = new Date(value).getTime();
-  return Number.isFinite(timestamp) ? timestamp : null;
-};
-
-const getActivityUsage = (activity) => {
-  const value =
-    activity.usage_count ??
-    activity.usageCount ??
-    activity.use_count ??
-    activity.useCount ??
-    activity.times_used ??
-    activity.timesUsed;
-  const usage = Number(value);
-  return Number.isFinite(usage) ? usage : null;
-};
 
 export default function AllActivities() {
   const [items, setItems] = useState([]);
@@ -79,10 +111,14 @@ export default function AllActivities() {
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortMode, setSortMode] = useState("relevance");
+  const [activityLibraryTipIndex, setActivityLibraryTipIndex] = useState(0);
+  const [tipVisible, setTipVisible] = useState(true);
   const categoryRowRef = useRef(null);
   const preservedScrollYRef = useRef(null);
   const sortMenuRef = useRef(null);
+  const tipSwapTimeoutRef = useRef(null);
   const [sortOpen, setSortOpen] = useState(false);
+  const { registerActivitySortControls } = useActivitySort();
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
@@ -91,6 +127,23 @@ export default function AllActivities() {
       setItems(a.data);
       setCategories(c.data.filter((x) => x.slug !== "all-activities"));
     });
+  }, []);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setTipVisible(false);
+      tipSwapTimeoutRef.current = window.setTimeout(() => {
+        setActivityLibraryTipIndex((index) => (index + 1) % ACTIVITY_LIBRARY_TIPS.length);
+        setTipVisible(true);
+      }, 180);
+    }, 2800);
+
+    return () => {
+      window.clearInterval(interval);
+      if (tipSwapTimeoutRef.current) {
+        window.clearTimeout(tipSwapTimeoutRef.current);
+      }
+    };
   }, []);
 
   const updateCarouselControls = useCallback(() => {
@@ -118,10 +171,10 @@ export default function AllActivities() {
     window.setTimeout(updateCarouselControls, 360);
   };
 
-  const preserveScrollForUpdate = (update) => {
+  const preserveScrollForUpdate = useCallback((update) => {
     preservedScrollYRef.current = window.scrollY;
     update();
-  };
+  }, []);
 
   useLayoutEffect(() => {
     if (preservedScrollYRef.current === null) return;
@@ -153,19 +206,14 @@ export default function AllActivities() {
   const nameFor = (slug) => categories.find((c) => c.slug === slug)?.name || slug;
   const iconFor = (slug) => HUB_CATEGORIES.find((category) => category.slug === slug)?.icon || DEFAULT_CARD_ICON;
 
-  const counts = items.reduce((acc, activity) => {
-    acc[activity.category] = (acc[activity.category] || 0) + 1;
-    return acc;
-  }, {});
-
   const indexedActivities = useMemo(
     () => buildActivityIndex(items, categories),
     [items, categories],
   );
   const normalizedSearch = normalizeSearchQuery(searchQuery);
-  const hasDateSort = items.some((activity) => getActivityDate(activity) !== null);
-  const hasUsageSort = items.some((activity) => getActivityUsage(activity) !== null);
-  const hasDurationSort = items.some((activity) => getActivityDuration(activity) !== null);
+  const sortCapabilities = useMemo(() => getActivitySortCapabilities(items), [items]);
+  const sortOptions = useMemo(() => getActivitySortOptions(sortCapabilities), [sortCapabilities]);
+  const selectedDomainId = filter === "all" ? null : filter;
   const filteredActivities = indexedActivities.filter((activity) => {
     if (filter !== "all" && activity.category !== filter) return false;
     return true;
@@ -173,175 +221,158 @@ export default function AllActivities() {
   const searchedActivities = normalizedSearch
     ? searchActivityIndex(filteredActivities, normalizedSearch)
     : filteredActivities;
-  const visible = [...searchedActivities].sort((a, b) => {
-    const titleSort = getActivityTitle(a).localeCompare(getActivityTitle(b), undefined, {
-      sensitivity: "base",
-    });
-    if (sortMode === "az") return titleSort;
-    if (sortMode === "za") return -titleSort;
-    if (sortMode === "recent" && hasDateSort) {
-      return (getActivityDate(b) || 0) - (getActivityDate(a) || 0) || titleSort;
-    }
-    if (sortMode === "used" && hasUsageSort) {
-      return (getActivityUsage(b) || 0) - (getActivityUsage(a) || 0) || titleSort;
-    }
-    if (sortMode === "shortest" && hasDurationSort) {
-      return (getActivityDuration(a) || Number.MAX_SAFE_INTEGER) - (getActivityDuration(b) || Number.MAX_SAFE_INTEGER) || titleSort;
-    }
-    if (sortMode === "longest" && hasDurationSort) {
-      return (getActivityDuration(b) || 0) - (getActivityDuration(a) || 0) || titleSort;
-    }
-    if (normalizedSearch && sortMode === "relevance") return 0;
-    return titleSort;
+  const visible = sortActivities(searchedActivities, sortMode, {
+    normalizedSearch,
+    capabilities: sortCapabilities,
   });
 
   const hubCards = HUB_CATEGORIES.map((category) => {
     const meta = categories.find((item) => item.slug === category.slug);
+    const descriptionOverride = DOMAIN_CARD_DESCRIPTIONS[category.slug];
     return {
       ...category,
-      label: meta?.name || category.label,
-      description: counts[category.slug]
-        ? `${counts[category.slug]} ${counts[category.slug] === 1 ? "activity" : "activities"}`
-        : category.fallback,
+      label: DOMAIN_CARD_LABELS[category.slug] || meta?.name || category.label,
+      description: descriptionOverride || category.fallback || meta?.description || "Clinical practice activities",
     };
   });
-  const sortOptions = [
-    { value: "az", label: "A-Z", disabled: false },
-    { value: "za", label: "Z-A", disabled: false },
-    { value: "recent", label: "Recently Added", disabled: !hasDateSort },
-    { value: "used", label: "Most Used", disabled: !hasUsageSort },
-    { value: "shortest", label: "Shortest Duration", disabled: !hasDurationSort },
-    { value: "longest", label: "Longest Duration", disabled: !hasDurationSort },
-  ];
+  const selectSortMode = useCallback(
+    (value) => preserveScrollForUpdate(() => setSortMode(value)),
+    [preserveScrollForUpdate],
+  );
+  const selectedSortLabel = sortOptions.find((option) => option.value === sortMode)?.label || "Recommended";
+
+  useEffect(
+    () =>
+      registerActivitySortControls({
+        searchQuery,
+        sortMode,
+        sortOptions,
+        setSearchQuery: (value) => preserveScrollForUpdate(() => setSearchQuery(value)),
+        setSortMode: selectSortMode,
+      }),
+    [preserveScrollForUpdate, registerActivitySortControls, searchQuery, selectSortMode, sortMode, sortOptions],
+  );
+
   return (
     <div className="min-h-screen" data-testid="all-activities-page">
       <Header />
-      <main className="clinician-page is-compact">
-        <section className="activities-hub-panel" aria-labelledby="activities-hub-title">
-          <div className="activities-hub-head">
-            <div>
-              <h1 id="activities-hub-title">Activities Hub</h1>
-              <p>Discover high-quality, clinician-built activities to support every client and every goal.</p>
+      <main className="clinician-page is-compact activities-hub-page">
+        <section id="activity-library" aria-label="Activities Library">
+          <div className="activities-library-tools" aria-label="Activity library controls">
+            <label className="activities-library-search" aria-label="Search activities">
+              <Search size={16} />
+              <input
+                value={searchQuery}
+                onChange={(event) => preserveScrollForUpdate(() => setSearchQuery(event.target.value))}
+                placeholder="What are we working on today?"
+              />
+            </label>
+            <div className="activities-library-sort" ref={sortMenuRef}>
+              <button
+                type="button"
+                className="activities-library-sort-button"
+                onClick={() => setSortOpen((open) => !open)}
+                aria-label="Sort activities"
+                aria-expanded={sortOpen}
+              >
+                <span className="activities-library-sort-label">Sort by:</span>
+                <span className="activities-library-sort-value">{selectedSortLabel}</span>
+                <ChevronDown size={15} />
+              </button>
+              {sortOpen ? (
+                <div className="activities-library-sort-menu" role="menu" aria-label="Sort activities">
+                  {sortOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className={sortMode === option.value ? "is-active" : ""}
+                      disabled={option.disabled}
+                      role="menuitem"
+                      onClick={() => {
+                        if (option.disabled) return;
+                        selectSortMode(option.value);
+                        setSortOpen(false);
+                      }}
+                    >
+                      <span>{option.label}</span>
+                      {option.disabled ? <small>Coming later</small> : null}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </div>
+            <p className={`activities-library-tip ${tipVisible ? "is-visible" : "is-hidden"}`} aria-live="polite">
+              <Lightbulb size={15} aria-hidden="true" />
+              <span>{ACTIVITY_LIBRARY_TIPS[activityLibraryTipIndex]}</span>
+            </p>
           </div>
 
-          <div className="activities-hub-carousel">
-            <button
-              type="button"
-              className="activities-hub-carousel-arrow is-left"
-              onClick={() => scrollCategoryRow("left")}
-              disabled={!canScrollLeft}
-              aria-label="Scroll categories left"
-            >
-              <ChevronLeft size={18} />
-            </button>
+          <section className="activities-hub-top-grid" aria-label="Activities Hub overview">
+            <section className="activities-hub-panel" aria-labelledby="activities-domain-title">
+              <div className="activities-domain-head">
+                <h2 id="activities-domain-title">Explore by Domain</h2>
+              </div>
 
-            <div
-              ref={categoryRowRef}
-              className="activities-hub-category-row"
-              aria-label="Activity domains"
-              onScroll={updateCarouselControls}
-            >
-              {hubCards.map(({ slug, label, href, icon: Icon, accent, tint, description }) => (
-                <Link
-                  key={slug}
-                  to={href}
-                  className="activities-hub-domain-card"
-                  style={{ "--hub-accent": accent, "--hub-tint": tint }}
-                >
-                  <span className="activities-hub-domain-icon">
-                    <Icon className="w-7 h-7" />
-                  </span>
-                  <strong>{label}</strong>
-                  <small>{description}</small>
-                </Link>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              className="activities-hub-carousel-arrow is-right"
-              onClick={() => scrollCategoryRow("right")}
-              disabled={!canScrollRight}
-              aria-label="Scroll categories right"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
-        </section>
-
-        <section id="activity-library" className="mt-6" aria-labelledby="activity-library-title">
-          <div className="activities-library-head">
-            <div>
-              <p className="text-xs font-display font-bold uppercase tracking-[0.2em] text-indigo-600">Activity library</p>
-              <h2 id="activity-library-title" className="mt-1 font-display text-xl sm:text-2xl font-bold tracking-tight">
-                Browse every activity
-              </h2>
-            </div>
-            <div className="activities-library-tools">
-              <label className="activities-library-search">
-                <Search size={17} />
-                <input
-                  value={searchQuery}
-                  onChange={(event) => preserveScrollForUpdate(() => setSearchQuery(event.target.value))}
-                  placeholder="Search Activities..."
-                  aria-label="Search activities, goals, skills"
-                />
-              </label>
-              <div className="activities-library-sort" ref={sortMenuRef}>
+              <div className="activities-hub-carousel">
                 <button
                   type="button"
-                  className="activities-library-sort-button"
-                  onClick={() => setSortOpen((open) => !open)}
-                  aria-label="Sort activities"
-                  aria-expanded={sortOpen}
+                  className="activities-hub-carousel-arrow is-left"
+                  onClick={() => scrollCategoryRow("left")}
+                  disabled={!canScrollLeft}
+                  aria-label="Scroll categories left"
                 >
-                  <SlidersHorizontal size={18} />
+                  <ChevronLeft size={18} />
                 </button>
-                {sortOpen ? (
-                  <div className="activities-library-sort-menu" role="menu" aria-label="Sort activities">
-                    {sortOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        type="button"
-                        className={sortMode === option.value ? "is-active" : ""}
-                        disabled={option.disabled}
-                        role="menuitem"
-                        onClick={() => {
-                          if (option.disabled) return;
-                          preserveScrollForUpdate(() => setSortMode(option.value));
-                          setSortOpen(false);
-                        }}
-                      >
-                        <span>{option.label}</span>
-                        {option.disabled ? <small>Coming later</small> : null}
-                      </button>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          </div>
 
-          <div className="mt-3 flex flex-wrap gap-2" data-testid="all-activities-filter">
-              <FilterPill active={filter === "all"} onClick={() => preserveScrollForUpdate(() => setFilter("all"))} color="#4F46E5">
-            All
-          </FilterPill>
-          {categories.map((c) => (
-            <FilterPill
-              key={c.slug}
-              active={filter === c.slug}
-              onClick={() => preserveScrollForUpdate(() => setFilter(c.slug))}
-              color={c.color}
-            >
-              {c.name}
-            </FilterPill>
-          ))}
-          </div>
+                <div
+                  ref={categoryRowRef}
+                  className="activities-hub-category-row"
+                  aria-label="Activity domains"
+                  onScroll={updateCarouselControls}
+                >
+                  {hubCards.map(({ slug, label, accent, hoverGlow, tint, blob, illustration, description }) => {
+                    const selected = selectedDomainId === slug;
+                    return (
+                    <button
+                      key={slug}
+                      type="button"
+                      className={`activities-hub-domain-card domain-${slug} ${illustration ? "has-illustration" : ""} ${selected ? "is-selected" : ""}`}
+                      style={{ "--hub-accent": accent, "--hub-glow": hoverGlow, "--hub-tint": tint, "--hub-blob": blob }}
+                      aria-pressed={selected}
+                      onClick={() => preserveScrollForUpdate(() => setFilter(selected ? "all" : slug))}
+                    >
+                      <span className="activities-hub-domain-visual" aria-hidden="true">
+                        {illustration ? (
+                          <img className="activities-hub-domain-illustration" src={illustration} alt="" />
+                        ) : (
+                          <span className="activities-hub-domain-blob" />
+                        )}
+                      </span>
+                      <span className="activities-hub-domain-copy">
+                        <strong>{label}</strong>
+                        <small>{description}</small>
+                      </span>
+                    </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  className="activities-hub-carousel-arrow is-right"
+                  onClick={() => scrollCategoryRow("right")}
+                  disabled={!canScrollRight}
+                  aria-label="Scroll categories right"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            </section>
+          </section>
 
           <div className="activities-library-results">
           {visible.length ? (
-            <ul className="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            <ul className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
               {visible.map((a, idx) => (
                 <li key={`${a.category}-${a.slug}`}>
                   {(() => {
@@ -399,23 +430,5 @@ export default function AllActivities() {
         </section>
       </main>
     </div>
-  );
-}
-
-function FilterPill({ active, onClick, color, children }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      data-testid={`filter-pill-${String(children).toLowerCase().replace(/\s+/g, "-")}`}
-      className="px-4 h-10 rounded-full text-sm font-display font-semibold border transition"
-      style={
-        active
-          ? { background: color, color: "white", borderColor: color }
-          : { background: "white", color: "#27272A", borderColor: "#E5E7EB" }
-      }
-    >
-      {children}
-    </button>
   );
 }

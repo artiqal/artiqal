@@ -1,15 +1,49 @@
-import React from "react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { HubSidebar } from "@/components/HubSidebar";
 import { HubTopbar } from "@/components/HubTopbar";
+import { Logo } from "@/components/Logo";
+import { ActivitySortProvider } from "@/contexts/ActivitySortContext";
 
 export function HubShell({ children, previewMode = false, onPreviewAction }) {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const brand = (
+    <>
+      <Logo size={32} />
+      <b>artiqal</b>
+    </>
+  );
+
   return (
-    <div className={`hub-app-shell ${previewMode ? "is-preview" : ""}`}>
-      <HubSidebar previewMode={previewMode} onPreviewAction={onPreviewAction} />
+    <ActivitySortProvider>
+    <div className={`hub-app-shell ${previewMode ? "is-preview" : ""} ${sidebarCollapsed ? "is-sidebar-collapsed" : "is-sidebar-expanded"}`}>
+      <div className="hub-left-rail">
+        {previewMode ? (
+          <button
+            type="button"
+            className="hub-shell-brand"
+            aria-label="artiqal home preview"
+            onClick={() => onPreviewAction?.("This is a preview of the Artiqal hub. Create a free account to open the full app.")}
+          >
+            {brand}
+          </button>
+        ) : (
+          <Link to="/" className="hub-shell-brand" aria-label="artiqal home">
+            {brand}
+          </Link>
+        )}
+        <HubSidebar
+          collapsed={sidebarCollapsed}
+          onCollapsedChange={setSidebarCollapsed}
+          previewMode={previewMode}
+          onPreviewAction={onPreviewAction}
+        />
+      </div>
       <div className="hub-app-column">
         <HubTopbar previewMode={previewMode} onPreviewAction={onPreviewAction} />
         <div className="hub-content-stage">{children}</div>
       </div>
     </div>
+    </ActivitySortProvider>
   );
 }

@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 import { DOMAIN_NAV_ITEMS, getDomainTheme } from "@/lib/domainThemes";
 import {
   ChevronDown,
@@ -9,7 +8,6 @@ import {
   Grid2X2,
   Heart,
   Home,
-  Search,
   Settings,
   Sparkles,
 } from "lucide-react";
@@ -21,11 +19,13 @@ const therapyCategoryLinks = DOMAIN_NAV_ITEMS.map((item) => ({
   icon: item.sidebarIcon,
 }));
 
+const AI_PRACTICE_HREF = "/activity/reading/ai-scenario";
+
 const mainLinks = [
   { label: "Home", href: "/dashboard", icon: Home },
-  { label: "Activities Hub", href: "/all-activities", icon: Grid2X2, children: therapyCategoryLinks },
+  { label: "Activities Library", href: "/all-activities", icon: Grid2X2, children: therapyCategoryLinks },
   { label: "Favourite Activities", href: "/explore/favourites", icon: Heart },
-  { label: "AI Practice", href: "/activity/reading/ai-scenario", icon: Sparkles },
+  { label: "AI Practice", href: AI_PRACTICE_HREF, icon: Sparkles },
 ];
 
 const childPathMatchers = {
@@ -36,23 +36,62 @@ const childPathMatchers = {
   "/category/functional-communication": ["/category/functional-communication", "/activity/functional-communication/"],
   "/explore/games": ["/explore/games"],
   "/explore/dysphagia": ["/explore/dysphagia"],
+  "/category/cognitive-communication": ["/category/cognitive-communication", "/activity/cognitive-communication/"],
   "/explore/motor-speech": ["/explore/motor-speech"],
   "/explore/voice": ["/explore/voice"],
 };
 
+function isAiPracticePath(pathname) {
+  return pathname === AI_PRACTICE_HREF || pathname.startsWith(`${AI_PRACTICE_HREF}/`);
+}
+
 function matchesHref(pathname, href) {
   if (pathname === href) return true;
+  if (href !== AI_PRACTICE_HREF && isAiPracticePath(pathname)) return false;
   return (childPathMatchers[href] || []).some((prefix) => pathname === prefix || pathname.startsWith(prefix));
 }
 
-export function HubSidebar({ previewMode = false, onPreviewAction }) {
-  const [collapsed, setCollapsed] = useState(previewMode ? false : true);
+export function HubSidebar({ collapsed: controlledCollapsed, onCollapsedChange, previewMode = false, onPreviewAction }) {
+  const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [activitiesOpen, setActivitiesOpen] = useState(false);
-  const [query, setQuery] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
   const [activeHref, setActiveHref] = useState(location.pathname);
-  const { user } = useAuth();
+  const collapsed = controlledCollapsed ?? internalCollapsed;
+  const setCollapsed = (nextValue) => {
+    const nextCollapsed = typeof nextValue === "function" ? nextValue(collapsed) : nextValue;
+    if (controlledCollapsed === undefined) {
+      setInternalCollapsed(nextCollapsed);
+    }
+    onCollapsedChange?.(nextCollapsed);
+  };
+  const collapsedShellStyle = collapsed
+    ? {
+        width: "60px",
+        paddingLeft: "6px",
+        paddingRight: "6px",
+      }
+    : undefined;
+  const collapsedItemStyle = collapsed
+    ? {
+        width: "30px",
+        minWidth: "30px",
+        height: "30px",
+        minHeight: "30px",
+        marginLeft: "auto",
+        marginRight: "auto",
+        padding: 0,
+        display: "grid",
+        placeItems: "center",
+        gap: 0,
+      }
+    : undefined;
+  const collapsedIconStyle = collapsed
+    ? {
+        position: "static",
+        transform: "none",
+      }
+    : undefined;
 
   useEffect(() => {
     setActiveHref(location.pathname);
@@ -60,16 +99,6 @@ export function HubSidebar({ previewMode = false, onPreviewAction }) {
       setActivitiesOpen(true);
     }
   }, [location.pathname]);
-
-  const normalizedQuery = query.trim().toLowerCase();
-
-  useEffect(() => {
-    if (location.pathname === "/search") {
-      setQuery(new URLSearchParams(location.search).get("q") || "");
-    } else {
-      setQuery("");
-    }
-  }, [location.pathname, location.search]);
 
   const visibleLinks = useMemo(() => mainLinks, []);
 
@@ -93,50 +122,19 @@ export function HubSidebar({ previewMode = false, onPreviewAction }) {
     setActivitiesOpen((value) => !value);
   };
 
-  const updateSearch = (value) => {
-    setQuery(value);
-    if (previewMode) {
-      onPreviewAction?.("Search is available inside the full Artiqal hub. Create a free account to explore activities.");
-      return;
-    }
-    const trimmed = value.trim();
-    if (trimmed) {
-      navigate(`/search?q=${encodeURIComponent(trimmed)}`, { replace: true });
-    } else if (location.pathname === "/search") {
-      navigate("/all-activities", { replace: true });
-    }
-  };
-
-  const displayName = user?.name || "Guest";
-  const accountLabel = "Account";
-  const initials = displayName
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-
   return (
-    <aside className={`hub-sidebar ${collapsed ? "is-collapsed" : ""}`} aria-label="Hub navigation">
+    <aside className={`hub-sidebar ${collapsed ? "is-collapsed" : ""}`} style={collapsedShellStyle} aria-label="Hub navigation">
       <div className="hub-sidebar-top">
         <button
           className="hub-sidebar-toggle"
           type="button"
+          style={collapsedItemStyle}
           onClick={() => setCollapsed((value) => !value)}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
 
-        <label className="hub-search">
-          <Search size={20} />
-          <input
-            value={query}
-            onChange={(event) => updateSearch(event.target.value)}
-            placeholder="Search activities..."
-            aria-label="Search activities"
-          />
-        </label>
       </div>
 
       <nav className="hub-sidebar-nav">
@@ -153,11 +151,12 @@ export function HubSidebar({ previewMode = false, onPreviewAction }) {
                 type="button"
                 onClick={() => selectLink(href)}
                 className={`hub-sidebar-link ${active ? "is-active" : ""} ${childActive ? "has-active-child" : ""} ${children ? "has-submenu" : ""} ${parentOpen ? "is-open" : ""}`}
+                style={collapsedItemStyle}
                 aria-current={active ? "page" : undefined}
                 aria-expanded={children ? parentOpen : undefined}
                 title={collapsed ? label : undefined}
               >
-                <Icon size={22} strokeWidth={2} />
+                <Icon size={22} strokeWidth={2} style={collapsedIconStyle} />
                 <span>{label}</span>
                 {children ? (
                   <span
@@ -184,7 +183,7 @@ export function HubSidebar({ previewMode = false, onPreviewAction }) {
                       className="hub-sidebar-submenu-dot"
                       style={{
                         "--domain-dot": activeChildTheme.dot,
-                        transform: `translateY(${activeChildIndex * 38}px)`,
+                        transform: `translateY(calc(${activeChildIndex} * var(--sidebar-submenu-step, 31px)))`,
                       }}
                       aria-hidden="true"
                     />
@@ -200,6 +199,7 @@ export function HubSidebar({ previewMode = false, onPreviewAction }) {
                         className={`hub-sidebar-submenu-link ${childIsActive ? "is-active" : ""}`}
                         style={{
                           "--domain-accent": childTheme.accent,
+                          "--domain-glow": childTheme.hoverGlow || childTheme.accent,
                           "--domain-sidebar-bg": childTheme.sidebarActiveBg,
                           "--domain-soft-bg": childTheme.softBg,
                         }}
@@ -218,16 +218,7 @@ export function HubSidebar({ previewMode = false, onPreviewAction }) {
       </nav>
 
       <div className="hub-sidebar-footer">
-        <div className="hub-account">
-          <span className="hub-account-avatar">{initials || "G"}</span>
-          <span className="hub-account-copy">
-            <strong>{displayName}</strong>
-            <small>{accountLabel}</small>
-          </span>
-          <ChevronRight className="hub-account-chevron" size={19} />
-        </div>
-
-        <button type="button" className="hub-settings-row" aria-label="Settings" title={collapsed ? "Settings" : undefined}>
+        <button type="button" className="hub-settings-row" style={collapsedItemStyle} aria-label="Settings" title={collapsed ? "Settings" : undefined}>
           <span className="hub-settings-icon">
             <Settings size={15} />
           </span>

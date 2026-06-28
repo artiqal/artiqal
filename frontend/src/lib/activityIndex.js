@@ -1,3 +1,5 @@
+import { DOMAIN_NAV_ITEMS } from "@/lib/domainThemes";
+
 const toSearchText = (value) => {
   if (Array.isArray(value)) return value.join(" ");
   if (value && typeof value === "object") return Object.values(value).join(" ");
@@ -31,7 +33,7 @@ export function getActivityHref(activity) {
 
 export function buildActivityIndex(activities = [], categories = []) {
   const categoryBySlug = Object.fromEntries(
-    categories.map((category) => [category.slug, category]),
+    [...DOMAIN_NAV_ITEMS, ...categories].map((category) => [category.slug, category]),
   );
 
   return activities.map((activity) => {
@@ -46,7 +48,7 @@ export function buildActivityIndex(activities = [], categories = []) {
     const searchFields = {
       title: normalizeField(activity.title),
       category: normalizeField([categoryName, activity.category, activity.domain]),
-      tags: normalizeField([activity.tags, category.tags]),
+      tags: normalizeField([activity.tags, category.tags, category.searchAliases]),
       details: normalizeField([
         activity.summary,
         activity.description,

@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSession } from "@/contexts/SessionContext";
 import { SessionBanner } from "@/components/SessionBanner";
 import { CategoryIcon } from "@/components/CategoryIcon";
-import { ArrowUpRight, ArrowRight, Play, Sparkles, Timer } from "lucide-react";
+import { Activity, ArrowRight, ArrowUpRight, CalendarCheck, CheckCircle2, FolderOpen, Play, Sparkles, Timer } from "lucide-react";
 
 // Vibrant gradient + foreground icon color per category
 const GRADIENTS = {
@@ -24,6 +24,13 @@ const GRADIENTS = {
   "ai-practice": { gradient: "linear-gradient(135deg,#4F46E5 0%,#06B6D4 100%)", fg: "#4338CA", soft: "rgba(79,70,229,.35)" },
   "all-activities": { gradient: "linear-gradient(135deg,#635BFF 0%,#00D4FF 100%)", fg: "#4F46E5", soft: "rgba(99,91,255,.35)" },
 };
+
+const HOME_STATS = [
+  { label: "Planned", value: "12", icon: CalendarCheck, tone: "planned" },
+  { label: "In Progress", value: "8", icon: Activity, tone: "progress" },
+  { label: "Completed", value: "24", icon: CheckCircle2, tone: "completed" },
+  { label: "Resources", value: "156", icon: FolderOpen, tone: "resources" },
+];
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -80,20 +87,25 @@ export default function Dashboard({ previewMode = false, onPreviewAction }) {
       <div className="min-h-screen" data-testid="dashboard-page">
         <main className="hub-dashboard-main hub-home-main clinician-page is-compact">
           <section className="hub-home-hero fade-up" data-testid="greeting-section">
-            <div className="hub-home-intro">
-              <span className="hub-home-eyebrow">Artiqal hub</span>
-              <h1>
-                {greeting.text}
-                {firstName ? `, ${firstName}` : ""} <span aria-hidden>{greeting.emoji}</span>
-              </h1>
-              <p>Choose a functional activity, continue a session, or browse the library by clinical goal.</p>
-              <div className="hub-home-actions">
-                <Link to="/all-activities" className="hub-home-primary" data-testid="browse-all-link">
-                  Explore activities <ArrowRight className="w-4 h-4" />
-                </Link>
-                <button type="button" onClick={startSession} className="hub-home-secondary" data-testid="start-session-btn">
-                  <Timer className="w-4 h-4" /> Start session
-                </button>
+            <div className="activities-greeting-card hub-home-greeting-card">
+              <div className="activities-greeting-copy">
+                <h1>
+                  {greeting.text}
+                  {firstName ? `, ${firstName}` : ""} <span aria-hidden>{greeting.emoji}</span>
+                </h1>
+                <p>Ready to help your clients achieve their goals today?</p>
+              </div>
+
+              <div className="activities-greeting-stats" aria-label="Activity summary">
+                {HOME_STATS.map(({ label, value, icon: Icon, tone }) => (
+                  <div className="activities-greeting-stat" key={label}>
+                    <span className={`activities-greeting-stat-icon is-${tone}`} aria-hidden="true">
+                      <Icon size={19} strokeWidth={2.2} />
+                    </span>
+                    <strong>{value}</strong>
+                    <small>{label}</small>
+                  </div>
+                ))}
               </div>
             </div>
 
