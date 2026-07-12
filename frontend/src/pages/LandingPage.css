@@ -1,3 +1,19 @@
+@font-face {
+  font-family: "Alpino";
+  src: url("../assets/fonts/alpino/Alpino-Variable.woff2") format("woff2");
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("../assets/fonts/satoshi/Fonts/WEB/fonts/Satoshi-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 .artiqal-public {
   --ap-ink: #0d123f;
   --ap-muted: #656982;
@@ -5,7 +21,7 @@
   overflow: hidden;
   color: var(--ap-ink);
   background: #fff;
-  font-family: "Figtree", system-ui, sans-serif;
+  font-family: "Outfit", system-ui, sans-serif;
 }
 .artiqal-public * { box-sizing: border-box; }
 .ap-nav { position: relative; z-index: 20; width: min(1500px, calc(100% - 70px)); height: 104px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
@@ -713,7 +729,7 @@ body:has(.artiqal-public) {
   border: 0;
   border-radius: 13px;
   background: transparent;
-  font: 700 12px/1 "Figtree", system-ui, sans-serif;
+  font: 700 12px/1 "Outfit", system-ui, sans-serif;
   text-align: left;
   cursor: pointer;
   transition: background .18s ease, color .18s ease, transform .18s ease;
@@ -772,7 +788,7 @@ body:has(.artiqal-public) {
   outline: 0;
   background: transparent;
   color: #11142e;
-  font: 600 13px/1 "Figtree", system-ui, sans-serif;
+  font: 600 13px/1 "Outfit", system-ui, sans-serif;
 }
 .ap-live-category-row {
   margin-top: 24px;
@@ -789,7 +805,7 @@ body:has(.artiqal-public) {
   border: 1px solid rgba(39,43,87,.10);
   border-radius: 999px;
   background: rgba(255,255,255,.72);
-  font: 800 11px/1 "Figtree", system-ui, sans-serif;
+  font: 800 11px/1 "Outfit", system-ui, sans-serif;
   cursor: pointer;
 }
 .ap-live-category-row button.active {
@@ -841,7 +857,7 @@ body:has(.artiqal-public) {
   border: 0;
   border-radius: 999px;
   background: linear-gradient(135deg,#5d46ef,#7c3ff2);
-  font: 800 12px/1 "Figtree", system-ui, sans-serif;
+  font: 800 12px/1 "Outfit", system-ui, sans-serif;
   cursor: pointer;
 }
 .ap-live-feature-orb {
@@ -1174,5 +1190,909 @@ body:has(.artiqal-public .hub-app-shell) {
 @media (prefers-reduced-motion: reduce) {
   .ap-rotating-ending {
     animation: none;
+  }
+}
+
+/* ---------- Scenic riverside landing hero ---------- */
+html:has(.ap-scenic-hero),
+body:has(.ap-scenic-hero),
+#root:has(.ap-scenic-hero) {
+  width: 100%;
+  min-width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: clip;
+  overscroll-behavior-y: none;
+  border: 0;
+  border-radius: 0;
+  background: #dfeef7;
+}
+
+.artiqal-public:has(.ap-scenic-hero) {
+  width: 100%;
+  min-width: 100%;
+  margin-left: 0;
+  padding-top: 0;
+  border: 0;
+  border-radius: 0;
+  background:
+    var(--landing-hero-image) center top / cover no-repeat,
+    #dfeef7;
+  box-shadow: none;
+  overflow: visible;
+  overflow-x: clip;
+  overscroll-behavior-y: none;
+}
+
+.artiqal-public:has(.ap-scenic-hero)::before {
+  content: none;
+}
+
+.ap-scenic-hero {
+  position: relative;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  min-height: calc(100svh + clamp(80px, 10vh, 130px));
+  padding: 0 0 clamp(80px, 10vh, 130px);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.025) 34%, transparent 64%, rgba(7, 13, 35, 0.10) 100%),
+    var(--landing-hero-image) center top / 100% auto no-repeat,
+    var(--landing-hero-image) center top / cover no-repeat;
+  background-attachment: scroll, scroll, scroll;
+}
+
+.ap-scenic-hero::before,
+.ap-scenic-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: auto;
+  height: auto;
+  display: block;
+  border-radius: 0;
+  pointer-events: none;
+  transform: none;
+  animation: none;
+  filter: none;
+}
+
+.ap-scenic-hero::before {
+  background:
+    radial-gradient(ellipse at 50% 24%, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.12) 28%, rgba(255, 255, 255, 0.02) 56%, transparent 74%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0%, transparent 42%, rgba(9, 14, 32, 0.09) 100%);
+  opacity: 1;
+}
+
+.ap-scenic-hero::after {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, transparent 18%, transparent 82%, rgba(255, 255, 255, 0.035) 100%),
+    linear-gradient(180deg, transparent 0%, transparent 78%, rgba(7, 13, 35, 0.12) 92%, rgba(255, 255, 255, 0.04) 100%);
+  opacity: 0.5;
+}
+
+.ap-scenic-hero .ap-hero-inner {
+  position: relative;
+  z-index: 2;
+  width: min(1320px, calc(100% - 64px));
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: clamp(98px, 11vh, 116px) 0 clamp(38px, 6vh, 64px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+}
+
+.ap-scenic-hero .ap-hero-copy {
+  width: min(980px, 100%);
+  max-width: 980px;
+  padding: clamp(104px, 14vh, 142px) 0 0;
+  text-align: center;
+}
+
+.ap-scenic-hero .ap-eyebrow {
+  min-height: 42px;
+  padding: 0 20px;
+  color: #6d58d4;
+  border-color: rgba(123, 103, 216, 0.16);
+  background: rgba(255, 255, 255, 0.55);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  backdrop-filter: blur(18px) saturate(1.2);
+  box-shadow:
+    0 16px 40px rgba(64, 67, 112, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.ap-scenic-hero .ap-hero h1,
+.ap-scenic-hero h1 {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 0.08em 0.08em;
+  color: #080d2c;
+  font-family: "Satoshi", "Outfit", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: clamp(44px, 4.45vw, 67px);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  font-weight: 700;
+  overflow: visible;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.36),
+    0 16px 42px rgba(255, 255, 255, 0.24);
+}
+
+.ap-scenic-hero h1 em {
+  display: inline-block;
+  color: transparent;
+  background: linear-gradient(90deg, #064ebf 0%, #4721c3 35%, #a80f91 66%, #cf371f 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-style: normal;
+  font-weight: 700;
+  padding: 0 0.08em 0.1em;
+  margin: 0 -0.08em;
+  line-height: 1.04;
+  text-shadow: none;
+}
+
+.ap-rotating-headline {
+  display: inline-grid;
+  grid-template-areas: "phrase";
+  max-width: 100%;
+  overflow: visible;
+  vertical-align: top;
+}
+
+.ap-rotating-headline-ghost,
+.ap-rotating-headline em {
+  grid-area: phrase;
+  justify-self: center;
+  white-space: nowrap;
+}
+
+.ap-rotating-headline-ghost {
+  visibility: hidden;
+  color: transparent;
+  font-style: normal;
+  font-weight: 700;
+  padding: 0 0.08em 0.1em;
+  margin: 0 -0.08em;
+  line-height: 1.04;
+  pointer-events: none;
+}
+
+.ap-rotating-headline em {
+  animation: apHeadlinePhraseIn 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: opacity, transform;
+}
+
+@keyframes apHeadlinePhraseIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.12em);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ap-scenic-hero .ap-hero-copy > p {
+  max-width: 670px;
+  margin: 18px auto 0;
+  color: rgba(24, 31, 58, 0.84);
+  font-size: clamp(15px, 1.13vw, 17px);
+  line-height: 1.58;
+  font-weight: 600;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.34),
+    0 10px 28px rgba(255, 255, 255, 0.28);
+}
+
+.ap-scenic-hero .ap-hero-actions {
+  margin-top: 26px;
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.artiqal-public:has(.ap-scenic-hero) .ap-nav-actions .ap-button-dark,
+.ap-scenic-hero .ap-hero-actions .ap-button {
+  min-height: 54px;
+  padding: 0 34px;
+  border-radius: 999px;
+  font-family: "Outfit", system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  gap: 16px;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.artiqal-public:has(.ap-scenic-hero) .ap-nav-actions .ap-button-dark,
+.ap-scenic-hero .ap-hero-actions .ap-button-dark {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: #fff !important;
+  min-width: 250px;
+  border: 0;
+  background: #070d35;
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+  box-shadow:
+    0 14px 28px rgba(7, 10, 34, 0.24),
+    0 4px 10px rgba(7, 10, 34, 0.12);
+}
+
+.artiqal-public:has(.ap-scenic-hero) .ap-nav-actions .ap-button-dark::before,
+.ap-scenic-hero .ap-hero-actions .ap-button-dark::before {
+  content: none;
+}
+
+.artiqal-public:has(.ap-scenic-hero) .ap-nav-actions .ap-button-dark {
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 21px 0 23px;
+  font-size: 13px;
+  gap: 12px;
+  border-radius: 999px;
+  box-shadow:
+    0 12px 24px rgba(7, 10, 34, 0.23),
+    0 3px 8px rgba(7, 10, 34, 0.13);
+}
+
+.ap-scenic-hero .ap-hero-actions .ap-button-dark {
+  box-shadow:
+    0 15px 30px rgba(7, 10, 34, 0.25),
+    0 5px 12px rgba(7, 10, 34, 0.13);
+}
+
+.ap-scenic-hero .ap-hero-actions .ap-button-light {
+  min-width: 280px;
+  color: #3a2c8f;
+  border: 1.5px solid rgba(132, 111, 225, 0.42);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.70));
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -1px 0 rgba(118, 96, 220, 0.06),
+    0 12px 24px rgba(50, 48, 96, 0.08);
+}
+
+.artiqal-public:has(.ap-scenic-hero) .ap-nav-actions .ap-button-dark:hover,
+.ap-scenic-hero .ap-hero-actions .ap-button-dark:hover {
+  transform: translateY(-2px);
+  background: #0a1240;
+  box-shadow:
+    0 18px 36px rgba(7, 10, 34, 0.28),
+    0 6px 14px rgba(7, 10, 34, 0.15);
+}
+
+.ap-scenic-hero .ap-hero-actions .ap-button-light:hover {
+  transform: translateY(-2px);
+  border-color: rgba(112, 88, 223, 0.50);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.68));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 18px 34px rgba(50, 48, 96, 0.13);
+}
+
+.artiqal-public:has(.ap-scenic-hero) .ap-nav-actions .ap-button:focus-visible,
+.ap-scenic-hero .ap-hero-actions .ap-button:focus-visible {
+  outline: 3px solid rgba(109, 88, 212, 0.28);
+  outline-offset: 4px;
+}
+
+.ap-scenic-hero .ap-benefits {
+  width: min(720px, 100%);
+  margin: clamp(160px, 24vh, 232px) auto 0;
+  padding-top: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  border-top: 0;
+  align-items: center;
+}
+
+.ap-scenic-hero .ap-benefit {
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow:
+    0 1px 8px rgba(8, 14, 31, 0.22),
+    0 1px 0 rgba(8, 14, 31, 0.10);
+}
+
+.ap-scenic-hero .ap-benefit + .ap-benefit {
+  border-left: 1px solid rgba(255, 255, 255, 0.48);
+}
+
+.ap-scenic-hero .ap-benefit-icon.ap-pink,
+.ap-scenic-hero .ap-benefit-icon.ap-orange,
+.ap-scenic-hero .ap-benefit-icon.ap-violet {
+  width: 48px;
+  height: 48px;
+  color: #6e59e6;
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.68);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
+  backdrop-filter: blur(18px) saturate(145%);
+  box-shadow:
+    0 14px 28px rgba(19, 25, 62, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.84),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.ap-scenic-hero .ap-benefit b {
+  color: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.ap-pricing-section {
+  position: relative;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  padding: clamp(72px, 7vw, 96px) 0 clamp(78px, 8vw, 108px);
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 34%, rgba(9, 14, 32, 0.12) 100%),
+    var(--pricing-bg-image) center center / 100% auto no-repeat,
+    var(--pricing-bg-image) center center / cover no-repeat,
+    #dfeadf;
+  isolation: isolate;
+}
+
+.ap-pricing-section::before,
+.ap-pricing-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ap-pricing-section::before {
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 50% 16%, rgba(255, 255, 255, 0.54) 0%, rgba(255, 255, 255, 0.20) 38%, transparent 68%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, transparent 32%, rgba(255, 255, 255, 0.10) 100%);
+}
+
+.ap-pricing-section::after {
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.58) 0%, transparent 18%, transparent 78%, rgba(255, 255, 255, 0.16) 100%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.10), transparent 18%, transparent 82%, rgba(255, 255, 255, 0.10));
+  opacity: 0.72;
+}
+
+.ap-pricing-content {
+  position: relative;
+  z-index: 2;
+  width: min(1280px, calc(100% - 96px));
+  margin: 0 auto;
+}
+
+.ap-pricing-heading {
+  max-width: 720px;
+  margin: 0 auto clamp(32px, 3.8vw, 44px);
+  text-align: center;
+}
+
+.ap-pricing-kicker {
+  min-height: 34px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #5f4bd6;
+  border: 1px solid rgba(123, 103, 216, 0.15);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.58);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
+  backdrop-filter: blur(18px) saturate(145%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.76),
+    0 14px 34px rgba(58, 64, 96, 0.10);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.ap-pricing-heading h2 {
+  margin: 18px 0 0;
+  color: #080d2c;
+  font-family: "Satoshi", "Outfit", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: clamp(34px, 3.55vw, 54px);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  font-weight: 700;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.36),
+    0 16px 42px rgba(255, 255, 255, 0.26);
+}
+
+.ap-pricing-heading h2 em {
+  color: transparent;
+  background: linear-gradient(90deg, #064ebf 0%, #4721c3 35%, #a80f91 66%, #cf371f 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-style: normal;
+}
+
+.ap-pricing-heading p {
+  max-width: 560px;
+  margin: 14px auto 0;
+  color: rgba(20, 29, 58, 0.78);
+  font-size: clamp(14px, 0.95vw, 15.5px);
+  line-height: 1.5;
+  font-weight: 600;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.36),
+    0 10px 26px rgba(255, 255, 255, 0.26);
+}
+
+.ap-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.ap-pricing-card {
+  position: relative;
+  min-height: 438px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.58));
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.90),
+    0 18px 42px rgba(22, 34, 65, 0.12),
+    0 5px 14px rgba(22, 34, 65, 0.07);
+}
+
+.ap-pricing-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 22% 10%, var(--pricing-accent-soft), transparent 42%),
+    radial-gradient(circle at 92% 0%, rgba(255, 255, 255, 0.44), transparent 36%);
+  opacity: 0.92;
+}
+
+.ap-pricing-card-blue {
+  --pricing-accent: #2f7df5;
+  --pricing-accent-soft: rgba(47, 125, 245, 0.16);
+}
+
+.ap-pricing-card-violet {
+  --pricing-accent: #7357e7;
+  --pricing-accent-soft: rgba(115, 87, 231, 0.16);
+}
+
+.ap-pricing-card-popular {
+  --pricing-accent: #1769e9;
+  --pricing-accent-soft: rgba(23, 105, 233, 0.20);
+  border-color: rgba(74, 133, 241, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 22px 52px rgba(22, 92, 197, 0.17),
+    0 6px 16px rgba(22, 34, 65, 0.08);
+}
+
+.ap-pricing-card-green {
+  --pricing-accent: #139a5b;
+  --pricing-accent-soft: rgba(19, 154, 91, 0.16);
+}
+
+.ap-pricing-plan-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  min-height: 24px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(23, 105, 233, 0.18);
+  border-radius: 999px;
+  color: #1769e9;
+  background: rgba(255, 255, 255, 0.62);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.ap-pricing-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  color: var(--pricing-accent);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.42)),
+    var(--pricing-accent-soft);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 9px 22px rgba(21, 34, 70, 0.09);
+}
+
+.ap-pricing-plan-title {
+  margin-top: 16px;
+}
+
+.ap-pricing-plan-title h3 {
+  margin: 0;
+  color: #0a1031;
+  font-size: 22px;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  font-weight: 850;
+}
+
+.ap-pricing-plan-title p {
+  margin: 6px 0 0;
+  color: var(--pricing-accent);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ap-pricing-price {
+  margin-top: 18px;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.ap-pricing-price strong {
+  color: #080d2c;
+  font-size: 38px;
+  line-height: 0.94;
+  letter-spacing: -0.045em;
+  font-weight: 850;
+}
+
+.ap-pricing-price span,
+.ap-pricing-note {
+  color: rgba(44, 51, 75, 0.64);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ap-pricing-note {
+  display: block;
+  margin-top: 5px;
+}
+
+.ap-pricing-description {
+  min-height: 42px;
+  margin: 14px 0 0;
+  color: rgba(31, 38, 65, 0.74);
+  font-size: 12.5px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+.ap-pricing-card ul {
+  margin: 17px 0 22px;
+  padding: 0;
+  display: grid;
+  gap: 9px;
+  list-style: none;
+}
+
+.ap-pricing-card li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: rgba(21, 28, 53, 0.74);
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.ap-pricing-card li svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--pricing-accent);
+}
+
+.ap-pricing-button {
+  min-height: 42px;
+  margin-top: auto;
+  padding: 0 17px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #fff;
+  border-radius: 999px;
+  background: #070d35;
+  box-shadow:
+    0 14px 28px rgba(7, 10, 34, 0.22),
+    0 4px 10px rgba(7, 10, 34, 0.10);
+  font-size: 12.5px;
+  font-weight: 850;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.ap-pricing-button:hover {
+  transform: translateY(-2px);
+  background: #0a1240;
+  box-shadow:
+    0 18px 36px rgba(7, 10, 34, 0.26),
+    0 6px 14px rgba(7, 10, 34, 0.13);
+}
+
+.ap-pricing-button:focus-visible {
+  outline: 3px solid rgba(109, 88, 212, 0.28);
+  outline-offset: 4px;
+}
+
+.artiqal-public:has(.ap-scenic-hero) .ap-trust {
+  position: relative;
+  z-index: 2;
+  margin-top: clamp(-92px, -7vh, -56px);
+  padding-top: clamp(82px, 9vh, 116px);
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.22) 28%, #fff 88%),
+    transparent;
+}
+
+.artiqal-public:has(.ap-scenic-hero) .ap-nav {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-color: transparent;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+.artiqal-public:has(.ap-scenic-hero) .ap-nav::before {
+  content: none;
+}
+
+.artiqal-public:has(.ap-scenic-hero) .ap-nav .ap-logo b {
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(8, 14, 32, 0.18);
+}
+
+.artiqal-public:has(.ap-scenic-hero) .ap-nav .ap-logo img {
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  background: transparent;
+  clip-path: inset(1px round 10px);
+}
+
+@media (max-width: 1100px) {
+  .ap-scenic-hero {
+    background-position: 50% top, 50% top, 50% top;
+    background-size: auto, 112% auto, cover;
+  }
+
+  .ap-scenic-hero .ap-hero-inner {
+    width: min(900px, calc(100% - 44px));
+    padding-top: 100px;
+  }
+
+  .ap-scenic-hero .ap-benefits {
+    width: min(690px, 100%);
+    margin-top: clamp(74px, 12vh, 112px);
+  }
+
+  .ap-pricing-content {
+    width: min(820px, calc(100% - 44px));
+  }
+
+  .ap-pricing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .ap-scenic-hero {
+    min-height: 100svh;
+    background-position: 49% top, 49% top, 49% top;
+    background-size: auto, 138% auto, cover;
+  }
+
+  .ap-scenic-hero::before {
+    background:
+      radial-gradient(ellipse at 50% 24%, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.18) 36%, rgba(255, 255, 255, 0.06) 70%, transparent 88%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(8, 14, 32, 0.08));
+  }
+
+  .ap-scenic-hero .ap-hero-inner {
+    width: calc(100% - 32px);
+    min-height: 100svh;
+    padding: 98px 0 34px;
+  }
+
+  .ap-scenic-hero .ap-hero-copy {
+    padding-top: 42px;
+  }
+
+  .ap-scenic-hero h1 {
+    font-size: clamp(33px, 9.4vw, 45px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .ap-rotating-headline {
+    width: min(100%, 10.8em);
+  }
+
+  .ap-rotating-headline-ghost,
+  .ap-rotating-headline em {
+    white-space: normal;
+  }
+
+  .ap-scenic-hero .ap-hero-copy > p {
+    margin-top: 18px;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .ap-scenic-hero .ap-hero-actions {
+    width: min(360px, 100%);
+    margin: 26px auto 0;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .ap-scenic-hero .ap-hero-actions .ap-button-dark,
+  .ap-scenic-hero .ap-hero-actions .ap-button-light {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .ap-scenic-hero .ap-benefits {
+    width: min(360px, 100%);
+    margin-top: 46px;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .ap-scenic-hero .ap-benefit {
+    width: 100%;
+    justify-content: flex-start;
+    color: rgba(255, 255, 255, 0.94);
+    text-shadow: 0 1px 8px rgba(8, 14, 31, 0.22);
+  }
+
+  .ap-scenic-hero .ap-benefit + .ap-benefit {
+    border-left: 0;
+  }
+
+  .ap-pricing-section {
+    padding: 64px 0 76px;
+    background-position: center top;
+    background-size: cover;
+  }
+
+  .ap-pricing-content {
+    width: calc(100% - 32px);
+  }
+
+  .ap-pricing-heading h2 {
+    font-size: clamp(32px, 9vw, 42px);
+  }
+
+  .ap-pricing-heading p {
+    max-width: 340px;
+  }
+
+  .ap-pricing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ap-pricing-card {
+    min-height: auto;
+    padding: 20px;
+  }
+
+  .ap-pricing-plan-badge {
+    top: 18px;
+    right: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ap-rotating-headline em {
+    animation: none;
+  }
+}
+
+/* ---------- Bottom subscriptions / footer rhythm ---------- */
+.artiqal-public .ap-categories {
+  margin-bottom: clamp(78px, 7vw, 104px);
+}
+
+.artiqal-public .ap-cta {
+  margin: 0 auto clamp(78px, 7vw, 108px);
+}
+
+.artiqal-public .ap-pricing-section {
+  margin-bottom: 0;
+}
+
+.artiqal-public .ap-footer {
+  position: relative;
+  padding-top: clamp(22px, 2.5vw, 32px);
+  background: transparent;
+  overflow: visible;
+}
+
+.artiqal-public .ap-footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: 0;
+  width: 100vw;
+  transform: translateX(-50%);
+  background: #f7f8fb;
+  pointer-events: none;
+}
+
+.artiqal-public .ap-footer > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 720px) {
+  .artiqal-public .ap-categories {
+    margin-bottom: 58px;
+  }
+
+  .artiqal-public .ap-cta {
+    margin-bottom: 56px;
+  }
+
+  .artiqal-public .ap-footer {
+    padding-top: 24px;
   }
 }

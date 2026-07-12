@@ -1,4 +1,4 @@
-"""Curated static content for Concentric activities."""
+﻿"""Curated static content for Concentric activities."""
 
 CATEGORIES = [
     {
@@ -42,12 +42,12 @@ CATEGORIES = [
         "description": "Real-world conversations and everyday communication practice.",
     },
     {
-        "slug": "sfa-therapy",
-        "name": "SFA Therapy Tool",
-        "tagline": "Semantic Feature Analysis",
-        "color": "#F43F5E",
-        "icon": "Brain",
-        "description": "Build word retrieval by exploring features: group, use, action, location, properties, association.",
+        "slug": "games",
+        "name": "Games",
+        "tagline": "Playful clinical practice",
+        "color": "#16A34A",
+        "icon": "Gamepad2",
+        "description": "Playful activities that build language, attention, and confidence.",
     },
     {
         "slug": "all-activities",
@@ -69,6 +69,8 @@ ACTIVITIES_BY_CATEGORY = {
             "summary": "Read a grocery store receipt and answer questions.",
             "duration_min": 5,
             "type": "reading",
+            "is_functional": True,
+            "tags": ["reading", "receipt", "functional", "grocery", "questions"],
             "content": {
                 "text": (
                     "GREEN MARKET\n"
@@ -94,115 +96,8 @@ ACTIVITIES_BY_CATEGORY = {
                 ],
             },
         },
-        {
-            "slug": "medication-package",
-            "title": "Medication Package Reading",
-            "summary": "Read a medication label and answer questions about dose and timing.",
-            "duration_min": 5,
-            "type": "reading",
-            "content": {
-                "text": (
-                    "ACETA-500\n"
-                    "Pain & Fever Relief\n"
-                    "Each tablet: 500 mg acetaminophen\n\n"
-                    "Dose: 1 to 2 tablets every 6 hours.\n"
-                    "Do NOT take more than 8 tablets in 24 hours.\n"
-                    "Take with a glass of water.\n"
-                    "Warning: Do not drink alcohol while taking this medicine.\n"
-                    "Keep out of reach of children.\n"
-                    "Store at room temperature."
-                ),
-                "questions": [
-                    {"q": "How many tablets is one dose?", "options": ["1 to 2", "3 to 4", "5"], "answer": 0},
-                    {"q": "How often can you take it?", "options": ["Every 1 hour", "Every 6 hours", "Once a week"], "answer": 1},
-                    {"q": "What should you NOT do?", "options": ["Drink water", "Drink alcohol", "Read the label"], "answer": 1},
-                ],
-            },
-        },
-        {
-            "slug": "patient-form",
-            "title": "Reading a Patient Form",
-            "summary": "Read a short medical form and find key facts.",
-            "duration_min": 6,
-            "type": "reading",
-            "content": {
-                "text": (
-                    "PATIENT INTAKE FORM\n"
-                    "Name: Sara Chen\n"
-                    "Date of birth: 04/12/1962\n"
-                    "Address: 88 Oak Lane\n"
-                    "Phone: (555) 204-7781\n"
-                    "Allergies: Penicillin\n"
-                    "Current medications: Lisinopril 10 mg\n"
-                    "Emergency contact: Mark Chen (555) 204-7780"
-                ),
-                "questions": [
-                    {"q": "Who is the patient?", "options": ["Mark Chen", "Sara Chen", "Dr. Oak"], "answer": 1},
-                    {"q": "What is she allergic to?", "options": ["Aspirin", "Penicillin", "Peanuts"], "answer": 1},
-                    {"q": "What medicine does she take?", "options": ["Lisinopril", "Tylenol", "Ibuprofen"], "answer": 0},
-                ],
-            },
-        },
-        {
-            "slug": "ai-scenario",
-            "title": "AI Practice Scenario",
-            "summary": "Generate a fresh receipt, label, or form with AI.",
-            "duration_min": 5,
-            "type": "ai-reading",
-            "content": {
-                "options": [
-                    {"key": "receipt", "label": "Grocery Receipt"},
-                    {"key": "medication", "label": "Medication Label"},
-                    {"key": "form", "label": "Patient Form"},
-                ],
-            },
-        },
     ],
-    "writing": [
-        {
-            "slug": "short-message",
-            "title": "Write a Short Message",
-            "summary": "Write a short message to a friend.",
-            "duration_min": 5,
-            "type": "writing",
-            "content": {
-                "prompt": "Write a short message to a friend telling them you arrived home safely.",
-                "starter": "Hi ____, I am",
-            },
-        },
-        {
-            "slug": "complete-sentence",
-            "title": "Complete the Sentence",
-            "summary": "Finish each sentence with your own words.",
-            "duration_min": 4,
-            "type": "writing",
-            "content": {
-                "items": [
-                    "Today I feel ____.",
-                    "For breakfast I ate ____.",
-                    "After lunch I will ____.",
-                    "My favourite season is ____ because ____.",
-                ],
-            },
-        },
-        {
-            "slug": "fill-form",
-            "title": "Fill a Sign-up Form",
-            "summary": "Practice writing your information into a form.",
-            "duration_min": 6,
-            "type": "writing",
-            "content": {
-                "fields": [
-                    {"label": "First name"},
-                    {"label": "Last name"},
-                    {"label": "Date of birth"},
-                    {"label": "Phone number"},
-                    {"label": "Address"},
-                    {"label": "Emergency contact"},
-                ],
-            },
-        },
-    ],
+    "writing": [],
     "word-finding": [
         {
             "slug": "naming",
@@ -221,68 +116,31 @@ ACTIVITIES_BY_CATEGORY = {
             },
         },
         {
-            "slug": "category-cueing",
-            "title": "Category Cueing",
-            "summary": "Name three things in each category.",
-            "duration_min": 4,
-            "type": "list",
+            "slug": "sfa-tool",
+            "title": "Semantic Feature Analysis",
+            "summary": "Explore features of a target word to support naming, associations, and word retrieval.",
+            "duration_min": 8,
+            "type": "sfa",
+            "primary_category": "word-finding",
+            "tags": [
+                "SFA",
+                "Semantic Feature Analysis",
+                "word finding",
+                "naming",
+                "semantic features",
+                "associations",
+                "word retrieval",
+                "cueing",
+            ],
             "content": {
-                "categories": [
-                    "Fruits",
-                    "Animals at the zoo",
-                    "Things in the kitchen",
-                    "Clothing",
-                    "Things that are red",
-                ],
-            },
-        },
-        {
-            "slug": "associations",
-            "title": "Word Associations",
-            "summary": "Pick the word that goes with the prompt.",
-            "duration_min": 4,
-            "type": "mcq",
-            "content": {
-                "items": [
-                    {"q": "Bread and ___", "options": ["butter", "shoe", "sky"], "answer": 0},
-                    {"q": "Salt and ___", "options": ["pepper", "rain", "blue"], "answer": 0},
-                    {"q": "Knife and ___", "options": ["lamp", "fork", "pillow"], "answer": 1},
-                    {"q": "Dog and ___", "options": ["book", "cat", "fan"], "answer": 1},
-                ],
+                "instructions": (
+                    "Pick a target word, then answer six feature prompts: Group, Use, Action, "
+                    "Location, Properties, and Association. Try to say the target word at the end."
+                ),
             },
         },
     ],
-    "auditory-comprehension": [
-        {
-            "slug": "follow-instructions",
-            "title": "Follow the Instructions",
-            "summary": "Listen and choose the picture or word that matches.",
-            "duration_min": 5,
-            "type": "mcq",
-            "content": {
-                "items": [
-                    {"q": "Point to the thing you read.", "options": ["book", "spoon", "shoe"], "answer": 0},
-                    {"q": "Choose the thing that gives light.", "options": ["lamp", "rug", "cup"], "answer": 0},
-                    {"q": "Choose the thing that flies.", "options": ["bird", "fish", "tree"], "answer": 0},
-                ],
-            },
-        },
-        {
-            "slug": "yes-no",
-            "title": "Yes or No?",
-            "summary": "Listen to a short statement and answer yes or no.",
-            "duration_min": 4,
-            "type": "yesno",
-            "content": {
-                "items": [
-                    {"q": "A dog is an animal.", "answer": True},
-                    {"q": "Ice is hot.", "answer": False},
-                    {"q": "We sleep at night.", "answer": True},
-                    {"q": "A bicycle has wings.", "answer": False},
-                ],
-            },
-        },
-    ],
+    "auditory-comprehension": [],
     "functional-communication": [
         {
             "slug": "appointment-letter",
@@ -290,6 +148,16 @@ ACTIVITIES_BY_CATEGORY = {
             "summary": "Read a clinic appointment letter and answer questions. Choose your difficulty.",
             "duration_min": 20,
             "type": "reading-leveled",
+            "primary_category": "reading",
+            "is_functional": True,
+            "tags": [
+                "reading",
+                "appointment letter",
+                "functional",
+                "clinic appointment",
+                "letter",
+                "questions",
+            ],
             "content": {
                 "levels": {
                     "green": {
@@ -299,7 +167,7 @@ ACTIVITIES_BY_CATEGORY = {
                         "best_for": "Clients who can read short sentences and are working on finding key information within a simple page.",
                         "questions_per_letter": 3,
                         "target_letter_count": 10,
-                        "est_minutes": "10–15 min",
+                        "est_minutes": "10â€“15 min",
                         "letters": [
                             {
                                 "id": 1,
@@ -331,7 +199,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#F97316",
                                 },
                                 "text": (
-                                    "Orion Medical — Health Begins Here\n"
+                                    "Orion Medical â€” Health Begins Here\n"
                                     "123 Orion Road, Burnford, BR1 2AB\n"
                                     "Tel: 01632 960001\n\n"
                                     "Date: 15 May\n\n"
@@ -900,7 +768,7 @@ ACTIVITIES_BY_CATEGORY = {
                         "best_for": "Clients who can read short paragraphs and are working on linking information across sentences.",
                         "questions_per_letter": 4,
                         "target_letter_count": 10,
-                        "est_minutes": "20–25 min",
+                        "est_minutes": "20â€“25 min",
                         "letters": [
                             {
                                 "id": 1,
@@ -937,7 +805,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#4A6B8A",
                                     "variant": "riverbank",
                                 },
-                                "text": "Riverbank Surgery — Medication Review",
+                                "text": "Riverbank Surgery â€” Medication Review",
                                 "questions": [
                                     {
                                         "q": "What is the purpose of the appointment?",
@@ -995,7 +863,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#2563EB",
                                     "variant": "westside",
                                 },
-                                "text": "Westside Dental Practice — Dental Treatment",
+                                "text": "Westside Dental Practice â€” Dental Treatment",
                                 "questions": [
                                     {
                                         "q": "Who is the appointment with?",
@@ -1058,7 +926,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#0F766E",
                                     "variant": "clearview-amber",
                                 },
-                                "text": "Clearview Opticians — Contact Lens Fitting",
+                                "text": "Clearview Opticians â€” Contact Lens Fitting",
                                 "questions": [
                                     {
                                         "q": "What is the appointment for?",
@@ -1120,7 +988,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#059669",
                                     "variant": "meadow",
                                 },
-                                "text": "Meadow Physiotherapy Clinic — Physiotherapy Assessment",
+                                "text": "Meadow Physiotherapy Clinic â€” Physiotherapy Assessment",
                                 "questions": [
                                     {
                                         "q": "What is the purpose of this appointment?",
@@ -1183,7 +1051,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#15803D",
                                     "variant": "oakwood",
                                 },
-                                "text": "Oakwood Medical Practice — Annual Health Review",
+                                "text": "Oakwood Medical Practice â€” Annual Health Review",
                                 "questions": [
                                     {
                                         "q": "What is the appointment for?",
@@ -1246,7 +1114,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#EAB308",
                                     "variant": "highfield",
                                 },
-                                "text": "Highfield Cardiology Unit — Cardiology Appointment",
+                                "text": "Highfield Cardiology Unit â€” Cardiology Appointment",
                                 "questions": [
                                     {
                                         "q": "What is an ECG?",
@@ -1317,7 +1185,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#06B6D4",
                                     "variant": "lakeside",
                                 },
-                                "text": "Lakeside Neurology Clinic — Neurology Consultation",
+                                "text": "Lakeside Neurology Clinic â€” Neurology Consultation",
                                 "questions": [
                                     {
                                         "q": "What will the doctor discuss at this appointment?",
@@ -1387,7 +1255,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#7C3AED",
                                     "variant": "northfield",
                                 },
-                                "text": "Northfield Stroke Clinic — Stroke Follow-up Appointment",
+                                "text": "Northfield Stroke Clinic â€” Stroke Follow-up Appointment",
                                 "questions": [
                                     {
                                         "q": "Who is the appointment with?",
@@ -1458,7 +1326,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#16A34A",
                                     "variant": "parkview",
                                 },
-                                "text": "Parkview Physiotherapy Clinic — Hydrotherapy Class",
+                                "text": "Parkview Physiotherapy Clinic â€” Hydrotherapy Class",
                                 "questions": [
                                     {
                                         "q": "What is hydrotherapy?",
@@ -1532,7 +1400,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#1D4ED8",
                                     "variant": "elmtree",
                                 },
-                                "text": "Elmtree Clinic Phlebotomy Department — Fasting Blood Test",
+                                "text": "Elmtree Clinic Phlebotomy Department â€” Fasting Blood Test",
                                 "questions": [
                                     {
                                         "q": "What is a fasting blood test?",
@@ -1577,7 +1445,7 @@ ACTIVITIES_BY_CATEGORY = {
                         "best_for": "Clients who can read paragraphs and are working on integrating information across sections.",
                         "questions_per_letter": 5,
                         "target_letter_count": 10,
-                        "est_minutes": "30–40 min",
+                        "est_minutes": "30â€“40 min",
                         "letters": [
                             {
                                 "id": 1,
@@ -1626,7 +1494,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#F97316",
                                     "variant": "clearview",
                                 },
-                                "text": "Clearview Opticians — Diabetic Eye Screening",
+                                "text": "Clearview Opticians â€” Diabetic Eye Screening",
                                 "questions": [
                                     {
                                         "q": "What is this screening checking for?",
@@ -1734,7 +1602,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#15803D",
                                     "variant": "oakwood",
                                 },
-                                "text": "Oakwood Medical Practice — Urgent Review Appointment",
+                                "text": "Oakwood Medical Practice â€” Urgent Review Appointment",
                                 "questions": [
                                     {
                                         "q": "Why has this appointment been arranged?",
@@ -1836,7 +1704,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#3F5872",
                                     "variant": "riverbank-red",
                                 },
-                                "text": "Riverbank Surgery — Anticoagulant Medication Review",
+                                "text": "Riverbank Surgery â€” Anticoagulant Medication Review",
                                 "questions": [
                                     {
                                         "q": "What are anticoagulants and why are they reviewed regularly?",
@@ -1943,7 +1811,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#0D9488",
                                     "variant": "greenhill",
                                 },
-                                "text": "Greenhill Hospital — Outpatient Appointment Parking and Access",
+                                "text": "Greenhill Hospital â€” Outpatient Appointment Parking and Access",
                                 "questions": [
                                     {
                                         "q": "Which car park is recommended, and how far is it from the outpatient entrance?",
@@ -2025,7 +1893,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         {
                                             "heading": "Parking",
                                             "paragraphs": [
-                                                "A pay-and-display car park is available at the new location. Charges are £2 for up to two hours and £4 for up to four hours. Card payment only.",
+                                                "A pay-and-display car park is available at the new location. Charges are Â£2 for up to two hours and Â£4 for up to four hours. Card payment only.",
                                             ],
                                         },
                                         {
@@ -2045,7 +1913,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#06B6D4",
                                     "variant": "lakeside",
                                 },
-                                "text": "Lakeside Neurology Clinic — Change of Building",
+                                "text": "Lakeside Neurology Clinic â€” Change of Building",
                                 "questions": [
                                     {
                                         "q": "Why has the location of the appointment changed?",
@@ -2144,7 +2012,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#059669",
                                     "variant": "meadow",
                                 },
-                                "text": "Meadow Physiotherapy Clinic — Back Care Group Class",
+                                "text": "Meadow Physiotherapy Clinic â€” Back Care Group Class",
                                 "questions": [
                                     {
                                         "q": "What is the purpose of this group class?",
@@ -2245,7 +2113,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#7C3AED",
                                     "variant": "northfield",
                                 },
-                                "text": "Northfield Stroke Clinic — Follow-up Appointment",
+                                "text": "Northfield Stroke Clinic â€” Follow-up Appointment",
                                 "questions": [
                                     {
                                         "q": "What will happen at this appointment?",
@@ -2350,7 +2218,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#1E3A8A",
                                     "variant": "willowbank",
                                 },
-                                "text": "Willowbank Foot Clinic — Urgent Diabetic Foot Review",
+                                "text": "Willowbank Foot Clinic â€” Urgent Diabetic Foot Review",
                                 "questions": [
                                     {
                                         "q": "Why has this appointment been arranged as urgent?",
@@ -2459,7 +2327,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#EAB308",
                                     "variant": "highfield",
                                 },
-                                "text": "Highfield Cardiology Unit — Cardiology Review Appointment",
+                                "text": "Highfield Cardiology Unit â€” Cardiology Review Appointment",
                                 "questions": [
                                     {
                                         "q": "What is the purpose of this appointment?",
@@ -2562,7 +2430,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "accent_color": "#0D9488",
                                     "variant": "greenhill",
                                 },
-                                "text": "Greenhill Hospital — Pre-assessment Appointment for Surgery",
+                                "text": "Greenhill Hospital â€” Pre-assessment Appointment for Surgery",
                                 "questions": [
                                     {
                                         "q": "What is the purpose of a pre-assessment appointment?",
@@ -2622,6 +2490,16 @@ ACTIVITIES_BY_CATEGORY = {
             "summary": "Read pharmacy and medication labels and answer questions. Choose your difficulty.",
             "duration_min": 15,
             "type": "reading-leveled",
+            "primary_category": "reading",
+            "is_functional": True,
+            "tags": [
+                "reading",
+                "prescription",
+                "medication labels",
+                "functional",
+                "pharmacy",
+                "questions",
+            ],
             "content": {
                 "levels": {
                     "green": {
@@ -2633,7 +2511,7 @@ ACTIVITIES_BY_CATEGORY = {
                         "target_letter_count": 10,
                         "item_label_singular": "Label",
                         "item_label_plural": "labels",
-                        "est_minutes": "8–12 min",
+                        "est_minutes": "8â€“12 min",
                         "letters": [
                             {
                                 "id": 1,
@@ -2659,7 +2537,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "prescriber": "Dr Bennett",
                                     },
                                 },
-                                "text": "Oakwood Pharmacy — Paracetamol 500mg",
+                                "text": "Oakwood Pharmacy â€” Paracetamol 500mg",
                                 "questions": [
                                     {
                                         "q": "What is the name of the medication?",
@@ -2702,7 +2580,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "prescriber": "Dr Carter",
                                     },
                                 },
-                                "text": "Brightside Pharmacy — Amoxicillin 500mg",
+                                "text": "Brightside Pharmacy â€” Amoxicillin 500mg",
                                 "questions": [
                                     {
                                         "q": "What is the name of this medication?",
@@ -2745,7 +2623,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "prescriber": "Dr Wells",
                                     },
                                 },
-                                "text": "Maple Pharmacy — Amlodipine 5mg",
+                                "text": "Maple Pharmacy â€” Amlodipine 5mg",
                                 "questions": [
                                     {
                                         "q": "What medication is on this label?",
@@ -2788,7 +2666,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "prescriber": "Dr Patel",
                                     },
                                 },
-                                "text": "Clearview Pharmacy — Atorvastatin 20mg",
+                                "text": "Clearview Pharmacy â€” Atorvastatin 20mg",
                                 "questions": [
                                     {
                                         "q": "Which medication has been dispensed?",
@@ -2831,7 +2709,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "prescriber": "Dr Roberts",
                                     },
                                 },
-                                "text": "Meadow Pharmacy — Omeprazole 20mg",
+                                "text": "Meadow Pharmacy â€” Omeprazole 20mg",
                                 "questions": [
                                     {
                                         "q": "What medication is this?",
@@ -2874,7 +2752,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "prescriber": "Dr Harris",
                                     },
                                 },
-                                "text": "Parkview Pharmacy — Levothyroxine 50 micrograms",
+                                "text": "Parkview Pharmacy â€” Levothyroxine 50 micrograms",
                                 "questions": [
                                     {
                                         "q": "What is the name of the medication?",
@@ -2917,7 +2795,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "prescriber": "Dr Owens",
                                     },
                                 },
-                                "text": "Northfield Pharmacy — Metformin 500mg",
+                                "text": "Northfield Pharmacy â€” Metformin 500mg",
                                 "questions": [
                                     {
                                         "q": "What medication has been prescribed?",
@@ -2960,7 +2838,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "prescriber": "Dr Marsh",
                                     },
                                 },
-                                "text": "Highfield Pharmacy — Salbutamol 100 micrograms inhaler",
+                                "text": "Highfield Pharmacy â€” Salbutamol 100 micrograms inhaler",
                                 "questions": [
                                     {
                                         "q": "What is this medication for?",
@@ -3003,7 +2881,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "prescriber": "Dr Whitehouse",
                                     },
                                 },
-                                "text": "Willowbank Pharmacy — Hydrocortisone 1% cream",
+                                "text": "Willowbank Pharmacy â€” Hydrocortisone 1% cream",
                                 "questions": [
                                     {
                                         "q": "What is the name of this medication?",
@@ -3046,7 +2924,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "prescriber": "Dr Carpenter",
                                     },
                                 },
-                                "text": "Soundwell Pharmacy — Lubricating eye drops",
+                                "text": "Soundwell Pharmacy â€” Lubricating eye drops",
                                 "questions": [
                                     {
                                         "q": "What are these drops used for?",
@@ -3076,7 +2954,7 @@ ACTIVITIES_BY_CATEGORY = {
                         "target_letter_count": 10,
                         "item_label_singular": "Label",
                         "item_label_plural": "labels",
-                        "est_minutes": "15–20 min",
+                        "est_minutes": "15â€“20 min",
                         "letters": [
                             {
                                 "id": 1,
@@ -3103,7 +2981,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "warning": "May cause drowsiness. Do not drive or operate machinery.",
                                     },
                                 },
-                                "text": "Oakwood Pharmacy — Co-codamol 8/500mg",
+                                "text": "Oakwood Pharmacy â€” Co-codamol 8/500mg",
                                 "questions": [
                                     {
                                         "q": "Which medication has been prescribed?",
@@ -3156,7 +3034,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "warning": "Complete the full course even if you feel better.",
                                     },
                                 },
-                                "text": "Brightside Medical Practice — Flucloxacillin 500mg",
+                                "text": "Brightside Medical Practice â€” Flucloxacillin 500mg",
                                 "questions": [
                                     {
                                         "q": "What is the name of this medication?",
@@ -3213,7 +3091,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "warning": "Take in the morning to avoid needing the toilet at night.",
                                     },
                                 },
-                                "text": "Maple Pharmacy — Bendroflumethiazide 2.5mg",
+                                "text": "Maple Pharmacy â€” Bendroflumethiazide 2.5mg",
                                 "questions": [
                                     {
                                         "q": "What is the name of this medication?",
@@ -3270,7 +3148,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "warning": "Avoid alcohol while taking this medication.",
                                     },
                                 },
-                                "text": "Clearview Pharmacy — Sertraline 50mg",
+                                "text": "Clearview Pharmacy â€” Sertraline 50mg",
                                 "questions": [
                                     {
                                         "q": "What medication has been prescribed?",
@@ -3319,7 +3197,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "warning": "May cause drowsiness or dizziness. Do not drive until you know how this medicine affects you.",
                                     },
                                 },
-                                "text": "Maple Pharmacy — Gabapentin 300mg",
+                                "text": "Maple Pharmacy â€” Gabapentin 300mg",
                                 "questions": [
                                     {
                                         "q": "What is the name of this medication?",
@@ -3380,7 +3258,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "warning": "This medicine may make your skin more sensitive to sunlight. Use sun screen and avoid strong sunlight.",
                                     },
                                 },
-                                "text": "Parklane Pharmacy — Doxycycline 100mg",
+                                "text": "Parklane Pharmacy â€” Doxycycline 100mg",
                                 "questions": [
                                     {
                                         "q": "What medication is on this label?",
@@ -3437,7 +3315,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "warning": "Tell your doctor if you experience stomach pain, black stools, or vomit that looks like coffee grounds.",
                                     },
                                 },
-                                "text": "Northfield Pharmacy — Naproxen 250mg",
+                                "text": "Northfield Pharmacy â€” Naproxen 250mg",
                                 "questions": [
                                     {
                                         "q": "What is the name of this medication?",
@@ -3494,7 +3372,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "warning": "Avoid alcohol. Speak to your doctor before stopping this medicine.",
                                     },
                                 },
-                                "text": "Highfield Pharmacy — Citalopram 20mg",
+                                "text": "Highfield Pharmacy â€” Citalopram 20mg",
                                 "questions": [
                                     {
                                         "q": "Which medication has been prescribed?",
@@ -3547,7 +3425,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "warning": "Do not stop taking this medication suddenly. Take with food.",
                                     },
                                 },
-                                "text": "Elmtree Pharmacy — Prednisolone 5mg",
+                                "text": "Elmtree Pharmacy â€” Prednisolone 5mg",
                                 "questions": [
                                     {
                                         "q": "What is the name of this medication?",
@@ -3604,7 +3482,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         "warning": "May cause drowsiness. Do not drive or drink alcohol.",
                                     },
                                 },
-                                "text": "Greenhill Pharmacy — Tramadol 50mg",
+                                "text": "Greenhill Pharmacy â€” Tramadol 50mg",
                                 "questions": [
                                     {
                                         "q": "What is this medication used for?",
@@ -3639,7 +3517,7 @@ ACTIVITIES_BY_CATEGORY = {
                         "target_letter_count": 10,
                         "item_label_singular": "Label",
                         "item_label_plural": "labels",
-                        "est_minutes": "25–35 min",
+                        "est_minutes": "25â€“35 min",
                         "letters": [
                             {
                                 "id": 1,
@@ -3658,12 +3536,12 @@ ACTIVITIES_BY_CATEGORY = {
                                             {"label": "Directions", "body": "Adults and children over 12 years: Take 2 tablets every 6 hours with water. Do not exceed 6 tablets in 24 hours. Take with or after food."},
                                             {"label": "Caution", "body": "Do not give to children under 12 years of age. Do not take for longer than 3 days for fever or 10 days for pain without speaking to your doctor."},
                                         ],
-                                        "storage": "Store below 25°C in a dry place. Keep out of reach of children.",
+                                        "storage": "Store below 25Â°C in a dry place. Keep out of reach of children.",
                                         "warning": "Stop taking and see a doctor if you experience stomach pain, black stools, or vomit that looks like coffee grounds.",
                                         "barcode_value": "1122334455667",
                                     },
                                 },
-                                "text": "Relievex extra — Ibuprofen 200mg tablets",
+                                "text": "Relievex extra â€” Ibuprofen 200mg tablets",
                                 "questions": [
                                     {"q": "What is this medication used for?", "options": ["Pain and fever", "Heartburn", "Allergies"], "answer": 0},
                                     {"q": "What is the maximum number of tablets you can take in 24 hours?", "options": ["6 tablets", "8 tablets", "10 tablets"], "answer": 0},
@@ -3691,7 +3569,7 @@ ACTIVITIES_BY_CATEGORY = {
                                         ],
                                     },
                                 },
-                                "text": "Paxolin — Paracetamol 500mg tablets",
+                                "text": "Paxolin â€” Paracetamol 500mg tablets",
                                 "questions": [
                                     {"q": "What is this medication used for?", "options": ["Pain and fever", "Heartburn", "Allergies"], "answer": 0},
                                     {"q": "How long should you wait between doses?", "options": ["At least 4 hours", "1 hour", "12 hours"], "answer": 0},
@@ -3718,11 +3596,11 @@ ACTIVITIES_BY_CATEGORY = {
                                         ],
                                         "sections_right": [
                                             {"label": "Caution", "body": "this medication may cause drowsiness in some people. Do not drive or operate machinery until you know how this medicine affects you. Avoid alcohol while taking this medication."},
-                                            {"label": "Storage", "body": "Store below 30°C. Keep in the original packaging until needed."},
+                                            {"label": "Storage", "body": "Store below 30Â°C. Keep in the original packaging until needed."},
                                         ],
                                     },
                                 },
-                                "text": "Allergex — Cetirizine 10mg tablets",
+                                "text": "Allergex â€” Cetirizine 10mg tablets",
                                 "questions": [
                                     {"q": "What is this medication used for?", "options": ["Allergies and hay fever", "Pain and fever", "Heartburn"], "answer": 0},
                                     {"q": "How often should an adult take this medication, and when?", "options": ["Once a day, preferably in the evening", "Twice a day with food", "Three times a day before meals"], "answer": 0},
@@ -3746,13 +3624,13 @@ ACTIVITIES_BY_CATEGORY = {
                                         "sections": [
                                             {"label": "Directions", "body": "Adults and children over 16 years: Take 1 tablet when symptoms start. If symptoms continue, take another tablet after 1 hour. Do not take more than 4 tablets in 24 hours. Do not take for more than 2 weeks without speaking to your doctor."},
                                             {"label": "Caution", "body": "This product is not suitable for children under 16 years. Speak to Your Doctor If: You have unintentionally lost weight, you have difficulty swallowing, your symptoms continue for more than 2 weeks, and/or you vomit blood or pass black stools."},
-                                            {"label": "Storage", "body": "Store below 25°C. Keep out of reach of children."},
+                                            {"label": "Storage", "body": "Store below 25Â°C. Keep out of reach of children."},
                                             {"label": "Warning", "body": "If you have chest pain that spreads to your arm, neck, or jaw, or you have difficulty breathing, stop taking this medication and seek urgent medical advice."},
                                         ],
                                         "barcode_value": "011452364",
                                     },
                                 },
-                                "text": "Rexazid — Ranitidine 75mg tablets",
+                                "text": "Rexazid â€” Ranitidine 75mg tablets",
                                 "questions": [
                                     {"q": "What is this medication used for?", "options": ["Heartburn, indigestion, and acid reflux", "Pain and fever", "Allergies"], "answer": 0},
                                     {"q": "When should you take the first tablet?", "options": ["When symptoms start", "Before food in the morning", "Only at night"], "answer": 0},
@@ -3782,10 +3660,10 @@ ACTIVITIES_BY_CATEGORY = {
                                         ],
                                     },
                                 },
-                                "text": "Throatmin Honey & Lemon — Hexylresorcinol 2.5mg lozenges",
+                                "text": "Throatmin Honey & Lemon â€” Hexylresorcinol 2.5mg lozenges",
                                 "questions": [
                                     {"q": "What is this medication used for?", "options": ["Sore throats and minor mouth infections", "Pain and fever", "Heartburn"], "answer": 0},
-                                    {"q": "How should you take the lozenge?", "options": ["Suck it slowly — do not chew or swallow whole", "Chew it well and swallow", "Crush it in water and drink"], "answer": 0},
+                                    {"q": "How should you take the lozenge?", "options": ["Suck it slowly â€” do not chew or swallow whole", "Chew it well and swallow", "Crush it in water and drink"], "answer": 0},
                                     {"q": "What is the maximum number of lozenges you can take in 24 hours?", "options": ["8 lozenges", "4 lozenges", "12 lozenges"], "answer": 0},
                                     {"q": "How many days in a row can you use this medication?", "options": ["No more than 3 days in a row", "Up to 7 days", "Up to 2 weeks"], "answer": 0},
                                     {"q": "Why might this product not be suitable for someone with diabetes?", "options": ["It contains sugar", "It contains caffeine", "It contains alcohol"], "answer": 0},
@@ -3793,7 +3671,7 @@ ACTIVITIES_BY_CATEGORY = {
                             },
                             {
                                 "id": 6,
-                                "title": "Throatease Night — Dry Cough Linctus",
+                                "title": "Throatease Night â€” Dry Cough Linctus",
                                 "summary": "An over-the-counter cough syrup bottle.",
                                 "letterhead": {
                                     "format": "label",
@@ -3801,7 +3679,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "image_url": "/renders/red-6-throatease.png",
                                     "image_alt": "Throatease Night Dry Cough Linctus 150ml bottle with measuring cup",
                                 },
-                                "text": "Throatease Night — Dry Cough Linctus 150ml",
+                                "text": "Throatease Night â€” Dry Cough Linctus 150ml",
                                 "questions": [
                                     {"q": "What is this medication used for?", "options": ["A dry, irritating cough", "Heartburn", "Travel sickness"], "answer": 0},
                                     {"q": "How long should you wait between doses?", "options": ["4 hours", "1 hour", "8 hours"], "answer": 0},
@@ -3812,7 +3690,7 @@ ACTIVITIES_BY_CATEGORY = {
                             },
                             {
                                 "id": 7,
-                                "title": "Reguloxin — Senna",
+                                "title": "Reguloxin â€” Senna",
                                 "summary": "An overnight constipation-relief tablet bottle.",
                                 "letterhead": {
                                     "format": "label",
@@ -3820,7 +3698,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "image_url": "/renders/red-7-reguloxin.png",
                                     "image_alt": "Reguloxin Senna 7.5mg overnight constipation relief bottle",
                                 },
-                                "text": "Reguloxin — Senna 7.5mg tablets",
+                                "text": "Reguloxin â€” Senna 7.5mg tablets",
                                 "questions": [
                                     {"q": "What is this medication used for?", "options": ["Short-term relief of occasional constipation", "Travel sickness", "Sore throat"], "answer": 0},
                                     {"q": "When should you take the tablets?", "options": ["At bedtime with a glass of water", "First thing in the morning", "With every meal"], "answer": 0},
@@ -3831,7 +3709,7 @@ ACTIVITIES_BY_CATEGORY = {
                             },
                             {
                                 "id": 8,
-                                "title": "Ferrovex — Iron Supplement",
+                                "title": "Ferrovex â€” Iron Supplement",
                                 "summary": "An iron-supplement tablet bottle.",
                                 "letterhead": {
                                     "format": "label",
@@ -3839,7 +3717,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "image_url": "/renders/red-8-ferrovex.png",
                                     "image_alt": "Ferrovex Iron Supplement Ferrous Sulfate tablets bottle",
                                 },
-                                "text": "Ferrovex — Iron Supplement for low iron levels",
+                                "text": "Ferrovex â€” Iron Supplement for low iron levels",
                                 "questions": [
                                     {"q": "What is this supplement used for?", "options": ["Prevention and treatment of iron deficiency in adults", "Constipation", "Travel sickness"], "answer": 0},
                                     {"q": "How many times a day should you take the tablets?", "options": ["Three times a day", "Once a day", "Twice a day"], "answer": 0},
@@ -3850,7 +3728,7 @@ ACTIVITIES_BY_CATEGORY = {
                             },
                             {
                                 "id": 9,
-                                "title": "Voyagex — Travel Sickness",
+                                "title": "Voyagex â€” Travel Sickness",
                                 "summary": "A travel-sickness tablet bottle.",
                                 "letterhead": {
                                     "format": "label",
@@ -3858,7 +3736,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "image_url": "/renders/red-9-voyagex.png",
                                     "image_alt": "Voyagex Cinnarizine 15mg travel sickness tablets bottle",
                                 },
-                                "text": "Voyagex — Cinnarizine 15mg tablets",
+                                "text": "Voyagex â€” Cinnarizine 15mg tablets",
                                 "questions": [
                                     {"q": "What is this medication used for?", "options": ["Prevention of travel sickness", "Constipation", "Sore throat"], "answer": 0},
                                     {"q": "How long before travel should you take the first dose?", "options": ["30 minutes before travel", "2 hours before travel", "Just as you start travelling"], "answer": 0},
@@ -3869,7 +3747,7 @@ ACTIVITIES_BY_CATEGORY = {
                             },
                             {
                                 "id": 10,
-                                "title": "Derminex — Antiseptic Cream",
+                                "title": "Derminex â€” Antiseptic Cream",
                                 "summary": "An antiseptic cream jar for minor cuts and grazes.",
                                 "letterhead": {
                                     "format": "label",
@@ -3877,7 +3755,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "image_url": "/renders/red-10-derminex.png",
                                     "image_alt": "Derminex Antiseptic Cream jar for minor cuts grazes and insect bites",
                                 },
-                                "text": "Derminex — Antiseptic Cream",
+                                "text": "Derminex â€” Antiseptic Cream",
                                 "questions": [
                                     {"q": "What is this cream used for?", "options": ["Minor cuts, grazes, and insect bites", "Heartburn", "Travel sickness"], "answer": 0},
                                     {"q": "What should you do before applying the cream?", "options": ["Clean the affected area with water and dry gently", "Apply ice for 5 minutes", "Wait until the wound stops bleeding for an hour"], "answer": 0},
@@ -3894,21 +3772,32 @@ ACTIVITIES_BY_CATEGORY = {
         {
             "slug": "voicemails",
             "title": "Listening to a Voicemail",
-            "summary": "Listen to voicemail messages and answer questions. Choose your difficulty.",
+            "summary": "Listen to realistic voicemail messages and answer targeted questions.",
             "duration_min": 20,
             "type": "reading-leveled",
+            "primary_category": "auditory-comprehension",
+            "is_functional": True,
+            "tags": [
+                "listening",
+                "voicemail",
+                "functional",
+                "phone",
+                "auditory comprehension",
+                "recall",
+                "inference",
+            ],
             "content": {
                 "levels": {
                     "green": {
                         "key": "green",
                         "title": "Foundational",
-                        "blurb": "10 short voicemails (15-30 seconds) from a single familiar caller, with five literal-recall questions each.",
-                        "best_for": "Clients working on picking out key information (caller, date/time, action) from a brief message.",
+                        "blurb": "10 short everyday voicemails with five direct-recall questions. Targets caller, message purpose, time, place, items, and next steps.",
+                        "best_for": "Clients practising key detail recall from brief spoken messages.",
                         "questions_per_letter": 5,
                         "target_letter_count": 10,
                         "item_label_singular": "Voicemail",
                         "item_label_plural": "voicemails",
-                        "est_minutes": "12–18 min",
+                        "est_minutes": "12â€“18 min",
                         "letters": [
                             {
                                 "id": 1,
@@ -3925,7 +3814,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/7xol65fe_Green%201%20-%20GP%20Appt%20Reminder.mp3",
                                     "transcript": "Hello, this is Orion Medical Centre calling for Alex Morgan. This is a reminder that you have a GP appointment on Monday at 10:30 in the morning with Dr Patel. Please arrive 10 minutes early for check-in. If you need to cancel or change your appointment, please call us back. Thank you.",
                                 },
-                                "text": "Voicemail from Orion Medical Centre — GP appointment reminder",
+                                "text": "Voicemail from Orion Medical Centre â€” GP appointment reminder",
                                 "questions": [
                                     {"q": "Who called Alex?", "options": ["Orion Medical Centre", "Westside Pharmacy", "Bella Hair Studio"], "answer": 0},
                                     {"q": "What type of appointment does Alex have?", "options": ["A GP appointment", "A hair appointment", "A dentist appointment"], "answer": 0},
@@ -3949,7 +3838,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/lc4ni4xi_Green%202%20-%20Prescription%20Ready.mp3",
                                     "transcript": "Hello, this is Westside Pharmacy. Your prescription is ready to collect. We are open until 6 PM today. Please bring your health card when you come in. Thank you.",
                                 },
-                                "text": "Voicemail from Westside Pharmacy — prescription ready",
+                                "text": "Voicemail from Westside Pharmacy â€” prescription ready",
                                 "questions": [
                                     {"q": "Who called?", "options": ["Westside Pharmacy", "Orion Medical Centre", "ParcelPoint"], "answer": 0},
                                     {"q": "What is ready to collect?", "options": ["The prescription", "A parcel", "Test results"], "answer": 0},
@@ -3973,7 +3862,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/hudgh49h_G03_%20Family%20Birthday%20Reminder.mp3",
                                     "transcript": "Hey! Just a reminder that Grandma's birthday dinner is this Saturday at 6 PM at my house. Don't forget to bring the photo album if you still have it. Okay, see you then! Bye!",
                                 },
-                                "text": "Voicemail from family — Grandma's birthday dinner",
+                                "text": "Voicemail from family â€” Grandma's birthday dinner",
                                 "questions": [
                                     {"q": "Why did the person call?", "options": ["To remind the listener about a birthday dinner", "To cancel a doctor's appointment", "To say a parcel is ready"], "answer": 0},
                                     {"q": "When is the birthday dinner?", "options": ["Saturday", "Friday", "Sunday"], "answer": 0},
@@ -3997,7 +3886,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/itcahi65_G04_Parcel%20Collection%20Notice.mp3",
                                     "transcript": "Hello, this is ParcelPoint. Your package is ready to collect from our Main Street location. Please collect it before Friday and bring a photo ID with you. Thank you.",
                                 },
-                                "text": "Voicemail from ParcelPoint — package ready",
+                                "text": "Voicemail from ParcelPoint â€” package ready",
                                 "questions": [
                                     {"q": "Who called?", "options": ["ParcelPoint", "Westside Pharmacy", "Bella Hair Studio"], "answer": 0},
                                     {"q": "What is ready to collect?", "options": ["A package", "A prescription", "A health card"], "answer": 0},
@@ -4021,7 +3910,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/n7f4pqjw_G05_GP_Hair%20Appointment%20Reminder.mp3",
                                     "transcript": "Hello, this is Bella Hair Studio. This is a reminder that you have a hair appointment tomorrow at 1 PM. Please arrive a few minutes early. Thank you.",
                                 },
-                                "text": "Voicemail from Bella Hair Studio — hair appointment reminder",
+                                "text": "Voicemail from Bella Hair Studio â€” hair appointment reminder",
                                 "questions": [
                                     {"q": "Who called?", "options": ["Bella Hair Studio", "Orion Medical Centre", "ParcelPoint"], "answer": 0},
                                     {"q": "What type of appointment is it?", "options": ["A hair appointment", "A GP appointment", "A dentist appointment"], "answer": 0},
@@ -4045,7 +3934,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/k4ae0u8j_G06_%20Art%20Class%20Reminder.mp3",
                                     "transcript": "Hello, this is the Greenview Community Centre with a reminder that your art class starts at 4 PM today in Room 3. Please bring your painting materials with you, see you soon!",
                                 },
-                                "text": "Voicemail from Greenview Community Centre — art class reminder",
+                                "text": "Voicemail from Greenview Community Centre â€” art class reminder",
                                 "questions": [
                                     {"q": "Who called?", "options": ["Greenview Community Centre", "Maple Grove Library", "Bella Hair Studio"], "answer": 0},
                                     {"q": "What class is being discussed?", "options": ["An art class", "A yoga class", "A cooking class"], "answer": 0},
@@ -4069,7 +3958,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/27bubmoj_G07_Blood%20Test%20Appointment.mp3",
                                     "transcript": "Hello, this is Orion Medical Laboratory. This is a reminder that you have a blood test appointment on Wednesday at 8:30 in the morning. Please do not eat or drink anything except water before your appointment. Thank you.",
                                 },
-                                "text": "Voicemail from Orion Medical Laboratory — blood test appointment",
+                                "text": "Voicemail from Orion Medical Laboratory â€” blood test appointment",
                                 "questions": [
                                     {"q": "Who called?", "options": ["Orion Medical Laboratory", "Westside Pharmacy", "Greenview Community Centre"], "answer": 0},
                                     {"q": "What type of appointment is it?", "options": ["A blood test appointment", "A GP appointment", "A hair appointment"], "answer": 0},
@@ -4093,7 +3982,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/t1lh4osc_G08_Taxi%20Pick%20Up.mp3",
                                     "transcript": "Hello, this is CityLine Taxi Services. This is a reminder that your taxi is booked for tomorrow at 9 AM, your driver will pick you up from your home address. Do call us back if you need to reschedule, Thank you.",
                                 },
-                                "text": "Voicemail from CityLine Taxi Services — taxi booking reminder",
+                                "text": "Voicemail from CityLine Taxi Services â€” taxi booking reminder",
                                 "questions": [
                                     {"q": "Who called?", "options": ["CityLine Taxi Services", "ParcelPoint", "Maple Grove Library"], "answer": 0},
                                     {"q": "When is the taxi booked for?", "options": ["Tomorrow", "Today", "Next week"], "answer": 0},
@@ -4117,7 +4006,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/3ufaxy3u_G09_Library%20Books%20Return.mp3",
                                     "transcript": "Hello, this is Maple Grove Library with a reminder that your library books are due back on Friday. Please return them before 5 PM to avoid a late fee, thank you!",
                                 },
-                                "text": "Voicemail from Maple Grove Library — books due back reminder",
+                                "text": "Voicemail from Maple Grove Library â€” books due back reminder",
                                 "questions": [
                                     {"q": "Who called?", "options": ["Maple Grove Library", "QuickShip Delivery Services", "Greenview Community Centre"], "answer": 0},
                                     {"q": "What needs to be returned?", "options": ["Library books", "A parcel", "A health card"], "answer": 0},
@@ -4133,7 +4022,7 @@ ACTIVITIES_BY_CATEGORY = {
                                 "letterhead": {
                                     "format": "voicemail",
                                     "caller_name": "QuickShip Delivery Services",
-                                    "caller_subtitle": "Missed delivery — parcel pick up",
+                                    "caller_subtitle": "Missed delivery â€” parcel pick up",
                                     "phone_number": "0345 778 0099",
                                     "time_label": "Today, 3:12 PM",
                                     "duration": "0:26",
@@ -4141,7 +4030,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/z7b32zr8_G010_Parcel%20Pick%20Up.mp3",
                                     "transcript": "Hello, this is QuickShip Delivery Services. We missed you today while trying to deliver your package. Your parcel will be available for collection at the Oak Street pickup location after 3 PM tomorrow. Please bring a photo ID when collecting your package. Thank you.",
                                 },
-                                "text": "Voicemail from QuickShip Delivery Services — parcel pick up",
+                                "text": "Voicemail from QuickShip Delivery Services â€” parcel pick up",
                                 "questions": [
                                     {"q": "Who called?", "options": ["QuickShip Delivery Services", "CityLine Taxi Services", "Westside Pharmacy"], "answer": 0},
                                     {"q": "What was missed?", "options": ["A package delivery", "A doctor's appointment", "A taxi booking"], "answer": 0},
@@ -4155,13 +4044,13 @@ ACTIVITIES_BY_CATEGORY = {
                     "amber": {
                         "key": "amber",
                         "title": "Intermediate",
-                        "blurb": "10 medium voicemails (30-60 seconds) with two pieces of information to integrate and five questions each.",
-                        "best_for": "Clients working on linking the reason for the call with a follow-up action or date.",
+                        "blurb": "10 medium functional voicemails with six questions. Includes appointment changes, collection options, deadlines, and simple instructions.",
+                        "best_for": "Clients linking multiple spoken details and identifying next steps.",
                         "questions_per_letter": 5,
                         "target_letter_count": 10,
                         "item_label_singular": "Voicemail",
                         "item_label_plural": "voicemails",
-                        "est_minutes": "20–28 min",
+                        "est_minutes": "20â€“28 min",
                         "letters": [
                             {
                                 "id": 1,
@@ -4178,7 +4067,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/7u58foa8_Amber%201%20-%20Appointment%20Change.mp3",
                                     "transcript": "Hello, this is Bridgeway Clinic calling for Alex about your appointment next Tuesday. Your appointment time has changed from 10:30 in the morning to 11:15 in the morning, as the clinician is running a later clinic that day. Please arrive 10 minutes early and bring your medication list with you. If this new time does not work for you, please call us back before Friday. Thank you.",
                                 },
-                                "text": "Voicemail from Bridgeway Clinic — appointment time change",
+                                "text": "Voicemail from Bridgeway Clinic â€” appointment time change",
                                 "questions": [
                                     {"q": "What day is the appointment?", "options": ["Next Tuesday", "Tomorrow", "Friday"], "answer": 0},
                                     {"q": "What was the original appointment time?", "options": ["10:30 in the morning", "11:15 in the morning", "1:30 in the afternoon"], "answer": 0},
@@ -4202,7 +4091,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/ee4sbaz6_Amber%202%20-%20Pharmacy%20Prescription%20Query.mp3",
                                     "transcript": "Hello, this is Parkside Pharmacy calling for Alex. We're calling about your repeat prescription. Most of your medication is ready to collect, but one item is currently out of stock and should arrive tomorrow afternoon. You can collect the rest today before 6 PM, or wait and collect everything together tomorrow after 3 PM. Please bring your health card when you come in. Thank you.",
                                 },
-                                "text": "Voicemail from Parkside Pharmacy — repeat prescription query",
+                                "text": "Voicemail from Parkside Pharmacy â€” repeat prescription query",
                                 "questions": [
                                     {"q": "Who was calling Alex?", "options": ["Parkside Pharmacy", "Westside Pharmacy", "Bridgeway Clinic"], "answer": 0},
                                     {"q": "What was the call about?", "options": ["Alex's repeat prescription", "A taxi booking", "A blood test result"], "answer": 0},
@@ -4226,7 +4115,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/xxssrmi9_Amber%203%20-%20Community%20Transport%20Pick-Up.mp3",
                                     "transcript": "Hello Alex, this is CityLink Community Transport calling about your ride to the therapy centre on Thursday. Your pick-up time is 9:10 in the morning. Please be ready at your front entrance five minutes before pick-up. If you no longer need the ride, please call us by 4 PM today. Thank you.",
                                 },
-                                "text": "Voicemail from CityLink Community Transport — ride to the therapy centre",
+                                "text": "Voicemail from CityLink Community Transport â€” ride to the therapy centre",
                                 "questions": [
                                     {"q": "Who was calling Alex?", "options": ["CityLink Community Transport", "CityLine Taxi Services", "Parkside Pharmacy"], "answer": 0},
                                     {"q": "Where is Alex travelling to?", "options": ["The therapy centre", "The hospital", "The library"], "answer": 0},
@@ -4250,7 +4139,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/l3nzufcs_Amber%204%20-%20Birthday%20Dinner.mp3",
                                     "transcript": "Hi Maya, it's Sam. I'm calling about Priya's birthday dinner on Saturday. The restaurant has moved our booking from 7:00 to 7:30. Please bring the balloons if you still have them, and meet us outside the restaurant at 7:15. See you then.",
                                 },
-                                "text": "Voicemail from Sam — Priya's birthday dinner",
+                                "text": "Voicemail from Sam â€” Priya's birthday dinner",
                                 "questions": [
                                     {"q": "Who left the voicemail?", "options": ["Sam", "Priya", "Maya"], "answer": 0},
                                     {"q": "What is the message about?", "options": ["Priya's birthday dinner", "A doctor's appointment", "A taxi booking"], "answer": 0},
@@ -4275,7 +4164,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/hx72kjfg_Amber%205%20-%20Pet%20Grooming%20Reminder.mp3",
                                     "transcript": "Hi Daniel, this is Happy Paws Grooming calling about Luna's appointment tomorrow. She's booked in for 2:00 PM for a wash and nail trim. Please remember to bring her vaccination card with you. If you need to cancel or change the appointment, please call us before 10:00 tomorrow morning. Thanks, see you soon.",
                                 },
-                                "text": "Voicemail from Happy Paws Grooming — Luna's grooming appointment",
+                                "text": "Voicemail from Happy Paws Grooming â€” Luna's grooming appointment",
                                 "questions": [
                                     {"q": "Who was calling Daniel?", "options": ["Happy Paws Grooming", "Bella Hair Studio", "Parkside Pharmacy"], "answer": 0},
                                     {"q": "Who is the appointment for?", "options": ["Luna", "Daniel", "Priya"], "answer": 0},
@@ -4300,7 +4189,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/yofl8qcx_Amber%206%20-%20%20Library%20Book%20Pick-Up.mp3",
                                     "transcript": "Hi Sofia, this is Oakwood Library calling about the book you reserved. It is now ready to collect and will be held for you until Friday afternoon. Please bring your library card when you come in. If you no longer want the book, you can ignore this message or cancel the reservation online. Thank you.",
                                 },
-                                "text": "Voicemail from Oakwood Library — reserved book ready to collect",
+                                "text": "Voicemail from Oakwood Library â€” reserved book ready to collect",
                                 "questions": [
                                     {"q": "Who was calling Sofia?", "options": ["Oakwood Library", "Maple Grove Library", "FitWell Gym"], "answer": 0},
                                     {"q": "What was the call about?", "options": ["A reserved book", "A pet appointment", "A taxi booking"], "answer": 0},
@@ -4325,9 +4214,9 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/aiqgayhj_Amber%207%20-%20Gym%20Class%20Booking.mp3",
                                     "transcript": "Hi Marcus, this is FitWell Gym calling about your yoga class booking for tomorrow evening. The class will now start at 6:45 instead of 6:30 because the studio is being cleaned after an earlier session. Please bring your own mat if you have one. If you can't attend, please cancel through the app before midday tomorrow. Thank you.",
                                 },
-                                "text": "Voicemail from FitWell Gym — yoga class booking update",
+                                "text": "Voicemail from FitWell Gym â€” yoga class booking update",
                                 "questions": [
-                                    {"q": "Who was calling Marcus?", "options": ["FitWell Gym", "Oakwood Library", "The Corner Café"], "answer": 0},
+                                    {"q": "Who was calling Marcus?", "options": ["FitWell Gym", "Oakwood Library", "The Corner CafÃ©"], "answer": 0},
                                     {"q": "What class is the message about?", "options": ["A yoga class", "A spin class", "A swimming class"], "answer": 0},
                                     {"q": "When is the class?", "options": ["Tomorrow evening", "Tonight", "On Saturday morning"], "answer": 0},
                                     {"q": "What is the new start time?", "options": ["6:45", "6:30", "7:00"], "answer": 0},
@@ -4350,7 +4239,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/o45ncyyt_Amber%208%20-%20Dentist%20Appointment%20Reminder.mp3",
                                     "transcript": "Hi Elena, this is Maple Dental Clinic calling to remind you about your check-up on Monday morning. Your appointment is at 9:30, but please arrive 10 minutes early to update your details at reception. If you have any new medication or allergies, please let the dentist know when you arrive. If you need to rearrange, please call us today. Thank you.",
                                 },
-                                "text": "Voicemail from Maple Dental Clinic — check-up reminder",
+                                "text": "Voicemail from Maple Dental Clinic â€” check-up reminder",
                                 "questions": [
                                     {"q": "Who was calling Elena?", "options": ["Maple Dental Clinic", "FitWell Gym", "Oakwood Library"], "answer": 0},
                                     {"q": "What type of appointment is the message about?", "options": ["A dental check-up", "A blood test", "A hair appointment"], "answer": 0},
@@ -4362,22 +4251,22 @@ ACTIVITIES_BY_CATEGORY = {
                             },
                             {
                                 "id": 9,
-                                "title": "Café Booking Update",
-                                "summary": "Hannah from The Corner Café updating Olivia about a brunch table booking.",
+                                "title": "CafÃ© Booking Update",
+                                "summary": "Hannah from The Corner CafÃ© updating Olivia about a brunch table booking.",
                                 "letterhead": {
                                     "format": "voicemail",
-                                    "caller_name": "The Corner Café",
-                                    "caller_subtitle": "Hannah · table booking update",
+                                    "caller_name": "The Corner CafÃ©",
+                                    "caller_subtitle": "Hannah Â· table booking update",
                                     "phone_number": "01632 965 022",
                                     "time_label": "Saturday, 5:12 PM",
                                     "duration": "0:34",
                                     "avatar_color": "#EA580C",
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/79likh8h_Amber%209%20-%20Caf%C3%A9%20Booking%20Update.mp3",
-                                    "transcript": "Hi Olivia, it's Hannah from The Corner Café. I'm calling about your table booking for Sunday brunch. We can still seat your group for four people, but your table will be outside because the indoor area is fully booked. Your booking is at 11:00, and we will hold the table for 15 minutes. If outdoor seating doesn't work for you, please call us back today and we will see what we can do. Thanks.",
+                                    "transcript": "Hi Olivia, it's Hannah from The Corner CafÃ©. I'm calling about your table booking for Sunday brunch. We can still seat your group for four people, but your table will be outside because the indoor area is fully booked. Your booking is at 11:00, and we will hold the table for 15 minutes. If outdoor seating doesn't work for you, please call us back today and we will see what we can do. Thanks.",
                                 },
-                                "text": "Voicemail from Hannah at The Corner Café — table booking update",
+                                "text": "Voicemail from Hannah at The Corner CafÃ© â€” table booking update",
                                 "questions": [
-                                    {"q": "Who was calling Olivia?", "options": ["Hannah from The Corner Café", "Maple Dental Clinic", "Willow Hair Studio"], "answer": 0},
+                                    {"q": "Who was calling Olivia?", "options": ["Hannah from The Corner CafÃ©", "Maple Dental Clinic", "Willow Hair Studio"], "answer": 0},
                                     {"q": "What was the call about?", "options": ["A table booking for brunch", "A taxi booking", "A library reservation"], "answer": 0},
                                     {"q": "What day is the booking for?", "options": ["Sunday", "Saturday", "Friday"], "answer": 0},
                                     {"q": "How many people is the booking for?", "options": ["Four people", "Two people", "Six people"], "answer": 0},
@@ -4400,7 +4289,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/kpfht5f4_Amber%2010%20-%20Hair%20Appointment%20Reminder.mp3",
                                     "transcript": "Hi Jamie, this is Willow Hair Studio calling about your appointment on Friday afternoon. You're booked in for a haircut and colour at 2:15. Please arrive with dry hair, and allow about two hours for the appointment. If you need to change your booking, please call us before the end of the day tomorrow. Thank you.",
                                 },
-                                "text": "Voicemail from Willow Hair Studio — haircut and colour reminder",
+                                "text": "Voicemail from Willow Hair Studio â€” haircut and colour reminder",
                                 "questions": [
                                     {"q": "Who was calling Jamie?", "options": ["Willow Hair Studio", "Bella Hair Studio", "Maple Dental Clinic"], "answer": 0},
                                     {"q": "What day is the appointment?", "options": ["Friday afternoon", "Thursday afternoon", "Saturday morning"], "answer": 0},
@@ -4415,13 +4304,13 @@ ACTIVITIES_BY_CATEGORY = {
                     "red": {
                         "key": "red",
                         "title": "Complex",
-                        "blurb": "10 longer voicemails (60-90 seconds) with multiple instructions, conditional steps, and five questions each requiring inference.",
-                        "best_for": "Clients working on holding several details in working memory and drawing conclusions from them.",
+                        "blurb": "10 longer functional voicemails with six questions. Includes changed plans, options, deadlines, safety details, and conditional steps.",
+                        "best_for": "Clients holding details in mind, comparing options, and choosing the correct action.",
                         "questions_per_letter": 5,
                         "target_letter_count": 10,
                         "item_label_singular": "Voicemail",
                         "item_label_plural": "voicemails",
-                        "est_minutes": "30–40 min",
+                        "est_minutes": "30â€“40 min",
                         "letters": [
                             {
                                 "id": 1,
@@ -4438,7 +4327,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/ni2vc6vl_Red%201%20-%20Wedding%20Cake%20Emergency.mp3",
                                     "transcript": "Hi Chloe, it's Mia. Slight panic, but it's fixable. The bakery just called about the wedding cake for Saturday. They can still make the lemon and raspberry cake, but the gold topper we chose has cracked, so they're offering either a plain white topper or fresh flowers instead. They need our choice by 3 PM today, otherwise they'll use the white topper. Also, the cake will now be delivered to the venue at 10:30 instead of 9:00, so please let the coordinator know. Call me back when you can.",
                                 },
-                                "text": "Voicemail from Mia — wedding cake update",
+                                "text": "Voicemail from Mia â€” wedding cake update",
                                 "questions": [
                                     {"q": "Who left the voicemail?", "options": ["Mia", "Chloe", "The bakery"], "answer": 0},
                                     {"q": "What is the voicemail about?", "options": ["The wedding cake for Saturday", "A taxi booking", "A blood test result"], "answer": 0},
@@ -4463,7 +4352,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/eb8gsmb6_Red%202%20-%20Escape%20Room%20Booking%20Mix-Up.mp3",
                                     "transcript": "Hi Ravi, it's Ella. I just got a voicemail that, uhm, from that escape room place about Saturday. So, they still have our booking for six people, but they've moved us from the detective room to the space mission room because the detective room was... I don't know they had some a technical issues with it. Anyway, so the new room starts at 5:40 instead of 5:30, and they said we need to arrive about 15 minutes early for the safety briefing. If anyone in the group doesn't wanna do the space theme, then maybe we can cancel for free, but only if we call back before 2 PM tomorrow. So, can you message the group and see what everyone thinks?",
                                 },
-                                "text": "Voicemail from Ella — escape room booking update",
+                                "text": "Voicemail from Ella â€” escape room booking update",
                                 "questions": [
                                     {"q": "Who left the voicemail?", "options": ["Ella", "Ravi", "The escape room"], "answer": 0},
                                     {"q": "What activity is the message about?", "options": ["An escape room booking", "A wedding cake", "A medical appointment"], "answer": 0},
@@ -4488,7 +4377,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/77oe8rdq_Red%203%20-%20Missing%20House%20Keys.mp3",
                                     "transcript": "Hi Sophie, it's Ben. I think I left my house keys in your car after lunch. I checked my coat pocket and my work bag, but they're not there. If you find them, could you leave them with the receptionist at your building before 5:30? I have a spare key, but it's at my brother's flat, and he won't be home until later tonight. If you're already on your way out, just text me and I'll come to you instead.",
                                 },
-                                "text": "Voicemail from Ben — missing house keys",
+                                "text": "Voicemail from Ben â€” missing house keys",
                                 "questions": [
                                     {"q": "Who left the voicemail?", "options": ["Ben", "Sophie", "Ben's brother"], "answer": 0},
                                     {"q": "What does Ben think he left in Sophie's car?", "options": ["His house keys", "His coat", "His work bag"], "answer": 0},
@@ -4513,7 +4402,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/6mgakxn6_Red%204%20-%20Dog%20Sitter%20Problem.mp3",
                                     "transcript": "Hi Amelia, it's Josh. I'm really sorry, but I've just realised I wrote down the wrong date for looking after Milo. I thought you were going away next weekend, not this weekend. I can still take him on Friday night, but I have a family lunch on Saturday, so he would need to be picked up by 11 in the morning. If that doesn't work, my neighbour Claire said she might be able to help, but she'll need Milo's food, lead, and his medication instructions. Can you call me when you get this?",
                                 },
-                                "text": "Voicemail from Josh — dog sitting for Milo",
+                                "text": "Voicemail from Josh â€” dog sitting for Milo",
                                 "questions": [
                                     {"q": "Who left the voicemail?", "options": ["Josh", "Amelia", "Claire"], "answer": 0},
                                     {"q": "What mistake did Josh make?", "options": ["He wrote down the wrong date for looking after Milo", "He forgot Milo's name", "He lost Milo's lead"], "answer": 0},
@@ -4538,7 +4427,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/5143xech_Red%205%20-%20Medical%20Test%20Follow-Up.mp3",
                                     "transcript": "Hello Priya, this is Westbrook Medical Centre calling about your recent blood test. The doctor has reviewed your results and would like to speak with you, but this is not urgent. We have booked you a telephone appointment for Thursday at 2:40 PM. Please keep your phone nearby, as the call may come from a private number. If this time does not work for you, please call reception before 5 PM tomorrow to rearrange. Thank you.",
                                 },
-                                "text": "Voicemail from Westbrook Medical Centre — blood test follow-up",
+                                "text": "Voicemail from Westbrook Medical Centre â€” blood test follow-up",
                                 "questions": [
                                     {"q": "Who was calling Priya?", "options": ["Westbrook Medical Centre", "Maple Dental Clinic", "Parkside Pharmacy"], "answer": 0},
                                     {"q": "What was the call about?", "options": ["Her recent blood test", "A repeat prescription", "A hair appointment"], "answer": 0},
@@ -4563,14 +4452,14 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/gz6037v7_Red%206%20-%20Utility%20Bill%20Payment%20Issue.mp3",
                                     "transcript": "Hello Daniel, this is Greenvale Energy calling about your electricity account. We received your payment yesterday, but the reference number was entered incorrectly, so it has not been matched to your account yet. Please do not make another payment. Instead, call our billing team before Friday with your payment confirmation number and the bank account it was sent from. The number for the billing team is 680 5014 3498. If we do not hear from you, you may receive an automatic reminder letter next week.",
                                 },
-                                "text": "Voicemail from Greenvale Energy — electricity account payment issue",
+                                "text": "Voicemail from Greenvale Energy â€” electricity account payment issue",
                                 "questions": [
                                     {"q": "Who was calling Daniel?", "options": ["Greenvale Energy", "Northbridge Bank", "Riverside Patient Transport"], "answer": 0},
                                     {"q": "What account is the message about?", "options": ["His electricity account", "His gas account", "His bank account"], "answer": 0},
                                     {"q": "What went wrong with the payment?", "options": ["The reference number was entered incorrectly, so the payment has not been matched to his account", "The payment was sent twice", "The bank rejected the payment"], "answer": 0},
                                     {"q": "What should Daniel not do?", "options": ["Make another payment", "Call the billing team", "Open his next bill"], "answer": 0},
                                     {"q": "What number should Daniel call?", "options": ["680 5014 3498", "0300 134 8532", "0808 196 6800"], "answer": 0},
-                                    {"q": "What might happen if Daniel does not call back?", "options": ["He may receive an automatic reminder letter next week", "His electricity will be cut off the same day", "He will be charged a £100 fine"], "answer": 0},
+                                    {"q": "What might happen if Daniel does not call back?", "options": ["He may receive an automatic reminder letter next week", "His electricity will be cut off the same day", "He will be charged a Â£100 fine"], "answer": 0},
                                 ],
                             },
                             {
@@ -4580,7 +4469,7 @@ ACTIVITIES_BY_CATEGORY = {
                                 "letterhead": {
                                     "format": "voicemail",
                                     "caller_name": "Parkside Pharmacy",
-                                    "caller_subtitle": "Medication delivery — missed",
+                                    "caller_subtitle": "Medication delivery â€” missed",
                                     "phone_number": "0300 134 8532",
                                     "time_label": "Today, 1:18 PM",
                                     "duration": "0:54",
@@ -4588,7 +4477,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/k77lzmh1_Red%207%20-%20Prescription%20Delivery%20Problem.mp3",
                                     "transcript": "Hello Aisha, this is Parkside Pharmacy calling about your medication delivery. Your usual prescription is ready, but the delivery driver could not leave it today because no one answered the door and the medication needs to be signed for. We can try again tomorrow morning, or you can collect it from the pharmacy after 4 PM today. If you choose collection, please bring photo ID and call us first so we can cancel the delivery slot. Our number is 0300 134 8532, that is 0300 134 8532. Thanks.",
                                 },
-                                "text": "Voicemail from Parkside Pharmacy — missed medication delivery",
+                                "text": "Voicemail from Parkside Pharmacy â€” missed medication delivery",
                                 "questions": [
                                     {"q": "Who was calling Aisha?", "options": ["Parkside Pharmacy", "Westside Pharmacy", "Greenvale Energy"], "answer": 0},
                                     {"q": "What is the message about?", "options": ["Her medication delivery", "A repeat prescription request", "A pharmacy survey"], "answer": 0},
@@ -4605,7 +4494,7 @@ ACTIVITIES_BY_CATEGORY = {
                                 "letterhead": {
                                     "format": "voicemail",
                                     "caller_name": "City Homes Repairs",
-                                    "caller_subtitle": "Bathroom leak — repair appointment",
+                                    "caller_subtitle": "Bathroom leak â€” repair appointment",
                                     "phone_number": "0300 555 1290",
                                     "time_label": "Today, 4:02 PM",
                                     "duration": "0:55",
@@ -4613,7 +4502,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/csk0gngj_Red%208%20-%20Housing%20Repair%20Appointment.mp3",
                                     "transcript": "Hello Elena, this is City Homes Repairs calling about the leak you reported in your bathroom. A plumber can attend tomorrow between 1 PM and 5 PM, but someone over 18 must be home for the whole appointment window. Please clear the area under the sink before they arrive. If the leak gets worse overnight or water reaches any electrical sockets, call the emergency repair line instead of waiting for tomorrow's appointment.",
                                 },
-                                "text": "Voicemail from City Homes Repairs — bathroom leak repair",
+                                "text": "Voicemail from City Homes Repairs â€” bathroom leak repair",
                                 "questions": [
                                     {"q": "Who was calling Elena?", "options": ["City Homes Repairs", "Greenvale Energy", "Riverside Patient Transport"], "answer": 0},
                                     {"q": "What repair is the message about?", "options": ["A bathroom leak", "A broken boiler", "A blocked drain"], "answer": 0},
@@ -4638,7 +4527,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/a652ju69_Red%209%20-%20Hospital%20Transport%20Confirmation.mp3",
                                     "transcript": "Hello Grace, this is Riverside Patient Transport calling about your hospital appointment on Tuesday. Your transport is confirmed, but the pick-up window has changed. The driver may arrive any time between 7:50 and 8:20 in the morning. Please be ready by 7:45 and bring your appointment letter, medication list, and mobility aid if you need one. If you no longer need transport, please call us by midday on Monday so we can offer the space to another patient.",
                                 },
-                                "text": "Voicemail from Riverside Patient Transport — hospital transport update",
+                                "text": "Voicemail from Riverside Patient Transport â€” hospital transport update",
                                 "questions": [
                                     {"q": "Who was calling Grace?", "options": ["Riverside Patient Transport", "CityLink Community Transport", "City Homes Repairs"], "answer": 0},
                                     {"q": "What is the message about?", "options": ["Her hospital transport", "A taxi booking", "A bathroom leak"], "answer": 0},
@@ -4655,7 +4544,7 @@ ACTIVITIES_BY_CATEGORY = {
                                 "letterhead": {
                                     "format": "voicemail",
                                     "caller_name": "Northbridge Bank",
-                                    "caller_subtitle": "Card security — unusual activity",
+                                    "caller_subtitle": "Card security â€” unusual activity",
                                     "phone_number": "0345 600 2200",
                                     "time_label": "Today, 9:02 AM",
                                     "duration": "0:58",
@@ -4663,12 +4552,12 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/xj9mlcvy_Red%2010%20-%20%20Bank%20Card%20Security%20Check.mp3",
                                     "transcript": "Hello Marcus, this is Northbridge Bank calling about your debit card. We noticed two online purchases this morning that are unusual for your account. Your card has not yet been cancelled, but online payments have been temporarily paused just until we confirm whether the purchases were yours. Please check your banking app and respond to the security message, or call the number on the back of your card. Do not reply to this voicemail with any personal details.",
                                 },
-                                "text": "Voicemail from Northbridge Bank — debit card security check",
+                                "text": "Voicemail from Northbridge Bank â€” debit card security check",
                                 "questions": [
                                     {"q": "Who was calling Marcus?", "options": ["Northbridge Bank", "Greenvale Energy", "Parkside Pharmacy"], "answer": 0},
                                     {"q": "What is the call about?", "options": ["His debit card", "His electricity bill", "A hospital appointment"], "answer": 0},
                                     {"q": "What did the bank notice?", "options": ["Two unusual online purchases", "A failed direct debit", "A duplicate payment"], "answer": 0},
-                                    {"q": "Has the card been cancelled?", "options": ["No, the card has not been cancelled — online payments have been temporarily paused", "Yes, the card has been cancelled", "Yes, and a new one is in the post"], "answer": 0},
+                                    {"q": "Has the card been cancelled?", "options": ["No, the card has not been cancelled â€” online payments have been temporarily paused", "Yes, the card has been cancelled", "Yes, and a new one is in the post"], "answer": 0},
                                     {"q": "What should Marcus do next?", "options": ["Check the banking app and respond to the security message, or call the number on the back of the card", "Send a text reply to this voicemail", "Wait for the bank to ring again"], "answer": 0},
                                     {"q": "What should Marcus avoid doing?", "options": ["Replying to the voicemail with personal details", "Checking his banking app", "Calling the number on his card"], "answer": 0},
                                 ],
@@ -4678,13 +4567,13 @@ ACTIVITIES_BY_CATEGORY = {
                     "pink": {
                         "key": "pink",
                         "title": "Bonus",
-                        "blurb": "10 automated phone menus. Listen to the options, read the scenario, and press the right number on the keypad.",
-                        "best_for": "Clients working on navigating real-world automated phone systems — a key independence goal.",
+                        "blurb": "10 automated phone menu tasks with one scenario-based decision each. Clients choose the correct number or action.",
+                        "best_for": "Clients practising phone navigation, auditory scanning, and option selection.",
                         "questions_per_letter": 1,
                         "target_letter_count": 10,
                         "item_label_singular": "Phone menu",
                         "item_label_plural": "phone menus",
-                        "est_minutes": "12–18 min",
+                        "est_minutes": "12â€“18 min",
                         "letters": [
                             {
                                 "id": 1,
@@ -4701,7 +4590,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/c8tw5mq7_1.%20GP%20Appointment%20Line.mp3",
                                     "transcript": "Thank you for calling Westbrook Medical Centre. For appointments, press 1. For repeat prescriptions, press 2. For test results, press 3. To speak to reception, press 4. To hear these options again, press 5.",
                                 },
-                                "text": "Phone menu — Westbrook Medical Centre",
+                                "text": "Phone menu â€” Westbrook Medical Centre",
                                 "questions": [
                                     {
                                         "q": "You are calling to book a GP appointment. What should you press?",
@@ -4726,7 +4615,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/kd5rua5b_2.%20Pharmacy%20Phone%20Menu.mp3",
                                     "transcript": "Thank you for calling Parkside Pharmacy. For opening hours, press 1. For prescription collections, press 2. For medication delivery, press 3. To speak to a pharmacist, press 4. To repeat these options, press 5.",
                                 },
-                                "text": "Phone menu — Parkside Pharmacy",
+                                "text": "Phone menu â€” Parkside Pharmacy",
                                 "questions": [
                                     {
                                         "q": "You are calling because you want to check whether your prescription is ready to pick up. What should you press?",
@@ -4751,7 +4640,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/5onflbmx_3.%20Hospital%20Appointments%20Line.mp3",
                                     "transcript": "Thank you for calling Riverside Hospital. For directions and parking, press 1. For outpatient appointment bookings or changes, press 2. For test results, press 3. For patient transport, press 4. For all other enquiries, please stay on the line.",
                                 },
-                                "text": "Phone menu — Riverside Hospital",
+                                "text": "Phone menu â€” Riverside Hospital",
                                 "questions": [
                                     {
                                         "q": "You are calling because you need to change the time of your outpatient appointment. What should you press?",
@@ -4775,7 +4664,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/mla36u2t_4.%20Council%20Services%20Menu.mp3",
                                     "transcript": "Thank you for calling City Council Services. Please listen carefully to the options as some may have recently changed. For council tax payments or balance enquiries, press 1. For rubbish, recycling, or missed bin collections, press 2. For housing repairs in a council property, press 3. For parking permits or parking fines, press 4. For blue badge or accessible parking enquiries, press 5. If your issue is urgent and may cause damage to your home, please stay on the line.",
                                 },
-                                "text": "Phone menu — City Council Services",
+                                "text": "Phone menu â€” City Council Services",
                                 "questions": [
                                     {
                                         "q": "You are calling because water is leaking through your ceiling and dripping near a plug socket. What should you do?",
@@ -4799,7 +4688,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/5q0k714b_5.%20Delivery%20Company%20Menu.mp3",
                                     "transcript": "Thank you for calling Northway Delivery. To track a parcel, press 1. To rearrange a missed delivery, press 2. To report a damaged parcel, press 3. To speak to customer services, press 4. To hear these options again, press 5.",
                                 },
-                                "text": "Phone menu — Northway Delivery",
+                                "text": "Phone menu â€” Northway Delivery",
                                 "questions": [
                                     {
                                         "q": "You were out when the driver came, and you need another delivery time. What should you press?",
@@ -4824,7 +4713,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/vpm8mp3c_6.%20Dental%20Clinic%20Menu.mp3",
                                     "transcript": "Thank you for calling Maple Dental Clinic. Please listen carefully to the following options, as some of these may have recently changed. For new appointments, press 1. To change or cancel an appointment, press 2. For dental emergencies, press 3. For payment or insurance questions, press 4. To speak to reception, stay on the line.",
                                 },
-                                "text": "Phone menu — Maple Dental Clinic",
+                                "text": "Phone menu â€” Maple Dental Clinic",
                                 "questions": [
                                     {
                                         "q": "You have a toothache and swelling, and you need urgent advice today. What should you press?",
@@ -4848,7 +4737,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/zgv162ov_7.%20Restaurant%20Booking%20Menu.mp3",
                                     "transcript": "Thank you for calling The Lantern Bistro. To make a new booking, press 1. To change or cancel an existing booking, press 2. For opening hours and location, press 3. For allergy or dietary questions, press 4. To speak to a member of staff, stay on the line.",
                                 },
-                                "text": "Phone menu — The Lantern Bistro",
+                                "text": "Phone menu â€” The Lantern Bistro",
                                 "questions": [
                                     {
                                         "q": "You already have a table booked, but you need to change the time. What should you press?",
@@ -4872,7 +4761,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/01afm6pj_8.%20Escape%20Room%20Phone%20Menu.mp3",
                                     "transcript": "Thank you for calling Locked In Escape Rooms. To make a new booking, press 1. To change or cancel an existing booking, press 2. For directions and parking, press 3. For party packages or group events, press 4. If your game starts in the next 30 minutes and you are running late, please stay on the line.",
                                 },
-                                "text": "Phone menu — Locked In Escape Rooms",
+                                "text": "Phone menu â€” Locked In Escape Rooms",
                                 "questions": [
                                     {
                                         "q": "Your escape room starts in 20 minutes, but your taxi is stuck in traffic and you may arrive late. What should you do?",
@@ -4896,7 +4785,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/n5l0otep_9.%20Cinema%20Phone%20Menu.mp3",
                                     "transcript": "Thank you for calling Starlight Cinema. To book tickets, press 1. To change or cancel an existing booking, press 2. For movie times, press 3. For accessibility information, press 4. For lost property, press 5. To speak to a member of staff, stay on the line.",
                                 },
-                                "text": "Phone menu — Starlight Cinema",
+                                "text": "Phone menu â€” Starlight Cinema",
                                 "questions": [
                                     {
                                         "q": "You left your glasses in the cinema after the film. What should you press?",
@@ -4920,7 +4809,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     "audio_url": "https://customer-assets.emergentagent.com/job_concentric-hub/artifacts/awhwstam_10.%20Hair%20Salon%20Phone%20Menu.mp3",
                                     "transcript": "Thank you for calling Willow Hair Studio. To book a new appointment, press 1. To change or cancel an existing appointment, press 2. For prices and services, press 3. For colour patch test information, press 4. To speak to a stylist, stay on the line.",
                                 },
-                                "text": "Phone menu — Willow Hair Studio",
+                                "text": "Phone menu â€” Willow Hair Studio",
                                 "questions": [
                                     {
                                         "q": "You already have a haircut booked, but you need to move it to a different day. What should you press?",
@@ -4934,76 +4823,86 @@ ACTIVITIES_BY_CATEGORY = {
                 },
             },
         },
-        {
-            "slug": "ordering-coffee",
-            "title": "Ordering Coffee",
-            "summary": "Practice ordering at a cafe.",
-            "duration_min": 5,
-            "type": "dialogue",
-            "content": {
-                "scene": "You walk into a cafe. The barista smiles and says hello.",
-                "lines": [
-                    {"speaker": "Barista", "text": "Hi! What can I get for you today?"},
-                    {"speaker": "You", "text": "(Order a small coffee with milk.)"},
-                    {"speaker": "Barista", "text": "For here or to go?"},
-                    {"speaker": "You", "text": "(Choose: for here OR to go.)"},
-                    {"speaker": "Barista", "text": "That'll be three dollars."},
-                    {"speaker": "You", "text": "(Pay and say thank you.)"},
-                ],
-            },
-        },
-        {
-            "slug": "doctor-visit",
-            "title": "At the Doctor",
-            "summary": "Practice telling the doctor how you feel.",
-            "duration_min": 6,
-            "type": "dialogue",
-            "content": {
-                "scene": "You are at the doctor's office. The doctor asks how you are feeling.",
-                "lines": [
-                    {"speaker": "Doctor", "text": "Hello. What brings you in today?"},
-                    {"speaker": "You", "text": "(Say you have a headache and it started yesterday.)"},
-                    {"speaker": "Doctor", "text": "On a scale from 1 to 10, how bad is the pain?"},
-                    {"speaker": "You", "text": "(Choose a number.)"},
-                    {"speaker": "Doctor", "text": "Have you taken any medicine?"},
-                    {"speaker": "You", "text": "(Say yes or no, and what you took.)"},
-                ],
-            },
-        },
-        {
-            "slug": "asking-directions",
-            "title": "Asking for Directions",
-            "summary": "Politely ask a stranger how to find a place.",
-            "duration_min": 5,
-            "type": "dialogue",
-            "content": {
-                "scene": "You are looking for the library. Ask someone on the street.",
-                "lines": [
-                    {"speaker": "You", "text": "(Greet the person.)"},
-                    {"speaker": "You", "text": "(Ask the way to the library.)"},
-                    {"speaker": "Stranger", "text": "Walk two blocks, then turn left."},
-                    {"speaker": "You", "text": "(Repeat the directions to be sure.)"},
-                    {"speaker": "You", "text": "(Say thank you.)"},
-                ],
-            },
-        },
     ],
-    "sfa-therapy": [
+    "games": [
         {
-            "slug": "sfa-tool",
-            "title": "SFA Therapy Tool",
-            "summary": "Use Semantic Feature Analysis on a target word.",
-            "duration_min": 8,
-            "type": "sfa",
+            "slug": "crossword",
+            "title": "Crossword",
+            "summary": "Use clues to complete a themed crossword.",
+            "type": "game",
+            "tags": [
+                "crossword",
+                "puzzle",
+                "clues",
+                "word finding",
+                "naming",
+                "semantic reasoning",
+                "spelling",
+                "reading",
+                "attention",
+                "problem solving",
+                "leisure",
+                "games",
+            ],
+            "skills": [
+                "word finding",
+                "naming",
+                "semantic reasoning",
+                "spelling",
+                "reading",
+                "attention",
+                "problem solving",
+                "leisure",
+            ],
             "content": {
-                "instructions": (
-                    "Pick a target word, then answer six feature prompts: Group, Use, Action, "
-                    "Location, Properties, and Association. Try to say the target word at the end."
-                ),
+                "instructions": "Use clues to complete a themed crossword. Full interactive play is coming soon.",
             },
         },
     ],
 }
+
+
+ACTIVITY_CARD_METADATA = {
+    ("reading", "receipt"): {
+        "clinical_target": "Reading comprehension",
+        "activity_format": "Functional task",
+        "card_visual": "receipt",
+    },
+    ("word-finding", "naming"): {
+        "clinical_target": "Word finding",
+        "activity_format": "Naming task",
+        "card_visual": "word",
+    },
+    ("functional-communication", "appointment-letter"): {
+        "clinical_target": "Reading comprehension",
+        "activity_format": "Levelled task",
+        "card_visual": "appointment-letter",
+    },
+    ("functional-communication", "prescription-medication-labels"): {
+        "clinical_target": "Reading comprehension",
+        "activity_format": "Levelled task",
+        "card_visual": "prescription-medication",
+    },
+    ("functional-communication", "voicemails"): {
+        "clinical_target": "Listening comprehension",
+        "activity_format": "Levelled task",
+        "card_visual": "voicemail",
+    },
+    ("games", "crossword"): {
+        "clinical_target": "Word finding",
+        "activity_format": "Game",
+        "card_visual": "crossword",
+    },
+    ("word-finding", "sfa-tool"): {
+        "clinical_target": "Word finding",
+        "activity_format": "Therapy tool",
+        "card_visual": "sfa",
+    },
+}
+
+for _category_slug, _activity_list in ACTIVITIES_BY_CATEGORY.items():
+    for _activity in _activity_list:
+        _activity.update(ACTIVITY_CARD_METADATA.get((_category_slug, _activity.get("slug")), {}))
 
 
 # Semantic Feature Analysis target words

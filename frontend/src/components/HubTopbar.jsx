@@ -1,13 +1,16 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSession } from "@/contexts/SessionContext";
 import {
   Bell,
+  Box,
   ChevronDown,
 } from "lucide-react";
 
 export function HubTopbar({ previewMode = false, onPreviewAction }) {
   const { user } = useAuth();
+  const { start: startSession } = useSession();
   const location = useLocation();
   const displayName = user?.name || "Guest Clinician";
   const initials = displayName
@@ -17,15 +20,17 @@ export function HubTopbar({ previewMode = false, onPreviewAction }) {
     .map((word) => word[0]?.toUpperCase())
     .join("");
 
-  const isActivities = location.pathname === "/all-activities" || location.pathname.startsWith("/category/") || location.pathname.startsWith("/activity/");
-
   const navItems = [
     { label: "Home", to: "/dashboard", active: location.pathname === "/dashboard" },
-    { label: "Activities", to: "/all-activities", active: isActivities },
-    { label: "Clients" },
-    { label: "Reports" },
-    { label: "Resources" },
+    { label: "SLP Blueprint" },
+    { label: "Help" },
+    { label: "Updates" },
   ];
+
+  const handleBuildSession = () => {
+    // TODO: Route this to the dedicated session builder when that workflow exists.
+    startSession();
+  };
 
   return (
     <header className="hub-topbar">
@@ -45,6 +50,10 @@ export function HubTopbar({ previewMode = false, onPreviewAction }) {
         </nav>
       </div>
       <div className="hub-topbar-actions">
+        <button type="button" className="hub-build-session-button" onClick={handleBuildSession}>
+          <Box size={15} strokeWidth={2.2} aria-hidden="true" />
+          <span>Build session</span>
+        </button>
         <button type="button" className="hub-notification-button" aria-label="Notifications">
           <Bell size={17} />
           <span aria-hidden="true" />

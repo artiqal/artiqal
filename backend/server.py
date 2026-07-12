@@ -317,7 +317,20 @@ async def all_activities():
 async def list_activities(slug: str):
     if slug not in ACTIVITIES_BY_CATEGORY:
         raise HTTPException(status_code=404, detail="Category not found")
-    return ACTIVITIES_BY_CATEGORY[slug]
+    items = []
+    seen = set()
+    for cat_slug, activities in ACTIVITIES_BY_CATEGORY.items():
+        for activity in activities:
+            belongs_to_category = cat_slug == slug or activity.get("primary_category") == slug
+            belongs_to_functional = slug == "functional-communication" and activity.get("is_functional")
+            if not belongs_to_category and not belongs_to_functional:
+                continue
+            key = activity.get("slug")
+            if key in seen:
+                continue
+            seen.add(key)
+            items.append({**activity, "category": cat_slug})
+    return items
 
 
 @api_router.get("/activities/{category}/{activity_slug}")

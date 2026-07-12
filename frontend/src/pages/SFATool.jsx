@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
+import { useSmartBack } from "@/lib/navigationHistory";
 import { useSession } from "@/contexts/SessionContext";
-import { Header } from "@/components/Header";
 import { AudioControls } from "@/components/AudioControls";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Brain, ChevronRight, Eye, EyeOff, Shuffle } from "lucide-react";
@@ -17,6 +17,7 @@ const FEATURES = [
 ];
 
 export default function SFATool() {
+  const smartBack = useSmartBack();
   const [words, setWords] = useState([]);
   const [idx, setIdx] = useState(0);
   const [reveal, setReveal] = useState({});
@@ -60,16 +61,16 @@ export default function SFATool() {
 
   return (
     <div className="min-h-screen" data-testid="sfa-page">
-      <Header />
-      <main className="max-w-4xl mx-auto px-6 py-12">
+      <main className="clinician-page is-narrow">
         <div className="flex items-center gap-3 flex-wrap" data-testid="breadcrumb-header">
-          <Link
-            to="/dashboard"
+          <button
+            type="button"
+            onClick={smartBack}
             className="inline-flex items-center text-sm text-zinc-600 hover:text-indigo-600 font-display font-medium"
             data-testid="back-to-hub"
           >
             <ArrowLeft className="w-4 h-4 mr-1" /> Back
-          </Link>
+          </button>
           <span className="hidden sm:inline-block w-px h-4 bg-zinc-300" />
           <nav className="flex items-center gap-1.5 text-sm text-zinc-500 flex-wrap" aria-label="Breadcrumb">
             <Link to="/dashboard" className="hover:text-indigo-600 hover:underline underline-offset-2 transition" data-testid="breadcrumb-crumb-0">

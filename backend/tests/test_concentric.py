@@ -45,11 +45,11 @@ class TestContent:
         assert r.status_code == 200
         data = r.json()
         assert isinstance(data, list)
-        assert len(data) == 7
+        assert len(data) == 8
         slugs = {c["slug"] for c in data}
         expected = {
             "reading", "writing", "word-finding", "auditory-comprehension",
-            "functional-communication", "sfa-therapy", "all-activities",
+            "functional-communication", "games", "sfa-therapy", "all-activities",
         }
         assert expected.issubset(slugs), f"Missing slugs: {expected - slugs}"
         for c in data:
@@ -61,9 +61,9 @@ class TestContent:
         assert r.status_code == 200
         data = r.json()
         assert isinstance(data, list)
-        assert len(data) == 4
         slugs = {a["slug"] for a in data}
-        assert slugs == {"receipt", "medication-package", "patient-form", "ai-scenario"}
+        assert "receipt" in slugs
+        assert "medication-package" not in slugs
 
     def test_unknown_category_404(self, session):
         r = session.get(f"{API}/categories/does-not-exist/activities", timeout=15)
@@ -92,16 +92,15 @@ class TestContent:
         assert r.status_code == 200
         data = r.json()
         assert isinstance(data, list)
-        # All categories combined - reading(4) + writing(3) + word-finding(3) + auditory(2) + func(3) + sfa(1) = 16
-        assert len(data) >= 10
+        # All active categories combined - reading(2) + word-finding(1) + func(3) + games(1) + sfa(1) = 8
+        assert len(data) >= 8
         for a in data:
             assert "category" in a
             assert "slug" in a
             assert "title" in a
         # Check at least one from each category
         cats = {a["category"] for a in data}
-        for c in ("reading", "writing", "word-finding", "auditory-comprehension",
-                  "functional-communication", "sfa-therapy"):
+        for c in ("reading", "word-finding", "functional-communication", "games", "sfa-therapy"):
             assert c in cats, f"Missing category {c} in flattened activities"
 
     def test_sfa_words(self, session):

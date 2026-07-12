@@ -327,25 +327,3 @@ function BadgeStat({ label, value }) {
   );
 }
 
-/** Compact pill banner for non-dashboard pages while a session is active. */
-export function SessionPill() {
-  const { isActive, elapsedSec, stats } = useSession();
-  if (!isActive) return null;
-  return (
-    <Link
-      to="/dashboard"
-      data-testid="session-pill"
-      className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-3 px-4 h-12 rounded-full text-white shadow-lg"
-      style={{ background: "linear-gradient(135deg,#10B981,#06B6D4)" }}
-    >
-      <span className="relative flex h-2.5 w-2.5">
-        <span className="absolute inline-flex h-full w-full rounded-full bg-white opacity-70 animate-ping" />
-        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white" />
-      </span>
-      <span className="font-display font-semibold tabular-nums">{formatElapsed(elapsedSec)}</span>
-      <span className="text-white/85 text-sm">
-        {stats?.correct ?? 0}/{stats?.total ?? 0} correct
-      </span>
-    </Link>
-  );
-}

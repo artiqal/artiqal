@@ -6,7 +6,7 @@ const ActivitySortContext = createContext(null);
 const defaultControls = {
   active: false,
   searchQuery: "",
-  sortMode: "relevance",
+  sortMode: "az",
   sortOptions: getActivitySortOptions(),
   setSearchQuery: () => {},
   setSortMode: () => {},

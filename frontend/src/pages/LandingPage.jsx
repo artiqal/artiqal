@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
+import { filterRetiredActivities } from "@/lib/activityIndex";
 import { CategoryIcon } from "@/components/CategoryIcon";
-import { HubShell } from "@/components/HubShell";
-import HubDashboard from "@/pages/Dashboard";
 import { Logo } from "@/components/Logo";
 import {
   Activity,
@@ -13,10 +12,10 @@ import {
   BookOpen,
   Brain,
   CalendarDays,
+  ClipboardCheck,
   CheckCircle2,
   ChevronDown,
   CircleHelp,
-  Heart,
   Home,
   Library,
   LockKeyhole,
@@ -25,12 +24,13 @@ import {
   Pencil,
   Search,
   ShieldCheck,
-  Sparkles,
   TrendingUp,
   Users,
   Wrench,
 } from "lucide-react";
 import "./LandingPage.css";
+import landingRiversideHero from "@/assets/landing-riverside-hero.jpeg";
+import pricingHillsBackground from "@/assets/pricing-hills-background.jpeg";
 
 const categories = [
   { title: "Speech", text: "Improve clarity and pronunciation", count: "12 activities", icon: Mic2, color: "pink" },
@@ -39,14 +39,6 @@ const categories = [
   { title: "Word Finding", text: "Find the right words faster", count: "16 activities", icon: Search, color: "violet" },
   { title: "Conversation", text: "Practise real-life communication", count: "10 activities", icon: MessageCircle, color: "green" },
   { title: "Reading & Writing", text: "Support everyday literacy goals", count: "12 activities", icon: Pencil, color: "orange" },
-];
-
-const heroEndings = [
-  "adult aphasia therapy.",
-  "real-world practice.",
-  "session-ready activities.",
-  "meaningful participation.",
-  "everyday communication.",
 ];
 
 const hubPreviewGradients = {
@@ -59,46 +51,157 @@ const hubPreviewGradients = {
   "all-activities": { gradient: "linear-gradient(135deg,#6366F1 0%,#06B6D4 100%)", fg: "#3730A3" },
 };
 
+const heroHeadlinePhrases = [
+  "everyday communication.",
+  "real-world practice.",
+  "confident conversations.",
+  "meaningful participation.",
+  "ready-to-run sessions.",
+  "adult-focused therapy.",
+  "purposeful session planning.",
+];
+
+const pricingPlans = [
+  {
+    name: "Free",
+    subtitle: "Explore artiqal",
+    price: "$0",
+    billing: "/forever",
+    description: "Try the core features and get a feel for the library.",
+    features: [
+      "Access to sample activities",
+      "1 session builder",
+      "Save up to 5 activities",
+      "Email support",
+    ],
+    button: "Get started",
+    icon: Library,
+    tone: "blue",
+  },
+  {
+    name: "Starter",
+    subtitle: "For individuals",
+    price: "$19",
+    billing: "/month",
+    description: "Everything you need to run effective therapy sessions.",
+    features: [
+      "Full activity library access",
+      "Session builder",
+      "Save unlimited activities",
+      "Client progress tracking",
+      "Email support",
+    ],
+    button: "Start free trial",
+    icon: Activity,
+    tone: "violet",
+  },
+  {
+    name: "Professional",
+    subtitle: "For clinicians",
+    price: "$39",
+    billing: "/month",
+    description: "Designed for busy clinicians who want more flexibility.",
+    features: [
+      "Everything in Starter",
+      "Advanced search & filters",
+      "Custom collections",
+      "Printable handouts",
+      "Priority support",
+    ],
+    button: "Start free trial",
+    icon: ClipboardCheck,
+    tone: "popular",
+    badge: "MOST POPULAR",
+    featured: true,
+  },
+  {
+    name: "Team",
+    subtitle: "For teams & organisations",
+    price: "$79",
+    billing: "/month",
+    note: "Per user, billed monthly",
+    description: "Collaborate and scale across your whole team.",
+    features: [
+      "Everything in Professional",
+      "Team management",
+      "Shared collections",
+      "Usage insights",
+      "Priority support",
+    ],
+    button: "Start free trial",
+    icon: Users,
+    tone: "green",
+  },
+];
+
 export default function LandingPage() {
-  const [heroEndingIndex, setHeroEndingIndex] = useState(0);
   const [hubPreviewNotice, setHubPreviewNotice] = useState("");
+  const [headlinePhraseIndex, setHeadlinePhraseIndex] = useState(0);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-
-    if (prefersReducedMotion) {
+    if (typeof window === "undefined" || !window.matchMedia) {
       return undefined;
     }
 
-    const intervalId = window.setInterval(() => {
-      setHeroEndingIndex((currentIndex) => (currentIndex + 1) % heroEndings.length);
-    }, 3200);
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handleChange = () => setPrefersReducedMotion(mediaQuery.matches);
 
-    return () => window.clearInterval(intervalId);
+    handleChange();
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
   }, []);
 
-  const heroEnding = heroEndings[heroEndingIndex];
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      setHeadlinePhraseIndex(0);
+      return undefined;
+    }
+
+    const phraseTimer = window.setInterval(() => {
+      setHeadlinePhraseIndex((currentIndex) => (currentIndex + 1) % heroHeadlinePhrases.length);
+    }, 3200);
+
+    return () => window.clearInterval(phraseTimer);
+  }, [prefersReducedMotion]);
+
+  const headlinePhrase = heroHeadlinePhrases[headlinePhraseIndex];
 
   return (
-    <div className="artiqal-public" data-testid="landing-page">
+    <div
+      className="artiqal-public"
+      data-testid="landing-page"
+      style={{ "--landing-hero-image": `url(${landingRiversideHero})` }}
+    >
       <PublicNav />
 
       <main>
-        <section className="ap-hero">
+        <section
+          className="ap-hero ap-scenic-hero"
+        >
           <div className="ap-hero-inner">
             <div className="ap-hero-copy">
-              <span className="ap-eyebrow"><Sparkles size={13} /> Virtual adult SLP activity library</span>
               <h1>
                 A virtual SLP library for
                 <br />
-                <em className="ap-rotating-ending" key={heroEnding}>{heroEnding}</em>
+                <span className="ap-rotating-headline">
+                  <span className="ap-rotating-headline-ghost" aria-hidden="true">
+                    purposeful session planning.
+                  </span>
+                  <em key={headlinePhrase}>
+                    {headlinePhrase}
+                  </em>
+                </span>
               </h1>
               <p>
-                Artiqal is a calm, clinician-built library of interactive speech and language therapy
-                activities for adults — designed for sessions, teletherapy, and homework.
-                {/*
-                Read, listen, speak, and write — at your own pace, with your own voice.
-                */}
+                artiqal is a calm clinical workspace for adult speech and language therapists,
+                built to support in-person sessions, telehealth, and real-world communication practice.
               </p>
               <div className="ap-hero-actions">
                 <Link className="ap-button ap-button-dark" to="/all-activities">Explore the library <ArrowRight size={17} /></Link>
@@ -107,25 +210,17 @@ export default function LandingPage() {
               <div className="ap-benefits">
                 <Benefit icon={Users} title="Clinician built" text="" tone="pink" />
                 <Benefit icon={LockKeyhole} title="Private & secure" text="" tone="orange" />
-                <Benefit icon={Heart} title="Loved by SLPs" text="" tone="violet" />
+                <Benefit icon={ClipboardCheck} title="Session-ready" text="" tone="violet" />
               </div>
-            </div>
-
-            <div className="ap-dashboard-wrap ap-real-hub-preview" data-testid="landing-real-hub-preview">
-              <HubShell previewMode onPreviewAction={setHubPreviewNotice}>
-                <HubDashboard previewMode onPreviewAction={setHubPreviewNotice} />
-              </HubShell>
             </div>
           </div>
         </section>
-
-        <TrustStrip />
 
         <section className="ap-categories" id="product">
           <div className="ap-section-intro">
             <span className="ap-kicker">Inside Artiqal</span>
             <h2>Six categories.<br />One calm hub.</h2>
-            <p>Every tile is a real moment from real life — the kind of thing therapists actually use.</p>
+            <p>Every tile is a real moment from real life â€” the kind of thing therapists actually use.</p>
             <Link to="/all-activities">Explore all activities <ArrowRight size={16} /></Link>
           </div>
           <div className="ap-category-grid">
@@ -161,12 +256,14 @@ export default function LandingPage() {
             </ul>
           </div>
         </section>
+
+        <PricingSection />
       </main>
 
       {hubPreviewNotice ? (
         <div className="ap-preview-modal" role="dialog" aria-modal="true" aria-label="Preview only">
           <div>
-            <button type="button" aria-label="Close preview notice" onClick={() => setHubPreviewNotice("")}>×</button>
+            <button type="button" aria-label="Close preview notice" onClick={() => setHubPreviewNotice("")}>Ã—</button>
             <span className="ap-mini-kicker">Preview only</span>
             <h4>Explore Artiqal</h4>
             <p>{hubPreviewNotice}</p>
@@ -208,6 +305,73 @@ function Benefit({ icon: Icon, title, text, tone }) {
   );
 }
 
+function PricingSection() {
+  return (
+    <section
+      className="ap-pricing-section"
+      id="pricing"
+      style={{ "--pricing-bg-image": `url(${pricingHillsBackground})` }}
+    >
+      <div className="ap-pricing-content">
+        <div className="ap-pricing-heading">
+          <span className="ap-pricing-kicker">Simple, transparent pricing</span>
+          <h2>
+            Choose the plan
+            <br />
+            that <em>works for you.</em>
+          </h2>
+          <p>
+            All plans include access to artiqal's activity library.
+            <br />
+            Cancel or change plans at any time.
+          </p>
+        </div>
+
+        <div className="ap-pricing-grid">
+          {pricingPlans.map((plan) => (
+            <PricingCard key={plan.name} plan={plan} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PricingCard({ plan }) {
+  const Icon = plan.icon;
+
+  return (
+    <article className={`ap-pricing-card ap-pricing-card-${plan.tone}${plan.featured ? " is-featured" : ""}`}>
+      {plan.badge ? <span className="ap-pricing-plan-badge">{plan.badge}</span> : null}
+      <span className="ap-pricing-icon">
+        <Icon size={23} />
+      </span>
+      <div className="ap-pricing-plan-title">
+        <h3>{plan.name}</h3>
+        <p>{plan.subtitle}</p>
+      </div>
+      <div className="ap-pricing-price">
+        <strong>{plan.price}</strong>
+        <span>{plan.billing}</span>
+      </div>
+      {plan.note ? <small className="ap-pricing-note">{plan.note}</small> : null}
+      <p className="ap-pricing-description">{plan.description}</p>
+      <ul>
+        {plan.features.map((feature) => (
+          <li key={feature}>
+            <CheckCircle2 size={15} />
+            <span>{feature}</span>
+          </li>
+        ))}
+      </ul>
+      <Link className="ap-pricing-button" to="/register">
+        {plan.button}
+        <ArrowRight size={15} />
+      </Link>
+    </article>
+  );
+}
+
 function LandingHubPreview({ previewMode = true }) {
   const [categories, setCategories] = useState([]);
   const [activities, setActivities] = useState([]);
@@ -223,7 +387,7 @@ function LandingHubPreview({ previewMode = true }) {
         if (!alive) return;
 
         setCategories((categoryResponse.data || []).filter((category) => category.slug !== "all-activities"));
-        setActivities(activityResponse.data || []);
+        setActivities(filterRetiredActivities(activityResponse.data || []));
       })
       .catch(() => {
         if (!alive) return;
@@ -332,7 +496,7 @@ function LandingHubPreview({ previewMode = true }) {
           {featured ? (
             <section className="ap-live-feature">
               <div>
-                <span>Today’s pick</span>
+                <span>Todayâ€™s pick</span>
                 <h4>{featured.title}</h4>
                 <p>{featured.summary || featured.description || "A guided communication activity for focused practice."}</p>
                 <button type="button" onClick={() => showPreviewNotice(featured)}>
@@ -382,7 +546,7 @@ function LandingHubPreview({ previewMode = true }) {
       {previewNotice ? (
         <div className="ap-preview-modal" role="dialog" aria-modal="true" aria-label="Preview only">
           <div>
-            <button type="button" aria-label="Close preview notice" onClick={() => setPreviewNotice(null)}>×</button>
+            <button type="button" aria-label="Close preview notice" onClick={() => setPreviewNotice(null)}>Ã—</button>
             <span className="ap-mini-kicker">Preview only</span>
             <h4>{previewNotice.title}</h4>
             <p>This is a preview of the Artiqal hub. Create a free account to start activities.</p>
@@ -411,20 +575,20 @@ function DashboardMockup() {
         </aside>
         <div className="ap-mock-main">
           <div className="ap-mock-head">
-            <div><h3>Good afternoon, Guest 👋</h3><p>Practise communication, one calm step at a time.</p></div>
+            <div><h3>Good afternoon, Guest ðŸ‘‹</h3><p>Practise communication, one calm step at a time.</p></div>
             <div className="ap-mock-tools"><Search /><Bell /><CircleHelp /><i>GC</i></div>
           </div>
           <div className="ap-mock-grid">
             <section className="ap-today-card">
-              <span className="ap-mini-kicker">✣ Today’s pick</span>
+              <span className="ap-mini-kicker">âœ£ Todayâ€™s pick</span>
               <h4>Naming Common Objects</h4>
               <p>Strengthen word retrieval by naming everyday items.</p>
               <div className="ap-object-art"><span className="ap-mug" /><span className="ap-apple" /></div>
               <div className="ap-tag-row"><small>10 min</small><small>Easy</small><small>Word Finding</small></div>
-              <div className="ap-card-actions"><button>Start Session →</button><a href="#history">Session history →</a></div>
+              <div className="ap-card-actions"><button>Start Session â†’</button><a href="#history">Session history â†’</a></div>
             </section>
             <aside className="ap-insights">
-              <div className="ap-insights-title"><b>Session insights</b><small>This week⌄</small></div>
+              <div className="ap-insights-title"><b>Session insights</b><small>This weekâŒ„</small></div>
               <div className="ap-stat-grid">
                 <MiniStat value="12" label="Sessions" color="violet" />
                 <MiniStat value="86%" label="Accuracy" color="orange" />
@@ -443,7 +607,7 @@ function DashboardMockup() {
 }
 
 function MiniStat({ value, label, color }) {
-  return <div className={`ap-mini-stat ap-${color}`}><strong>{value}</strong><span>{label}</span><i /><small>↑ 8%</small></div>;
+  return <div className={`ap-mini-stat ap-${color}`}><strong>{value}</strong><span>{label}</span><i /><small>â†‘ 8%</small></div>;
 }
 
 function ContinueCard({ title, value, color }) {
@@ -456,15 +620,6 @@ function ContinueCard({ title, value, color }) {
   );
 }
 
-function TrustStrip() {
-  return (
-    <section className="ap-trust" id="clinicians">
-      <span>Trusted by clinicians and healthcare organizations</span>
-      <div><b>UCLA <i>Health</i></b><b>Stanford <i>Medicine</i></b><b>Mayo Clinic</b><b>Cleveland Clinic</b><b>NYU Langone <i>Health</i></b></div>
-    </section>
-  );
-}
-
 function PublicFooter() {
   const columns = [
     ["Product", "Features", "How it works", "Integrations", "Updates"],
@@ -474,7 +629,7 @@ function PublicFooter() {
   ];
   return (
     <footer className="ap-footer" id="about">
-      <div className="ap-footer-brand"><Link className="ap-logo" to="/"><Logo size={37} /><b>artiqal</b></Link><small>© 2026 Artiqal, Inc. All rights reserved.</small></div>
+      <div className="ap-footer-brand"><Link className="ap-logo" to="/"><Logo size={37} /><b>artiqal</b></Link><small>Â© 2026 Artiqal, Inc. All rights reserved.</small></div>
       {columns.map(([heading, ...items]) => <div className="ap-footer-col" key={heading}><b>{heading}</b>{items.map((item) => <a href={`#${item.toLowerCase().replaceAll(" ", "-")}`} key={item}>{item}</a>)}</div>)}
       <div className="ap-newsletter" id="resources"><b>Stay in the loop</b><p>Helpful resources, straight to your inbox.</p><label><input placeholder="Enter your email" /><button><ArrowRight size={17} /></button></label></div>
     </footer>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { HubSidebar } from "@/components/HubSidebar";
 import { HubTopbar } from "@/components/HubTopbar";
@@ -7,6 +7,7 @@ import { ActivitySortProvider } from "@/contexts/ActivitySortContext";
 
 export function HubShell({ children, previewMode = false, onPreviewAction }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const shellRef = useRef(null);
   const brand = (
     <>
       <Logo size={32} />
@@ -14,9 +15,39 @@ export function HubShell({ children, previewMode = false, onPreviewAction }) {
     </>
   );
 
+  const handleShellWheel = useCallback((event) => {
+    if (!event.deltaY || event.defaultPrevented) return;
+
+    const shell = shellRef.current;
+    const target = event.target;
+    if (!shell || !(target instanceof Element)) return;
+
+    const mainScroller = shell.querySelector(".hub-app-column");
+    if (!mainScroller) return;
+
+    if (target.closest(".hub-app-column")) return;
+
+    const horizontalScroller = target.closest(".activities-hub-category-row");
+    if (horizontalScroller && Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+
+    const nestedScroller = target.closest(".hub-sidebar-nav");
+    if (nestedScroller) {
+      const canScrollDown = nestedScroller.scrollTop + nestedScroller.clientHeight < nestedScroller.scrollHeight;
+      const canScrollUp = nestedScroller.scrollTop > 0;
+      if ((event.deltaY > 0 && canScrollDown) || (event.deltaY < 0 && canScrollUp)) return;
+    }
+
+    mainScroller.scrollTop += event.deltaY;
+    event.preventDefault();
+  }, []);
+
   return (
     <ActivitySortProvider>
-    <div className={`hub-app-shell ${previewMode ? "is-preview" : ""} ${sidebarCollapsed ? "is-sidebar-collapsed" : "is-sidebar-expanded"}`}>
+    <div
+      ref={shellRef}
+      onWheelCapture={handleShellWheel}
+      className={`hub-app-shell ${previewMode ? "is-preview" : ""} ${sidebarCollapsed ? "is-sidebar-collapsed" : "is-sidebar-expanded"}`}
+    >
       <div className="hub-left-rail">
         {previewMode ? (
           <button
@@ -41,6 +72,7 @@ export function HubShell({ children, previewMode = false, onPreviewAction }) {
       </div>
       <div className="hub-app-column">
         <HubTopbar previewMode={previewMode} onPreviewAction={onPreviewAction} />
+        <div className="hub-topbar-safe-occluder" aria-hidden="true" />
         <div className="hub-content-stage">{children}</div>
       </div>
     </div>

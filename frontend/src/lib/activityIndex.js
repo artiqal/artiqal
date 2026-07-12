@@ -1,4 +1,57 @@
 import { DOMAIN_NAV_ITEMS } from "@/lib/domainThemes";
+import { getActivityCardSearchTextValues } from "@/lib/activityCardConfig";
+
+export const RETIRED_ACTIVITY_SLUGS = new Set([
+  "patient-form",
+  "ai-scenario",
+  "short-message",
+  "complete-sentence",
+  "fill-form",
+  "signup-form",
+  "category-cueing",
+  "associations",
+  "follow-instructions",
+  "yes-no",
+  "ordering-coffee",
+  "doctor-visit",
+  "asking-directions",
+]);
+
+export const isRetiredActivity = (activity) =>
+  RETIRED_ACTIVITY_SLUGS.has(activity?.slug);
+
+export const filterRetiredActivities = (activities = []) =>
+  activities.filter((activity) => !isRetiredActivity(activity));
+
+export const isFunctionalActivity = (activity) =>
+  Boolean(
+    activity?.isFunctional ||
+      activity?.is_functional ||
+      activity?.functional ||
+      activity?.slug === "voicemails" ||
+      activity?.slug === "appointment-letter" ||
+      activity?.slug === "prescription-medication-labels"
+  );
+
+export const getActivityPrimaryCategory = (activity) =>
+  activity?.primaryCategory ||
+  activity?.primary_category ||
+  activity?.primaryDomain ||
+  activity?.primary_domain ||
+  (activity?.slug === "sfa-tool" ? "word-finding" : null) ||
+  (activity?.slug === "appointment-letter" ? "reading" : null) ||
+  (activity?.slug === "prescription-medication-labels" ? "reading" : null) ||
+  (activity?.slug === "voicemails" ? "auditory-comprehension" : activity?.category);
+
+export const getActivityDisplayCategory = (activity, fallbackCategory) =>
+  getActivityPrimaryCategory(activity) || fallbackCategory || activity?.category;
+
+export const activityBelongsToCategory = (activity, categorySlug) => {
+  if (!categorySlug || categorySlug === "all") return true;
+  if (getActivityPrimaryCategory(activity) === categorySlug) return true;
+  if (activity?.category === categorySlug) return true;
+  return categorySlug === "functional-communication" && isFunctionalActivity(activity);
+};
 
 const toSearchText = (value) => {
   if (Array.isArray(value)) return value.join(" ");
@@ -10,6 +63,9 @@ export const normalizeSearchQuery = (query = "") =>
   query
     .toString()
     .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/[-–—_/]+/g, " ")
+    .replace(/[.,;:!?()[\]{}"“”]+/g, " ")
     .trim()
     .replace(/\s+/g, " ");
 
@@ -38,17 +94,36 @@ export function buildActivityIndex(activities = [], categories = []) {
 
   return activities.map((activity) => {
     const category = categoryBySlug[activity.category] || {};
-    const categoryName = category.name || category.title || activity.category;
+    const displayCategorySlug = getActivityDisplayCategory(activity, activity.category);
+    const displayCategory = categoryBySlug[displayCategorySlug] || category;
+    const categoryName = displayCategory.name || displayCategory.title || category.name || category.title || activity.category;
     const description =
       activity.summary ||
       activity.description ||
       category.tagline ||
       category.description ||
       "Guided communication practice.";
+    const informationalSearchText = getActivityCardSearchTextValues(activity, displayCategorySlug);
     const searchFields = {
       title: normalizeField(activity.title),
-      category: normalizeField([categoryName, activity.category, activity.domain]),
-      tags: normalizeField([activity.tags, category.tags, category.searchAliases]),
+      category: normalizeField([
+        categoryName,
+        displayCategorySlug,
+        activity.category,
+        activity.domain,
+        isFunctionalActivity(activity) ? "functional functional task functional tasks" : "",
+      ]),
+      tags: normalizeField([
+        activity.tags,
+        activity.searchTerms,
+        activity.search_terms,
+        activity.searchKeywords,
+        activity.search_keywords,
+        activity.keywords,
+        category.tags,
+        category.searchAliases,
+      ]),
+      info: normalizeField(informationalSearchText),
       details: normalizeField([
         activity.summary,
         activity.description,
@@ -56,6 +131,7 @@ export function buildActivityIndex(activities = [], categories = []) {
         activity.clinicalArea,
         activity.skills,
         activity.clinical_skills,
+        informationalSearchText,
         category.description,
         category.tagline,
         category.clinical_area,
@@ -89,6 +165,8 @@ function scoreActivityForTerm(activity, term) {
   if (fieldMeaningfullyIncludes(fields.category, term, { allowShortSubstring: true })) return 70;
   if (fieldStartsWith(fields.tags, term)) return 60;
   if (fieldMeaningfullyIncludes(fields.tags, term, { allowShortSubstring: true })) return 55;
+  if (fieldStartsWith(fields.info, term)) return 58;
+  if (fieldMeaningfullyIncludes(fields.info, term, { allowShortSubstring: true })) return 52;
   if (fieldStartsWith(fields.details, term)) return 45;
   if (fieldMeaningfullyIncludes(fields.details, term)) return 35;
   return 0;

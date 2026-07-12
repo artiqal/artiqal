@@ -4,7 +4,6 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SessionProvider } from "@/contexts/SessionContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { SessionPill } from "@/components/SessionBanner";
 import { Toaster } from "@/components/ui/sonner";
 
 import LandingPage from "@/pages/LandingPage";
@@ -116,7 +115,11 @@ function AppRouter() {
     path.endsWith("/") ? location.pathname.startsWith(path) : location.pathname === path || location.pathname.startsWith(`${path}/`)
   );
 
-  return usesHubShell ? <HubShell>{routeTree}</HubShell> : routeTree;
+  return (
+    <>
+      {usesHubShell ? <HubShell>{routeTree}</HubShell> : routeTree}
+    </>
+  );
 }
 
 export default function App() {
@@ -126,7 +129,6 @@ export default function App() {
         <AuthProvider>
           <SessionProvider>
             <AppRouter />
-            <SessionPill />
             <Toaster richColors position="top-center" />
           </SessionProvider>
         </AuthProvider>

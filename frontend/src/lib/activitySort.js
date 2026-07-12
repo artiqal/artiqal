@@ -1,11 +1,10 @@
 export const ACTIVITY_SORT_OPTIONS = [
-  { value: "relevance", label: "Recommended", capability: null },
-  { value: "az", label: "A-Z", capability: null },
-  { value: "za", label: "Z-A", capability: null },
-  { value: "recent", label: "Recently Added", capability: "date" },
-  { value: "used", label: "Most Used", capability: "usage" },
+  { value: "az", label: "A–Z", capability: null },
+  { value: "za", label: "Z–A", capability: null },
   { value: "shortest", label: "Shortest Duration", capability: "duration" },
   { value: "longest", label: "Longest Duration", capability: "duration" },
+  { value: "recent", label: "Recently Added", capability: "date" },
+  { value: "used", label: "Most Used", capability: "usage" },
 ];
 
 export const getActivityTitle = (activity) => activity.title || "";
@@ -75,6 +74,5 @@ export const sortActivities = (activities, sortMode, { normalizedSearch = "", ca
     if (sortMode === "longest" && capabilities.duration) {
       return (getActivityDuration(b) || 0) - (getActivityDuration(a) || 0) || titleSort;
     }
-    if (normalizedSearch && sortMode === "relevance") return 0;
     return titleSort;
   });

@@ -1,35 +1,97 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
-import { getActivityHref } from "@/lib/activityIndex";
+import { filterRetiredActivities, getActivityHref } from "@/lib/activityIndex";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSession } from "@/contexts/SessionContext";
 import { SessionBanner } from "@/components/SessionBanner";
-import { CategoryIcon } from "@/components/CategoryIcon";
-import { Activity, ArrowRight, ArrowUpRight, CalendarCheck, CheckCircle2, FolderOpen, Play, Sparkles, Timer } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Box,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle2,
+  Clock,
+  ListChecks,
+  MoreHorizontal,
+  Play,
+  Plus,
+  Sparkles,
+  Timer,
+  X,
+} from "lucide-react";
 
-// Vibrant gradient + foreground icon color per category
-const GRADIENTS = {
-  reading: { gradient: "linear-gradient(135deg,#2563EB 0%,#38BDF8 100%)", fg: "#2563EB", soft: "rgba(37,99,235,.34)" },
-  writing: { gradient: "linear-gradient(135deg,#F97316 0%,#FB7185 100%)", fg: "#EA580C", soft: "rgba(249,115,22,.36)" },
-  "word-finding": { gradient: "linear-gradient(135deg,#7C3AED 0%,#38BDF8 100%)", fg: "#6D28D9", soft: "rgba(124,58,237,.35)" },
-  "auditory-comprehension": { gradient: "linear-gradient(135deg,#06B6D4 0%,#3B82F6 100%)", fg: "#0891B2", soft: "rgba(6,182,212,.35)" },
-  "functional-communication": { gradient: "linear-gradient(135deg,#F59E0B 0%,#EF4444 100%)", fg: "#D97706", soft: "rgba(245,158,11,.38)" },
-  "sfa-therapy": { gradient: "linear-gradient(135deg,#EC4899 0%,#8B5CF6 100%)", fg: "#DB2777", soft: "rgba(236,72,153,.35)" },
-  games: { gradient: "linear-gradient(135deg,#22C55E 0%,#14B8A6 100%)", fg: "#059669", soft: "rgba(34,197,94,.34)" },
-  dysphagia: { gradient: "linear-gradient(135deg,#0F766E 0%,#84CC16 100%)", fg: "#0F766E", soft: "rgba(15,118,110,.34)" },
-  "motor-speech": { gradient: "linear-gradient(135deg,#6366F1 0%,#A855F7 100%)", fg: "#4F46E5", soft: "rgba(99,102,241,.35)" },
-  voice: { gradient: "linear-gradient(135deg,#E11D48 0%,#F97316 100%)", fg: "#BE123C", soft: "rgba(225,29,72,.34)" },
-  favourites: { gradient: "linear-gradient(135deg,#F43F5E 0%,#EC4899 100%)", fg: "#E11D48", soft: "rgba(244,63,94,.35)" },
-  "ai-practice": { gradient: "linear-gradient(135deg,#4F46E5 0%,#06B6D4 100%)", fg: "#4338CA", soft: "rgba(79,70,229,.35)" },
-  "all-activities": { gradient: "linear-gradient(135deg,#635BFF 0%,#00D4FF 100%)", fg: "#4F46E5", soft: "rgba(99,91,255,.35)" },
-};
+const HUB_TASKS = [
+  { title: "Prep for Sarah J. session", subtitle: "Language — Following Directions", time: "9:00 AM", tone: "purple" },
+  { title: "Review Ethan M. progress", subtitle: "Articulation — /r/ Blends", time: "10:30 AM", tone: "blue" },
+  { title: "Update goals — Mia T.", subtitle: "Receptive Language", time: "12:00 PM", tone: "violet" },
+  { title: "Write session note — Liam K.", subtitle: "Fluency", time: "2:00 PM", tone: "blue" },
+  { title: "Parent consult — Ava P.", subtitle: "Caregiver Education", time: "3:30 PM", tone: "pink" },
+  { title: "Resource review", subtitle: "Build library", time: "Tomorrow", tone: "slate" },
+];
 
-const HOME_STATS = [
-  { label: "Planned", value: "12", icon: CalendarCheck, tone: "planned" },
-  { label: "In Progress", value: "8", icon: Activity, tone: "progress" },
-  { label: "Completed", value: "24", icon: CheckCircle2, tone: "completed" },
-  { label: "Resources", value: "156", icon: FolderOpen, tone: "resources" },
+const HUB_TASK_IDS = [
+  "sarah-session-prep",
+  "ethan-progress-review",
+  "mia-goal-update",
+  "liam-session-note",
+  "ava-parent-consult",
+  "resource-review",
+];
+
+const INITIAL_HUB_TASKS = HUB_TASKS.map((task, index) => ({
+  ...task,
+  id: HUB_TASK_IDS[index] || `task-${index}`,
+}));
+
+const CALENDAR_WEEKS = [
+  [
+    { day: 27, muted: true },
+    { day: 28, muted: true },
+    { day: 29, muted: true },
+    { day: 30, muted: true },
+    { day: 1 },
+    { day: 2 },
+    { day: 3 },
+  ],
+  [
+    { day: 4 },
+    { day: 5, events: [{ label: "9:00 Sarah J.", tone: "purple" }] },
+    { day: 6, events: [{ label: "10:30 Ethan M.", tone: "mint" }] },
+    { day: 7, events: [{ label: "1:00 Mia T.", tone: "amber" }] },
+    { day: 8 },
+    { day: 9, events: [{ label: "9:30 Liam K.", tone: "lavender" }] },
+    { day: 10 },
+  ],
+  [
+    { day: 11 },
+    { day: 12, events: [{ label: "3:30 Ava P.", tone: "pink" }] },
+    { day: 13 },
+    { day: 14 },
+    { day: 15, selected: true, events: [{ label: "11:00 Group", tone: "mint" }], more: "+2 more" },
+    { day: 16 },
+    { day: 17 },
+  ],
+  [
+    { day: 18 },
+    { day: 19 },
+    { day: 20, events: [{ label: "2:00 Noah B.", tone: "blue" }] },
+    { day: 21 },
+    { day: 22 },
+    { day: 23 },
+    { day: 24 },
+  ],
+  [
+    { day: 25 },
+    { day: 26, note: "Memorial Day" },
+    { day: 27 },
+    { day: 28, events: [{ label: "10:30 Olivia S.", tone: "amber" }] },
+    { day: 29 },
+    { day: 30, events: [{ label: "1:30 Mason B.", tone: "lavender" }] },
+    { day: 31 },
+  ],
 ];
 
 function getGreeting() {
@@ -43,20 +105,98 @@ function getGreeting() {
 
 export default function Dashboard({ previewMode = false, onPreviewAction }) {
   const { user } = useAuth();
-  const [categories, setCategories] = useState([]);
   const [activities, setActivities] = useState([]);
+  const [todoTasks, setTodoTasks] = useState(INITIAL_HUB_TASKS);
+  const [pendingCompletedTasks, setPendingCompletedTasks] = useState({});
+  const [completedTasks, setCompletedTasks] = useState([]);
+  const [isTodoMenuOpen, setIsTodoMenuOpen] = useState(false);
+  const [isCompletedTasksOpen, setIsCompletedTasksOpen] = useState(false);
+  const todoMenuRef = useRef(null);
+  const completionTimersRef = useRef(new Map());
 
   useEffect(() => {
-    Promise.all([api.get("/categories"), api.get("/activities")])
-      .then(([c, a]) => {
-        setCategories(c.data);
-        setActivities(a.data);
-      })
+    api.get("/activities")
+      .then((response) => setActivities(filterRetiredActivities(response.data || [])))
       .catch(() => {});
   }, []);
 
-  const linkFor = (slug) =>
-    slug === "all-activities" ? "/all-activities" : slug === "sfa-therapy" ? "/sfa" : `/category/${slug}`;
+  useEffect(() => {
+    if (!isTodoMenuOpen && !isCompletedTasksOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (isTodoMenuOpen && todoMenuRef.current && !todoMenuRef.current.contains(event.target)) {
+        setIsTodoMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsTodoMenuOpen(false);
+        setIsCompletedTasksOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isTodoMenuOpen, isCompletedTasksOpen]);
+
+  useEffect(() => () => {
+    completionTimersRef.current.forEach(({ completeTimer, removeTimer }) => {
+      clearTimeout(completeTimer);
+      clearTimeout(removeTimer);
+    });
+    completionTimersRef.current.clear();
+  }, []);
+
+  const completeTask = (task) => {
+    if (pendingCompletedTasks[task.id]) return;
+    if (completionTimersRef.current.has(task.id)) return;
+
+    setPendingCompletedTasks((current) => ({ ...current, [task.id]: "completed" }));
+
+    const completeTimer = setTimeout(() => {
+      setPendingCompletedTasks((current) => ({ ...current, [task.id]: "removing" }));
+
+      const removeTimer = setTimeout(() => {
+        setTodoTasks((current) => current.filter((item) => item.id !== task.id));
+        setPendingCompletedTasks((current) => {
+          const next = { ...current };
+          delete next[task.id];
+          return next;
+        });
+        setCompletedTasks((current) => {
+          if (current.some((item) => item.id === task.id)) return current;
+          return [{ ...task, completedAt: new Date().toISOString() }, ...current];
+        });
+        completionTimersRef.current.delete(task.id);
+      }, 260);
+
+      const timers = completionTimersRef.current.get(task.id);
+      completionTimersRef.current.set(task.id, { ...timers, removeTimer });
+    }, 5000);
+
+    completionTimersRef.current.set(task.id, { completeTimer, removeTimer: null });
+  };
+
+  const undoTaskCompletion = (taskId) => {
+    const timers = completionTimersRef.current.get(taskId);
+    if (timers) {
+      clearTimeout(timers.completeTimer);
+      clearTimeout(timers.removeTimer);
+      completionTimersRef.current.delete(taskId);
+    }
+
+    setPendingCompletedTasks((current) => {
+      const next = { ...current };
+      delete next[taskId];
+      return next;
+    });
+  };
 
   const greeting = useMemo(getGreeting, []);
   const firstName = user?.name ? user.name.split(" ")[0] : "Guest";
@@ -70,14 +210,9 @@ export default function Dashboard({ previewMode = false, onPreviewAction }) {
   }, [activities]);
 
   const pickHref = pick ? getActivityHref(pick) : "/all-activities";
-  const activityCounts = useMemo(() => {
-    return activities.reduce((counts, activity) => {
-      counts[activity.category] = (counts[activity.category] || 0) + 1;
-      return counts;
-    }, {});
-  }, [activities]);
 
   const { isActive, start: startSession } = useSession();
+  const activeTaskLabel = `${todoTasks.length} ${todoTasks.length === 1 ? "task" : "tasks"}`;
   const showPreviewNotice = (message = "This is a preview of the Artiqal hub. Create a free account to start activities.") => {
     onPreviewAction?.(message);
   };
@@ -86,95 +221,197 @@ export default function Dashboard({ previewMode = false, onPreviewAction }) {
     return (
       <div className="min-h-screen" data-testid="dashboard-page">
         <main className="hub-dashboard-main hub-home-main clinician-page is-compact">
-          <section className="hub-home-hero fade-up" data-testid="greeting-section">
-            <div className="activities-greeting-card hub-home-greeting-card">
-              <div className="activities-greeting-copy">
-                <h1>
-                  {greeting.text}
-                  {firstName ? `, ${firstName}` : ""} <span aria-hidden>{greeting.emoji}</span>
-                </h1>
-                <p>Ready to help your clients achieve their goals today?</p>
-              </div>
-
-              <div className="activities-greeting-stats" aria-label="Activity summary">
-                {HOME_STATS.map(({ label, value, icon: Icon, tone }) => (
-                  <div className="activities-greeting-stat" key={label}>
-                    <span className={`activities-greeting-stat-icon is-${tone}`} aria-hidden="true">
-                      <Icon size={19} strokeWidth={2.2} />
-                    </span>
-                    <strong>{value}</strong>
-                    <small>{label}</small>
+          <div className="hub-home-grid fade-up">
+            <div className="hub-home-main-column">
+              <section className="hub-home-hero-card" data-testid="greeting-section">
+                <div className="hub-home-hero-flow" aria-hidden />
+                <div className="hub-home-hero-copy">
+                  <h1>Good morning, Guest</h1>
+                  <p>Ready to help your clients achieve their communication goals today?</p>
+                  <div className="hub-home-hero-actions">
+                    <button type="button" onClick={startSession} className="hub-home-build-button" data-testid="start-session-btn">
+                      <Box size={18} strokeWidth={2.2} />
+                      Build your session
+                      <ArrowRight size={18} strokeWidth={2.2} />
+                    </button>
+                    <Link to="/sessions" className="hub-home-history-button">
+                      <Clock size={17} strokeWidth={2.1} />
+                      View session history
+                    </Link>
                   </div>
-                ))}
-              </div>
+                </div>
+              </section>
+
+              <section className="hub-home-calendar-card" aria-label="Calendar for May 2025">
+                <header className="hub-home-calendar-header">
+                  <div className="hub-home-calendar-title">
+                    <h2>May 2025</h2>
+                    <div className="hub-home-calendar-nav" aria-label="Calendar navigation">
+                      <button type="button" aria-label="Previous month"><ChevronLeft size={17} /></button>
+                      <button type="button" aria-label="Next month"><ChevronRight size={17} /></button>
+                    </div>
+                    <button type="button" className="hub-home-calendar-today">Today</button>
+                  </div>
+                  <div className="hub-home-calendar-tools">
+                    <button type="button" className="hub-home-calendar-mode">
+                      Month <ChevronDown size={15} />
+                    </button>
+                    <button type="button" className="hub-home-calendar-add">
+                      <Plus size={17} /> Add
+                    </button>
+                  </div>
+                </header>
+                <div className="hub-home-calendar-grid" role="grid" aria-label="May 2025 month view">
+                  {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day) => (
+                    <div className="hub-home-calendar-weekday" key={day}>{day}</div>
+                  ))}
+                  {CALENDAR_WEEKS.flat().map((day, index) => (
+                    <div className={`hub-home-calendar-day${day.muted ? " is-muted" : ""}${day.selected ? " is-selected" : ""}`} key={`${day.day}-${index}`}>
+                      <span className="hub-home-calendar-date">{day.day}</span>
+                      {day.note ? <small className="hub-home-calendar-note">{day.note}</small> : null}
+                      {day.events?.map((event) => (
+                        <span className={`hub-home-calendar-event is-${event.tone}`} key={event.label}>{event.label}</span>
+                      ))}
+                      {day.more ? <span className="hub-home-calendar-more">{day.more}</span> : null}
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
 
-            <aside className="hub-home-pick" data-testid="welcome-block">
-              <div className="hub-home-pick-glow" aria-hidden />
-              <div className="hub-home-pick-topline">
-                <span><Sparkles className="w-3.5 h-3.5" /> Today’s pick</span>
-                <small>Recommended</small>
-              </div>
-              <h2>{pick ? pick.title : "Choose a category to begin"}</h2>
-              <p>{pick ? (pick.summary || "A short guided activity is ready when you are.") : "Pick a category and dive in. Every activity is built for calm, practical communication practice."}</p>
-              <div className="hub-home-pick-actions">
-                <Link to={pickHref} className="hub-home-primary compact" data-testid="welcome-cta-primary">
-                  <Play className="w-4 h-4" /> {pick ? "Open pick" : "Pick a category"}
-                </Link>
-                <Link to="/sessions" className="hub-home-text-link" data-testid="welcome-cta-secondary">
-                  Session history <ArrowUpRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </aside>
-          </section>
+            <div className="hub-home-side-column">
+              <aside className="hub-home-todo-card" aria-label="To do list">
+                <header className="hub-home-card-header">
+                  <h2>To do</h2>
+                  <div className="hub-home-header-actions" ref={todoMenuRef}>
+                    <span className="hub-home-task-count">{activeTaskLabel}</span>
+                    <button
+                      type="button"
+                      className="hub-home-icon-button"
+                      aria-label="To do options"
+                      aria-haspopup="menu"
+                      aria-expanded={isTodoMenuOpen}
+                      onClick={() => setIsTodoMenuOpen((open) => !open)}
+                    >
+                      <MoreHorizontal size={18} />
+                    </button>
+                    {isTodoMenuOpen ? (
+                      <div className="hub-home-todo-menu" role="menu" aria-label="To do options">
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setIsTodoMenuOpen(false);
+                            setIsCompletedTasksOpen(true);
+                          }}
+                        >
+                          <ListChecks size={16} strokeWidth={2.1} aria-hidden="true" />
+                          View completed tasks
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                </header>
+                <div className="hub-home-task-list">
+                  {todoTasks.map((task) => {
+                    const completionState = pendingCompletedTasks[task.id];
+                    const isCompleting = Boolean(completionState);
+
+                    return (
+                    <div
+                      className={`hub-home-task-row${isCompleting ? " is-completed" : ""}${completionState === "removing" ? " is-removing" : ""}`}
+                      key={task.id}
+                    >
+                      <button
+                        type="button"
+                        className="hub-home-checkbox"
+                        aria-label={`Complete ${task.title}`}
+                        aria-pressed={isCompleting}
+                        disabled={isCompleting}
+                        onClick={() => completeTask(task)}
+                      >
+                        <CheckCircle2 size={14} strokeWidth={2.25} aria-hidden="true" />
+                      </button>
+                      <span className="hub-home-task-copy">
+                        <strong>{task.title}</strong>
+                        <small>{task.subtitle}</small>
+                      </span>
+                      <span className="hub-home-task-meta">
+                        <span className="hub-home-task-time">{task.time}</span>
+                        <span className={`hub-home-task-dot is-${task.tone}`} aria-hidden />
+                      </span>
+                      {isCompleting ? (
+                        <button type="button" className="hub-home-task-undo" onClick={() => undoTaskCompletion(task.id)}>
+                          Undo
+                        </button>
+                      ) : null}
+                    </div>
+                    );
+                  })}
+                </div>
+                <div className="hub-home-task-input">
+                  <span>Add a new task...</span>
+                  <button type="button" aria-label="Add task">
+                    <Plus size={19} strokeWidth={2.2} />
+                  </button>
+                </div>
+              </aside>
+              {isCompletedTasksOpen ? (
+                <div
+                  className="hub-home-completed-backdrop"
+                  role="presentation"
+                  onMouseDown={(event) => {
+                    if (event.target === event.currentTarget) {
+                      setIsCompletedTasksOpen(false);
+                    }
+                  }}
+                >
+                  <section
+                    className="hub-home-completed-dialog"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="completed-tasks-title"
+                  >
+                    <header>
+                      <div>
+                        <span className="hub-home-completed-icon" aria-hidden="true">
+                          <CheckCircle2 size={18} strokeWidth={2.15} />
+                        </span>
+                        <h3 id="completed-tasks-title">Completed tasks</h3>
+                      </div>
+                      <button type="button" aria-label="Close completed tasks" onClick={() => setIsCompletedTasksOpen(false)}>
+                        <X size={17} strokeWidth={2.15} />
+                      </button>
+                    </header>
+                    {completedTasks.length ? (
+                      <div className="hub-home-completed-list">
+                        {completedTasks.map((task) => (
+                          <div className="hub-home-completed-row" key={task.id}>
+                            <CheckCircle2 size={15} strokeWidth={2.15} aria-hidden="true" />
+                            <span>
+                              <strong>{task.title}</strong>
+                              <small>{task.subtitle}</small>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="hub-home-completed-empty">
+                        <p>No completed tasks yet.</p>
+                        <small>Finished tasks will appear here after the undo window closes.</small>
+                      </div>
+                    )}
+                  </section>
+                </div>
+              ) : null}
+            </div>
+          </div>
 
           {isActive ? (
             <div className="mt-6">
               <SessionBanner />
             </div>
           ) : null}
-
-          <section className="hub-home-library">
-            <div className="hub-home-library-head">
-              <div>
-                <span className="hub-home-eyebrow">Activity library</span>
-                <h2>Choose a category</h2>
-                <p>Session-ready practice organized by real clinical goals.</p>
-              </div>
-              <Link to="/all-activities" className="hub-home-text-link strong">
-                Browse all <ArrowUpRight className="w-4 h-4" />
-              </Link>
-            </div>
-
-            <div className="hub-home-category-grid" data-testid="category-grid">
-              {categories.map((c, idx) => {
-                const g = GRADIENTS[c.slug] || GRADIENTS["all-activities"];
-                const count = activityCounts[c.slug] || 0;
-
-                return (
-                  <Link
-                    key={c.slug}
-                    to={linkFor(c.slug)}
-                    className={`hub-home-category-card fade-up delay-${(idx % 4) + 1} group`}
-                    style={{ "--category-gradient": g.gradient, "--category-color": g.fg, "--category-soft": g.soft }}
-                    data-testid={`category-tile-${c.slug}`}
-                  >
-                    <div className="cat-art-icon hub-home-category-icon" style={{ "--cat-gradient": g.gradient, "--cat-fg": g.fg }}>
-                      <CategoryIcon name={c.icon} className="w-5 h-5" />
-                    </div>
-                    <div className="hub-home-category-copy">
-                      <h3>{c.name}</h3>
-                      <p>{c.tagline}</p>
-                      <small>{count ? `${count} activities` : "Browse activities"}</small>
-                    </div>
-                    <span className="hub-home-category-arrow" aria-hidden>
-                      <ArrowUpRight className="w-4 h-4" />
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
         </main>
       </div>
     );
@@ -367,61 +604,6 @@ export default function Dashboard({ previewMode = false, onPreviewAction }) {
           </>
         )}
 
-        {/* Library header */}
-        <section className={`${previewMode ? "mt-12" : "mt-8"} flex items-end justify-between gap-4`}>
-          <div>
-            <div className="text-xs text-indigo-600 font-semibold tracking-[0.18em] uppercase">
-              Library
-            </div>
-            <h3 className="font-display text-2xl sm:text-3xl font-bold tracking-tight mt-1">
-              Choose a category
-            </h3>
-          </div>
-          <Link
-            to="/all-activities"
-            data-testid="browse-all-link"
-            className="inline-flex items-center gap-1 text-indigo-600 font-display font-semibold hover:text-indigo-700"
-          >
-            Browse all <ArrowUpRight className="w-4 h-4" />
-          </Link>
-        </section>
-
-        {/* Categories grid */}
-        <div
-          className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
-          data-testid="category-grid"
-        >
-          {categories.map((c, idx) => {
-            const g = GRADIENTS[c.slug] || GRADIENTS["all-activities"];
-            return (
-              <Link
-                key={c.slug}
-                to={linkFor(c.slug)}
-                className={`cat-card fade-up delay-${(idx % 4) + 1} group`}
-                data-testid={`category-tile-${c.slug}`}
-              >
-                <div
-                  className="cat-art"
-                  style={{ "--cat-gradient": g.gradient, "--cat-fg": g.fg }}
-                >
-                  <span className="cat-art-icon">
-                    <CategoryIcon name={c.icon} className="w-6 h-6" />
-                  </span>
-                  <span
-                    className="absolute top-3 right-3 inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/85 text-zinc-700 group-hover:bg-white transition"
-                    aria-hidden
-                  >
-                    <ArrowUpRight className="w-4 h-4" />
-                  </span>
-                </div>
-                <div className="cat-card-body">
-                  <div className="cat-card-title">{c.name}</div>
-                  <div className="cat-card-tag">{c.tagline}</div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
       </main>
     </div>
   );

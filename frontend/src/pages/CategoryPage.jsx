@@ -1,26 +1,30 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { api } from "@/lib/api";
-import { getActivityHref } from "@/lib/activityIndex";
+import { ActivityCard } from "@/components/ActivityCard";
 import { DOMAIN_NAV_ITEMS, getDomainTheme } from "@/lib/domainThemes";
-import { Header } from "@/components/Header";
+import { activityBelongsToCategory, filterRetiredActivities } from "@/lib/activityIndex";
+import { useSmartBack } from "@/lib/navigationHistory";
+import aiPracticeArtwork from "@/assets/domain-ai-practice.png";
+import wordFindingArtwork from "@/assets/domain-word-finding.png";
+import readingArtwork from "@/assets/domain-reading.png";
+import writingArtwork from "@/assets/domain-writing.png";
+import listeningArtwork from "@/assets/domain-auditory-comprehension.png";
+import functionalArtwork from "@/assets/domain-functional-communication.png";
+import gamesArtwork from "@/assets/domain-games.png";
+import cognitiveArtwork from "@/assets/domain-cognitive-communication.png";
 import {
   ArrowLeft,
-  ArrowRight,
   Brain,
   ChevronDown,
   ChevronRight,
-  Clock,
-  Coffee,
   Compass,
-  MapPin,
   MessageCircle,
   MessageSquare,
   Mic,
-  Pill,
-  Stethoscope,
+  Gamepad2,
+  Sparkles,
   Target,
-  Voicemail,
   Mail,
 } from "lucide-react";
 
@@ -34,9 +38,11 @@ const CATEGORY_VISUALS = {
   },
   "word-finding": {
     icon: WordFindingBannerIcon,
-    bannerClassName: "word-finding-hero",
     iconStyle: "whiteTile",
     description: "Find the right word with cueing, naming, and association exercises.",
+    chips: ["Build vocabulary", "Improve expression"],
+    artGlow:
+      "radial-gradient(ellipse at 50% 44%, rgba(74, 202, 219, 0.42), transparent 54%), radial-gradient(ellipse at 34% 64%, rgba(34, 211, 238, 0.22), transparent 42%)",
   },
   "auditory-comprehension": {
     icon: Mic,
@@ -44,28 +50,38 @@ const CATEGORY_VISUALS = {
   "functional-communication": {
     icon: MessageCircle,
   },
+  games: {
+    icon: Gamepad2,
+    description: "Playful activities that build language, attention, and confidence.",
+    chips: ["Playful practice", "Build attention", "Support language"],
+  },
   "cognitive-communication": {
     icon: Brain,
   },
-  "sfa-therapy": {
-    icon: Target,
+  "ai-practice": {
+    icon: Brain,
+    description: "AI-powered practice activities",
+    chips: ["AI supported", "Session-ready"],
   },
   "all-activities": {
     icon: Compass,
   },
 };
 
-// Per-activity icon + pastel tile colour
-const ACTIVITY_ICONS = {
-  "appointment-letter": { icon: Mail, color: "#F97316", bg: "#FFEDD5" },
-  "prescription-medication-labels": { icon: Pill, color: "#D97706", bg: "#FEF3C7" },
-  voicemails: { icon: Voicemail, color: "#7C3AED", bg: "#EDE9FE" },
-  "ordering-coffee": { icon: Coffee, color: "#16A34A", bg: "#DCFCE7" },
-  "doctor-visit": { icon: Stethoscope, color: "#2563EB", bg: "#DBEAFE" },
-  "asking-directions": { icon: MapPin, color: "#DB2777", bg: "#FCE7F3" },
+const CATEGORY_ARTWORK = {
+  reading: readingArtwork,
+  writing: writingArtwork,
+  "word-finding": wordFindingArtwork,
+  "auditory-comprehension": listeningArtwork,
+  "functional-communication": functionalArtwork,
+  games: gamesArtwork,
+  "cognitive-communication": cognitiveArtwork,
+  "ai-practice": aiPracticeArtwork,
 };
 
-const FALLBACK_ICON = { icon: MessageCircle, color: "#6366F1", bg: "#E0E7FF" };
+const DEFAULT_CATEGORY_CHIPS = ["Guided practice", "Session-ready"];
+const CHIP_ICONS = [Sparkles, MessageSquare];
+
 const WORD_FINDING_ICON_TILE_STYLE = {
   border: "1px solid rgba(255,255,255,.72)",
   background: "rgba(255,255,255,.96)",
@@ -86,17 +102,20 @@ function WordFindingBannerIcon({ className = "w-9 h-9" }) {
 
 export default function CategoryPage() {
   const { slug } = useParams();
+  const smartBack = useSmartBack();
   const [category, setCategory] = useState(null);
   const [activities, setActivities] = useState([]);
   const [error, setError] = useState("");
+  const [loaded, setLoaded] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [sortBy, setSortBy] = useState("Recommended");
 
   useEffect(() => {
     let cancelled = false;
+    setLoaded(false);
     Promise.all([
       api.get("/categories").catch(() => ({ data: [] })),
-      api.get(`/categories/${slug}/activities`).catch(() => ({ data: [] })),
+      api.get("/activities").catch(() => ({ data: [] })),
     ])
       .then(([c, a]) => {
         if (cancelled) return;
@@ -119,9 +138,14 @@ export default function CategoryPage() {
             }
           : null;
         setCategory(normalizeCategory(apiCategory) || fallbackCategory);
-        setActivities(a.data);
+        setActivities(filterRetiredActivities(a.data || []).filter((activity) => activityBelongsToCategory(activity, slug)));
+        setLoaded(true);
       })
-      .catch(() => setError("Could not load this category."));
+      .catch(() => {
+        if (cancelled) return;
+        setError("Could not load this category.");
+        setLoaded(true);
+      });
     return () => {
       cancelled = true;
     };
@@ -131,6 +155,14 @@ export default function CategoryPage() {
   const theme = { ...domainTheme, ...(CATEGORY_VISUALS[slug] || CATEGORY_VISUALS["all-activities"]) };
   const HeaderIcon = theme.icon;
   const categoryDescription = theme.description || category?.description;
+  const categoryChips = theme.chips || DEFAULT_CATEGORY_CHIPS;
+  const categoryArtwork = CATEGORY_ARTWORK[slug];
+  const activitySectionTitle =
+    slug === "functional-communication" ? "Functional Tasks" : "Conversation Scenarios";
+  const activitySectionDescription =
+    slug === "functional-communication"
+      ? "Real-world activities for everyday communication practice."
+      : "Real-life situations to build your confidence and communication skills.";
   const categoryIconStyle =
     theme.iconStyle === "whiteTile"
       ? { ...WORD_FINDING_ICON_TILE_STYLE, color: theme.accent }
@@ -141,6 +173,12 @@ export default function CategoryPage() {
           boxShadow:
             "inset 0 1px 0 rgba(255,255,255,.34), 0 10px 24px rgba(15,23,42,.14)",
         };
+  const categoryBannerStyle = {
+    "--category-accent": theme.accent,
+    "--category-glow": theme.hoverGlow || theme.accent,
+    "--category-soft-bg": theme.softBg,
+    "--category-art-gradient": theme.artGlow || theme.blobGradient || theme.bannerGradient,
+  };
 
   const sortedActivities = useMemo(() => {
     const list = [...activities];
@@ -157,27 +195,32 @@ export default function CategoryPage() {
   if (error) {
     return (
       <div className="min-h-screen">
-        <Header />
-        <div className="max-w-3xl mx-auto px-6 py-16 text-center text-rose-600" data-testid="category-error">
+        <main className="clinician-page">
+        <div className="max-w-3xl mx-auto py-16 text-center text-rose-600" data-testid="category-error">
           {error}
         </div>
+        </main>
       </div>
     );
   }
 
+  if (loaded && !category) {
+    return <Navigate to="/all-activities" replace />;
+  }
+
   return (
     <div className="min-h-screen" data-testid="category-page">
-      <Header />
       <main className="clinician-page">
         {/* Breadcrumb */}
         <div className="flex items-center gap-3 flex-wrap" data-testid="breadcrumb-header">
-          <Link
-            to="/dashboard"
+          <button
+            type="button"
+            onClick={smartBack}
             className="inline-flex items-center text-sm text-zinc-600 hover:text-indigo-600 font-display font-medium"
             data-testid="back-to-hub"
           >
             <ArrowLeft className="w-4 h-4 mr-1" /> Back
-          </Link>
+          </button>
           <span className="hidden sm:inline-block w-px h-4 bg-zinc-300" />
           <nav
             className="flex items-center gap-1.5 text-sm text-zinc-500 flex-wrap"
@@ -204,42 +247,52 @@ export default function CategoryPage() {
         {category ? (
           <header className="mt-6 fade-up">
             <div
-              className={`rounded-[28px] px-6 sm:px-10 py-9 sm:py-11 relative overflow-hidden ${theme.bannerClassName || ""}`}
-              style={{ background: theme.bannerGradient }}
+              className="category-domain-banner"
+              style={categoryBannerStyle}
               data-testid="category-hero"
             >
-              {/* Decorative chat-bubble illustrations on the right (desktop only) */}
-              {slug !== "word-finding" ? (
-                <div
-                  className="hidden lg:block absolute right-10 top-1/2 -translate-y-1/2 pointer-events-none"
-                  aria-hidden="true"
-                >
-                  <ChatBubbleArt />
-                </div>
-              ) : null}
-
-              <div className="relative flex items-start gap-5">
+              <div className="category-domain-content">
                 <span
-                  className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white"
+                  className="category-domain-icon-tile"
                   style={categoryIconStyle}
                 >
-                  <HeaderIcon className="w-9 h-9" />
+                  <HeaderIcon className="category-domain-icon" />
                 </span>
-                <div className="text-white max-w-2xl">
-                  <h1 className="font-display text-3xl sm:text-[40px] font-bold tracking-tight leading-tight">
+                <div className="category-domain-copy">
+                  <h1 className="font-display">
                     {category.name}
                   </h1>
-                  <p className="mt-2 text-white/95 text-base sm:text-lg leading-relaxed">
+                  <p>
                     {categoryDescription}
                   </p>
+                  <div className="category-domain-chips" aria-label={`${category.name} focus areas`}>
+                    {categoryChips.slice(0, 2).map((chip, index) => {
+                      const ChipIcon = CHIP_ICONS[index] || Sparkles;
+                      return (
+                        <span key={chip} className="category-domain-chip">
+                          <ChipIcon className="w-3.5 h-3.5" />
+                          {chip}
+                        </span>
+                      );
+                    })}
+                  </div>
                 </div>
+              </div>
+
+              <div className="category-domain-art" aria-hidden="true">
+                <span className="category-domain-art-glow" />
+                {categoryArtwork ? (
+                  <img className="category-domain-art-image" src={categoryArtwork} alt="" />
+                ) : (
+                  <span className="category-domain-art-fallback" />
+                )}
               </div>
             </div>
           </header>
         ) : null}
 
         {/* Section header */}
-        <div className="mt-10 flex items-end justify-between flex-wrap gap-4">
+        <div className="mt-8 flex items-end justify-between flex-wrap gap-4">
           <div className="flex items-start gap-3.5">
             <span
               className="inline-flex items-center justify-center w-12 h-12 rounded-2xl shrink-0"
@@ -249,10 +302,10 @@ export default function CategoryPage() {
             </span>
             <div>
               <h2 className="font-display text-2xl sm:text-[28px] font-bold tracking-tight">
-                Conversation Scenarios
+                {activitySectionTitle}
               </h2>
               <p className="text-zinc-500 mt-1 text-sm sm:text-[15px]">
-                Real-life situations to build your confidence and communication skills.
+                {activitySectionDescription}
               </p>
             </div>
           </div>
@@ -315,85 +368,14 @@ export default function CategoryPage() {
         {/* Activity cards */}
         {sortedActivities.length ? (
           <ul
-            className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+            className="activities-card-grid mt-8"
             data-testid="activity-list"
           >
-            {sortedActivities.map((a, idx) => {
-            const spec = ACTIVITY_ICONS[a.slug] || FALLBACK_ICON;
-            const IconCmp = spec.icon;
-            return (
+            {sortedActivities.map((a, idx) => (
               <li key={a.slug}>
-                <Link
-                  to={getActivityHref(a)}
-                  className={`group block rounded-3xl bg-white p-5 sm:p-6 h-full flex flex-col transition fade-up delay-${(idx % 4) + 1}`}
-                  style={{
-                    border: "1px solid #F0F0F4",
-                    boxShadow: "0 4px 14px -8px rgba(15,23,42,0.08)",
-                  }}
-                  data-testid={`activity-card-${a.slug}`}
-                >
-                  {/* Top row: icon tile + duration pill */}
-                  <div className="flex items-start justify-between gap-3">
-                    <span
-                      className="inline-flex items-center justify-center w-14 h-14 rounded-2xl shrink-0"
-                      style={{
-                        color: spec.color,
-                        background: spec.bg,
-                        border: "1px solid rgba(255,255,255,.62)",
-                        boxShadow:
-                          "0 12px 24px -18px rgba(15,23,42,.26), inset 0 1px 0 rgba(255,255,255,.72)",
-                      }}
-                      aria-hidden="true"
-                    >
-                      <IconCmp className="w-7 h-7" />
-                    </span>
-                    {a.duration_min ? (
-                      <span
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-display font-semibold text-zinc-600 bg-white"
-                        style={{
-                          border: "1px solid #F0F0F4",
-                          boxShadow: "0 2px 8px -4px rgba(15,23,42,0.06)",
-                        }}
-                      >
-                        <Clock className="w-3.5 h-3.5 text-zinc-400" />
-                        {a.duration_min} min
-                      </span>
-                    ) : null}
-                  </div>
-
-                  {/* Title + summary */}
-                  <div className="mt-5">
-                    <h3 className="font-display font-bold text-[20px] leading-tight text-zinc-900">
-                      {a.title}
-                    </h3>
-                    <p className="mt-2 text-[14px] text-zinc-500 leading-relaxed line-clamp-4">
-                      {a.summary}
-                    </p>
-                  </div>
-
-                  {/* Footer */}
-                  <div
-                    className="mt-5 pt-4 flex items-center justify-between"
-                    style={{ borderTop: "1px solid #F0F0F4" }}
-                  >
-                    <span
-                      className="font-display font-bold text-[15px]"
-                      style={{ color: theme.accent }}
-                    >
-                      Start practice
-                    </span>
-                    <span
-                      className="inline-grid place-items-center w-9 h-9 rounded-full bg-white text-zinc-500 transition group-hover:bg-zinc-50"
-                      style={{ border: "1px solid #EAEAEF" }}
-                      aria-hidden="true"
-                    >
-                      <ArrowRight className="w-4 h-4" />
-                    </span>
-                  </div>
-                </Link>
+                <ActivityCard activity={a} delayIndex={idx} />
               </li>
-            );
-            })}
+            ))}
           </ul>
         ) : (
           <div
@@ -415,44 +397,3 @@ export default function CategoryPage() {
   );
 }
 
-// Small decorative chat-bubble cluster for the hero banner (right side, desktop)
-function ChatBubbleArt() {
-  return (
-    <div className="relative w-[220px] h-[180px] opacity-95">
-      {/* Big bubble */}
-      <span
-        className="absolute right-4 top-3 w-[120px] h-[100px] rounded-[34px] rounded-br-[10px] bg-white grid place-items-center"
-        style={{ boxShadow: "0 24px 50px -22px rgba(0,0,0,0.25)" }}
-      >
-        <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-zinc-400" />
-          <span className="w-2 h-2 rounded-full bg-zinc-400" />
-          <span className="w-2 h-2 rounded-full bg-zinc-400" />
-        </span>
-      </span>
-      {/* Small bubble */}
-      <span
-        className="absolute right-0 bottom-2 w-[88px] h-[70px] rounded-[26px] rounded-tl-[8px] grid place-items-center"
-        style={{
-          background: "#FFE082",
-          boxShadow: "0 18px 40px -20px rgba(0,0,0,0.22)",
-        }}
-      >
-        <span className="flex items-center gap-1.5">
-          <span className="w-7 h-1 rounded-full bg-zinc-700/70" />
-        </span>
-      </span>
-      {/* Tiny spark lines */}
-      <span
-        className="absolute -top-1 -right-2 w-6 h-6 text-white/90"
-        aria-hidden="true"
-      >
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M14 4 L18 2" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
-          <path d="M16 8 L20 8" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
-          <path d="M14 12 L18 14" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
-        </svg>
-      </span>
-    </div>
-  );
-}

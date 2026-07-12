@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
-import { Header } from "@/components/Header";
+import { useSmartBack } from "@/lib/navigationHistory";
 import { ArrowLeft, ArrowUpRight, ChevronRight, Clock, FileText, Loader2, User } from "lucide-react";
 import { formatElapsed } from "@/contexts/SessionContext";
 
 export default function SessionsList() {
+  const smartBack = useSmartBack("/dashboard");
   const [items, setItems] = useState(null);
 
   useEffect(() => {
@@ -17,16 +18,16 @@ export default function SessionsList() {
 
   return (
     <div className="min-h-screen" data-testid="sessions-list-page">
-      <Header />
       <main className="clinician-page">
         <div className="flex items-center gap-3 flex-wrap" data-testid="breadcrumb-header">
-          <Link
-            to="/dashboard"
+          <button
+            type="button"
+            onClick={smartBack}
             className="inline-flex items-center text-sm text-zinc-600 hover:text-indigo-600 font-display font-medium"
             data-testid="back-to-hub"
           >
             <ArrowLeft className="w-4 h-4 mr-1" /> Back
-          </Link>
+          </button>
           <span className="hidden sm:inline-block w-px h-4 bg-zinc-300" />
           <nav className="flex items-center gap-1.5 text-sm text-zinc-500 flex-wrap" aria-label="Breadcrumb">
             <Link to="/dashboard" className="hover:text-indigo-600 hover:underline underline-offset-2 transition" data-testid="breadcrumb-crumb-0">

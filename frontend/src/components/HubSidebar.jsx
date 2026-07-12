@@ -9,7 +9,6 @@ import {
   Heart,
   Home,
   Settings,
-  Sparkles,
 } from "lucide-react";
 
 const therapyCategoryLinks = DOMAIN_NAV_ITEMS.map((item) => ({
@@ -19,13 +18,10 @@ const therapyCategoryLinks = DOMAIN_NAV_ITEMS.map((item) => ({
   icon: item.sidebarIcon,
 }));
 
-const AI_PRACTICE_HREF = "/activity/reading/ai-scenario";
-
 const mainLinks = [
   { label: "Home", href: "/dashboard", icon: Home },
   { label: "Activities Library", href: "/all-activities", icon: Grid2X2, children: therapyCategoryLinks },
   { label: "Favourite Activities", href: "/explore/favourites", icon: Heart },
-  { label: "AI Practice", href: AI_PRACTICE_HREF, icon: Sparkles },
 ];
 
 const childPathMatchers = {
@@ -34,20 +30,16 @@ const childPathMatchers = {
   "/category/writing": ["/category/writing", "/activity/writing/"],
   "/category/auditory-comprehension": ["/category/auditory-comprehension", "/activity/auditory-comprehension/"],
   "/category/functional-communication": ["/category/functional-communication", "/activity/functional-communication/"],
-  "/explore/games": ["/explore/games"],
+  "/category/games": ["/category/games", "/activity/games/", "/explore/games"],
   "/explore/dysphagia": ["/explore/dysphagia"],
   "/category/cognitive-communication": ["/category/cognitive-communication", "/activity/cognitive-communication/"],
+  "/category/ai-practice": ["/category/ai-practice", "/activity/ai-practice/"],
   "/explore/motor-speech": ["/explore/motor-speech"],
   "/explore/voice": ["/explore/voice"],
 };
 
-function isAiPracticePath(pathname) {
-  return pathname === AI_PRACTICE_HREF || pathname.startsWith(`${AI_PRACTICE_HREF}/`);
-}
-
 function matchesHref(pathname, href) {
   if (pathname === href) return true;
-  if (href !== AI_PRACTICE_HREF && isAiPracticePath(pathname)) return false;
   return (childPathMatchers[href] || []).some((prefix) => pathname === prefix || pathname.startsWith(prefix));
 }
 
@@ -138,11 +130,20 @@ export function HubSidebar({ collapsed: controlledCollapsed, onCollapsedChange, 
       </div>
 
       <nav className="hub-sidebar-nav">
-        {visibleLinks.map(({ label, href, icon: Icon, children }) => {
+        {visibleLinks.map(({ label, href, icon: Icon, children, themeSlug }) => {
           const childActive = children?.some((item) => matchesHref(location.pathname, item.href));
           const activeChildIndex = children?.findIndex((item) => matchesHref(location.pathname, item.href)) ?? -1;
           const activeChild = activeChildIndex >= 0 ? children?.[activeChildIndex] : null;
           const activeChildTheme = activeChild ? getDomainTheme(activeChild.slug) : null;
+          const linkTheme = themeSlug ? getDomainTheme(themeSlug) : null;
+          const themedLinkStyle = linkTheme
+            ? {
+                "--sidebar-link-accent": linkTheme.sidebarAccent || linkTheme.accent,
+                "--sidebar-link-glow": linkTheme.sidebarHoverGlow || linkTheme.hoverGlow || linkTheme.accent,
+                "--sidebar-link-bg": linkTheme.sidebarSoftBg || linkTheme.softBg,
+                "--sidebar-link-active-bg": linkTheme.sidebarFocusBg || linkTheme.sidebarActiveBg,
+              }
+            : null;
           const active = activeHref === href || (href === "/all-activities" && activeHref === "/all-activities");
           const parentOpen = href === "/all-activities" && activitiesOpen && !collapsed;
           return (
@@ -150,8 +151,8 @@ export function HubSidebar({ collapsed: controlledCollapsed, onCollapsedChange, 
               <button
                 type="button"
                 onClick={() => selectLink(href)}
-                className={`hub-sidebar-link ${active ? "is-active" : ""} ${childActive ? "has-active-child" : ""} ${children ? "has-submenu" : ""} ${parentOpen ? "is-open" : ""}`}
-                style={collapsedItemStyle}
+                className={`hub-sidebar-link ${active ? "is-active" : ""} ${childActive ? "has-active-child" : ""} ${children ? "has-submenu" : ""} ${parentOpen ? "is-open" : ""} ${linkTheme ? "is-themed" : ""}`}
+                style={{ ...(collapsedItemStyle || {}), ...(themedLinkStyle || {}) }}
                 aria-current={active ? "page" : undefined}
                 aria-expanded={children ? parentOpen : undefined}
                 title={collapsed ? label : undefined}
@@ -182,7 +183,7 @@ export function HubSidebar({ collapsed: controlledCollapsed, onCollapsedChange, 
                     <span
                       className="hub-sidebar-submenu-dot"
                       style={{
-                        "--domain-dot": activeChildTheme.dot,
+                        "--domain-dot": activeChildTheme.sidebarDot || activeChildTheme.dot,
                         transform: `translateY(calc(${activeChildIndex} * var(--sidebar-submenu-step, 31px)))`,
                       }}
                       aria-hidden="true"
@@ -198,10 +199,10 @@ export function HubSidebar({ collapsed: controlledCollapsed, onCollapsedChange, 
                         onClick={() => selectLink(childHref)}
                         className={`hub-sidebar-submenu-link ${childIsActive ? "is-active" : ""}`}
                         style={{
-                          "--domain-accent": childTheme.accent,
-                          "--domain-glow": childTheme.hoverGlow || childTheme.accent,
-                          "--domain-sidebar-bg": childTheme.sidebarActiveBg,
-                          "--domain-soft-bg": childTheme.softBg,
+                          "--domain-accent": childTheme.sidebarAccent || childTheme.accent,
+                          "--domain-glow": childTheme.sidebarHoverGlow || childTheme.hoverGlow || childTheme.accent,
+                          "--domain-sidebar-bg": childTheme.sidebarFocusBg || childTheme.sidebarActiveBg,
+                          "--domain-soft-bg": childTheme.sidebarSoftBg || childTheme.softBg,
                         }}
                         aria-current={childIsActive ? "page" : undefined}
                       >

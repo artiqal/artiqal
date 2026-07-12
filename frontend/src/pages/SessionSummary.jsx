@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "@/lib/api";
-import { Header } from "@/components/Header";
+import { useSmartBack } from "@/lib/navigationHistory";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
@@ -20,6 +20,7 @@ import { formatElapsed } from "@/contexts/SessionContext";
 
 export default function SessionSummary() {
   const { sessionId } = useParams();
+  const smartBack = useSmartBack("/sessions");
   const [doc, setDoc] = useState(null);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
@@ -34,18 +35,20 @@ export default function SessionSummary() {
   if (error)
     return (
       <div className="min-h-screen">
-        <Header />
+        <main className="clinician-page">
         <div className="max-w-3xl mx-auto px-6 py-16 text-center text-rose-600">{error}</div>
+        </main>
       </div>
     );
 
   if (!doc)
     return (
       <div className="min-h-screen">
-        <Header />
+        <main className="clinician-page">
         <div className="max-w-3xl mx-auto px-6 py-16 text-center text-zinc-500 inline-flex items-center justify-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading session…
         </div>
+        </main>
       </div>
     );
 
@@ -66,19 +69,17 @@ export default function SessionSummary() {
 
   return (
     <div className="min-h-screen" data-testid="session-summary-page">
-      <div className="no-print">
-        <Header />
-      </div>
-      <main className="max-w-4xl mx-auto px-6 py-10">
+      <main className="clinician-page is-narrow">
         <div className="no-print flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 flex-wrap" data-testid="breadcrumb-header">
-            <Link
-              to="/sessions"
+            <button
+              type="button"
+              onClick={smartBack}
               className="inline-flex items-center text-sm text-zinc-600 hover:text-indigo-600 font-display font-medium"
               data-testid="back-to-sessions"
             >
               <ArrowLeft className="w-4 h-4 mr-1" /> Back
-            </Link>
+            </button>
             <span className="hidden sm:inline-block w-px h-4 bg-zinc-300" />
             <nav className="flex items-center gap-1.5 text-sm text-zinc-500 flex-wrap" aria-label="Breadcrumb">
               <Link to="/dashboard" className="hover:text-indigo-600 hover:underline underline-offset-2 transition" data-testid="breadcrumb-crumb-0">

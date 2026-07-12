@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
-import { Header } from "@/components/Header";
+import { ActivityCard } from "@/components/ActivityCard";
 import { DOMAIN_NAV_ITEMS, getDomainTheme } from "@/lib/domainThemes";
 import { useActivitySort } from "@/contexts/ActivitySortContext";
 import aiPracticeIllustration from "@/assets/domain-ai-practice.png";
@@ -16,26 +15,21 @@ import voiceIllustration from "@/assets/domain-voice.png";
 import wordFindingIllustration from "@/assets/domain-word-finding.png";
 import writingIllustration from "@/assets/domain-writing.png";
 import {
-  ArrowUpRight,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Lightbulb,
+  ChevronUp,
   Search,
   Type,
 } from "lucide-react";
-import { buildActivityIndex, getActivityHref, normalizeSearchQuery, searchActivityIndex } from "@/lib/activityIndex";
+import {
+  activityBelongsToCategory,
+  buildActivityIndex,
+  filterRetiredActivities,
+  normalizeSearchQuery,
+  searchActivityIndex,
+} from "@/lib/activityIndex";
 import { getActivitySortCapabilities, getActivitySortOptions, sortActivities } from "@/lib/activitySort";
-
-const GRADIENTS = {
-  reading: "linear-gradient(135deg,#0EA5E9 0%,#6366F1 60%,#8B5CF6 100%)",
-  writing: "linear-gradient(135deg,#FB923C 0%,#F43F5E 100%)",
-  "word-finding": "linear-gradient(135deg,#10B981 0%,#06B6D4 100%)",
-  "auditory-comprehension": "linear-gradient(135deg,#A78BFA 0%,#EC4899 100%)",
-  "functional-communication": "linear-gradient(135deg,#FBBF24 0%,#F97316 100%)",
-  "sfa-therapy": "linear-gradient(135deg,#F43F5E 0%,#A855F7 100%)",
-  "all-activities": "linear-gradient(135deg,#6366F1 0%,#06B6D4 100%)",
-};
 
 const DEFAULT_CARD_ICON = Type;
 
@@ -54,7 +48,7 @@ const DOMAIN_CARD_ILLUSTRATIONS = {
 };
 
 const DOMAIN_CARD_DESCRIPTIONS = {
-  "ai-practice": "AI-powered activities",
+  "ai-practice": "AI-powered practice activities",
   "auditory-comprehension": "Instructions and spoken information",
   "cognitive-communication": "Memory, attention, and planning",
   dysphagia: "Swallowing support resources",
@@ -67,29 +61,11 @@ const DOMAIN_CARD_DESCRIPTIONS = {
   writing: "Messages, forms, and sentences",
 };
 
-const ACTIVITY_LIBRARY_TIPS = [
-  "Tip: Click a domain once to filter, then click it again to reset.",
-  "Tip: Use Sort by to quickly organise your session options.",
-  "Tip: Search by activity, goal, or skill.",
-  "Tip: Sort activities A–Z or by duration.",
-  "Tip: Use domains to narrow your session plan.",
-  "Tip: Favourite activities you use often.",
-];
-
 const DOMAIN_CARD_LABELS = {
   "auditory-comprehension": "Listening",
 };
 
-const EXTRA_HUB_CATEGORIES = [
-  {
-    slug: "ai-practice",
-    name: "AI Practice",
-    route: "/activity/reading/ai-scenario",
-    fallback: "AI-powered activities",
-  },
-];
-
-const HUB_CATEGORIES = [...DOMAIN_NAV_ITEMS, ...EXTRA_HUB_CATEGORIES].map((category) => {
+const HUB_CATEGORIES = DOMAIN_NAV_ITEMS.map((category) => {
   const theme = getDomainTheme(category.slug);
   return {
     slug: category.slug,
@@ -110,40 +86,21 @@ export default function AllActivities() {
   const [categories, setCategories] = useState([]);
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortMode, setSortMode] = useState("relevance");
-  const [activityLibraryTipIndex, setActivityLibraryTipIndex] = useState(0);
-  const [tipVisible, setTipVisible] = useState(true);
+  const [sortMode, setSortMode] = useState("az");
   const categoryRowRef = useRef(null);
   const preservedScrollYRef = useRef(null);
   const sortMenuRef = useRef(null);
-  const tipSwapTimeoutRef = useRef(null);
   const [sortOpen, setSortOpen] = useState(false);
+  const [isDomainExpanded, setIsDomainExpanded] = useState(true);
   const { registerActivitySortControls } = useActivitySort();
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
   useEffect(() => {
     Promise.all([api.get("/activities"), api.get("/categories")]).then(([a, c]) => {
-      setItems(a.data);
+      setItems(filterRetiredActivities(a.data || []));
       setCategories(c.data.filter((x) => x.slug !== "all-activities"));
     });
-  }, []);
-
-  useEffect(() => {
-    const interval = window.setInterval(() => {
-      setTipVisible(false);
-      tipSwapTimeoutRef.current = window.setTimeout(() => {
-        setActivityLibraryTipIndex((index) => (index + 1) % ACTIVITY_LIBRARY_TIPS.length);
-        setTipVisible(true);
-      }, 180);
-    }, 2800);
-
-    return () => {
-      window.clearInterval(interval);
-      if (tipSwapTimeoutRef.current) {
-        window.clearTimeout(tipSwapTimeoutRef.current);
-      }
-    };
   }, []);
 
   const updateCarouselControls = useCallback(() => {
@@ -202,8 +159,6 @@ export default function AllActivities() {
     return () => document.removeEventListener("pointerdown", closeSortMenu);
   }, [sortOpen]);
 
-  const colorFor = (slug) => categories.find((c) => c.slug === slug)?.color || "#4F46E5";
-  const nameFor = (slug) => categories.find((c) => c.slug === slug)?.name || slug;
   const iconFor = (slug) => HUB_CATEGORIES.find((category) => category.slug === slug)?.icon || DEFAULT_CARD_ICON;
 
   const indexedActivities = useMemo(
@@ -215,7 +170,7 @@ export default function AllActivities() {
   const sortOptions = useMemo(() => getActivitySortOptions(sortCapabilities), [sortCapabilities]);
   const selectedDomainId = filter === "all" ? null : filter;
   const filteredActivities = indexedActivities.filter((activity) => {
-    if (filter !== "all" && activity.category !== filter) return false;
+    if (filter !== "all" && !activityBelongsToCategory(activity, filter)) return false;
     return true;
   });
   const searchedActivities = normalizedSearch
@@ -239,7 +194,7 @@ export default function AllActivities() {
     (value) => preserveScrollForUpdate(() => setSortMode(value)),
     [preserveScrollForUpdate],
   );
-  const selectedSortLabel = sortOptions.find((option) => option.value === sortMode)?.label || "Recommended";
+  const selectedSortLabel = sortOptions.find((option) => option.value === sortMode)?.label || "A–Z";
 
   useEffect(
     () =>
@@ -255,7 +210,6 @@ export default function AllActivities() {
 
   return (
     <div className="min-h-screen" data-testid="all-activities-page">
-      <Header />
       <main className="clinician-page is-compact activities-hub-page">
         <section id="activity-library" aria-label="Activities Library">
           <div className="activities-library-tools" aria-label="Activity library controls">
@@ -301,18 +255,30 @@ export default function AllActivities() {
                 </div>
               ) : null}
             </div>
-            <p className={`activities-library-tip ${tipVisible ? "is-visible" : "is-hidden"}`} aria-live="polite">
-              <Lightbulb size={15} aria-hidden="true" />
-              <span>{ACTIVITY_LIBRARY_TIPS[activityLibraryTipIndex]}</span>
-            </p>
           </div>
 
           <section className="activities-hub-top-grid" aria-label="Activities Hub overview">
-            <section className="activities-hub-panel" aria-labelledby="activities-domain-title">
+            <section className={`activities-hub-panel ${isDomainExpanded ? "is-expanded" : "is-collapsed"}`} aria-labelledby="activities-domain-title">
               <div className="activities-domain-head">
                 <h2 id="activities-domain-title">Explore by Domain</h2>
+                <button
+                  type="button"
+                  className="activities-domain-toggle"
+                  onClick={() => setIsDomainExpanded((expanded) => !expanded)}
+                  aria-expanded={isDomainExpanded}
+                  aria-controls="activities-domain-carousel"
+                  aria-label={isDomainExpanded ? "Collapse Explore by Domain" : "Expand Explore by Domain"}
+                >
+                  {isDomainExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                </button>
               </div>
 
+              <div
+                id="activities-domain-carousel"
+                className="activities-domain-collapse"
+                aria-hidden={!isDomainExpanded}
+                inert={!isDomainExpanded ? true : undefined}
+              >
               <div className="activities-hub-carousel">
                 <button
                   type="button"
@@ -343,7 +309,14 @@ export default function AllActivities() {
                     >
                       <span className="activities-hub-domain-visual" aria-hidden="true">
                         {illustration ? (
-                          <img className="activities-hub-domain-illustration" src={illustration} alt="" />
+                          <img
+                            className="activities-hub-domain-illustration"
+                            src={illustration}
+                            alt=""
+                            loading="eager"
+                            decoding="async"
+                            draggable="false"
+                          />
                         ) : (
                           <span className="activities-hub-domain-blob" />
                         )}
@@ -367,44 +340,16 @@ export default function AllActivities() {
                   <ChevronRight size={18} />
                 </button>
               </div>
+              </div>
             </section>
           </section>
 
           <div className="activities-library-results">
           {visible.length ? (
-            <ul className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+            <ul className="activities-card-grid mt-3">
               {visible.map((a, idx) => (
                 <li key={`${a.category}-${a.slug}`}>
-                  {(() => {
-                    const theme = getDomainTheme(a.category);
-                    const Icon = iconFor(a.category);
-                    const categoryName = nameFor(a.category);
-                    return (
-                  <Link
-                    to={getActivityHref(a)}
-                    className={`cat-card activity-card-soft fade-up delay-${(idx % 4) + 1} block group`}
-                    data-testid={`activity-card-${a.slug}`}
-                    style={{
-                      "--cat-gradient": theme.bannerGradient || GRADIENTS[a.category] || GRADIENTS["all-activities"],
-                      "--cat-accent": theme.accent || colorFor(a.category),
-                      "--cat-soft": theme.softBg || "rgba(99,102,241,0.10)",
-                      "--cat-icon-tint": theme.iconTint || theme.softBg || "rgba(99,102,241,0.12)",
-                    }}
-                  >
-                    <div className="cat-card-top">
-                      <span className="cat-art-icon" aria-hidden>
-                        <Icon className="w-5 h-5" />
-                      </span>
-                      <span className="cat-card-open" aria-hidden>
-                        <ArrowUpRight className="w-4 h-4" />
-                      </span>
-                    </div>
-                    <div className="cat-card-domain">{categoryName}</div>
-                    <div className="cat-card-title">{a.title}</div>
-                    <div className="cat-card-tag">{a.summary}</div>
-                  </Link>
-                    );
-                  })()}
+                  <ActivityCard activity={a} delayIndex={idx} />
                 </li>
               ))}
             </ul>

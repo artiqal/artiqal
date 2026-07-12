@@ -1,19 +1,23 @@
-import React from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Gamepad2, Heart, Mic2, Speech, UtensilsCrossed } from "lucide-react";
-import { Header } from "@/components/Header";
+import { api } from "@/lib/api";
+import ActivityCard from "@/components/ActivityCard";
+import { buildActivityIndex, filterRetiredActivities } from "@/lib/activityIndex";
+import {
+  FAVOURITES_UPDATED_EVENT,
+  getActivityFavouriteKey,
+  readStoredFavourites,
+} from "@/lib/activityFavourites";
 import { getDomainTheme } from "@/lib/domainThemes";
+import CategoryPage from "@/pages/CategoryPage";
 
 const pages = {
   games: {
     title: "Games",
     description: "Playful activities that build language, attention, and confidence.",
     icon: Gamepad2,
-    links: [
-      ["Name the Picture", "/activity/word-finding/naming"],
-      ["Word Associations", "/activity/word-finding/associations"],
-      ["Yes or No?", "/activity/auditory-comprehension/yes-no"],
-    ],
+    links: [],
   },
   dysphagia: {
     title: "Dysphagia",
@@ -43,13 +47,140 @@ const pages = {
 
 export default function ExplorePage() {
   const { slug } = useParams();
+  if (slug === "games") {
+    return <CategoryPage />;
+  }
+
+  if (slug === "favourites") {
+    return <FavouriteActivitiesPage />;
+  }
+
+  return <LegacyExplorePage slug={slug} />;
+}
+
+function FavouriteActivitiesPage() {
+  const [activities, setActivities] = useState([]);
+  const [favouriteKeys, setFavouriteKeys] = useState(() => readStoredFavourites());
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+
+    Promise.all([
+      api.get("/activities"),
+      api.get("/categories").catch(() => ({ data: [] })),
+    ])
+      .then(([activityResponse, categoryResponse]) => {
+        if (!alive) return;
+        const currentActivities = filterRetiredActivities(activityResponse.data || []);
+        setActivities(buildActivityIndex(currentActivities, categoryResponse.data || []));
+        setIsLoaded(true);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setActivities([]);
+        setIsLoaded(true);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const syncFavouriteKeys = useCallback(() => {
+    setFavouriteKeys(new Set(readStoredFavourites()));
+  }, []);
+
+  useEffect(() => {
+    syncFavouriteKeys();
+    window.addEventListener("storage", syncFavouriteKeys);
+    window.addEventListener(FAVOURITES_UPDATED_EVENT, syncFavouriteKeys);
+
+    return () => {
+      window.removeEventListener("storage", syncFavouriteKeys);
+      window.removeEventListener(FAVOURITES_UPDATED_EVENT, syncFavouriteKeys);
+    };
+  }, [syncFavouriteKeys]);
+
+  const favouriteActivities = useMemo(() => {
+    const seenKeys = new Set();
+
+    return activities.filter((activity) => {
+      const favouriteKey = getActivityFavouriteKey(activity);
+      if (!favouriteKey || !favouriteKeys.has(favouriteKey) || seenKeys.has(favouriteKey)) {
+        return false;
+      }
+
+      seenKeys.add(favouriteKey);
+      return true;
+    });
+  }, [activities, favouriteKeys]);
+
+  return (
+    <div className="min-h-screen" data-testid="favourite-activities-page">
+      <main className="clinician-page is-compact activities-hub-page">
+        <section aria-label="Favourite Activities">
+          <div className="activities-library-results">
+            <div className="favourite-activities-header">
+              <h1>Favourite Activities</h1>
+              <p>Your saved activities stay here for quick session planning.</p>
+            </div>
+
+            {favouriteActivities.length ? (
+              <ul className="activities-card-grid mt-3">
+                {favouriteActivities.map((activity, index) => (
+                  <li key={`${activity.category}-${activity.slug || activity.id || activity.title}`}>
+                    <ActivityCard activity={activity} delayIndex={index} />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="favourite-activities-empty">
+                <h2>{isLoaded ? "No favourite activities yet." : "Loading favourites..."}</h2>
+                <p>
+                  {isLoaded
+                    ? "Tap the heart on an activity card to save it here."
+                    : "Your saved activities will appear here in a moment."}
+                </p>
+                {isLoaded ? (
+                  <Link to="/all-activities">Browse Activities Library</Link>
+                ) : null}
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+function LegacyExplorePage({ slug }) {
   const page = pages[slug] || pages.games;
   const Icon = page.icon;
   const theme = getDomainTheme(slug);
+  const [activities, setActivities] = useState([]);
+
+  useEffect(() => {
+    let alive = true;
+
+    api
+      .get(`/categories/${slug}/activities`)
+      .then(({ data }) => {
+        if (!alive) return;
+        setActivities(filterRetiredActivities(data || []).map((activity) => ({ ...activity, category: slug })));
+      })
+      .catch(() => {
+        if (!alive) return;
+        setActivities([]);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [slug]);
 
   return (
     <div className="min-h-screen">
-      <Header />
       <main className="clinician-page">
         <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-600 hover:text-indigo-600">
           <ArrowLeft size={16} /> Back to Hub
@@ -76,7 +207,13 @@ export default function ExplorePage() {
             {page.description}
           </p>
 
-          {page.links.length ? (
+          {activities.length ? (
+            <ul className="activities-card-grid mt-9">
+              {activities.map((activity, index) => (
+                <ActivityCard key={activity.slug} activity={activity} delayIndex={index} />
+              ))}
+            </ul>
+          ) : page.links.length ? (
             <div className="mt-9 grid sm:grid-cols-2 gap-4">
               {page.links.map(([label, href]) => (
                 <Link key={href} to={href} className="tile flex items-center justify-between font-display font-semibold">

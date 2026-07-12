@@ -1994,7 +1994,7 @@ function VoicemailCard({ letterhead, replayNonce = 0 }) {
           onClick={cycleSpeed}
           disabled={!hasAudio}
           data-testid="voicemail-speed-button"
-          aria-label={`Playback speed ${SPEEDS[speedIdx]}x. Click to change.`}
+          aria-label={`Playback speed ${VOICEMAIL_SPEEDS[speedIdx]}x. Click to change.`}
           title="Click to change playback speed"
           className="flex-shrink-0 grid place-items-center w-14 h-14 rounded-2xl bg-white text-zinc-700 font-display font-bold text-[14px] tabular-nums transition disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-50"
           style={{
@@ -2003,7 +2003,7 @@ function VoicemailCard({ letterhead, replayNonce = 0 }) {
               "0 8px 20px -10px rgba(79,70,229,0.22), 0 1px 0 rgba(255,255,255,0.6) inset",
           }}
         >
-          {SPEEDS[speedIdx]}×
+          {VOICEMAIL_SPEEDS[speedIdx]}×
         </button>
       </div>
 
