@@ -1,70 +1,67 @@
-# Getting Started with Create React App
+# Artiqal Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The Artiqal frontend is the React clinician interface for browsing activities, configuring therapy tasks, building sessions, and running supported activities. It uses Create React App through CRACO, React Router, shared clinician-shell components, and central activity presentation helpers.
 
-## Available Scripts
+For repository-wide setup and architecture, start with the [root README](../README.md).
 
-In the project directory, you can run:
+## Project guidance
 
-### `npm start`
+- [Contributor workflow](../CONTRIBUTING.md)
+- [Permanent Codex instructions](../AGENTS.md)
+- [Verified design system](../docs/design-system.md)
+- [Activity architecture](../docs/activity-architecture.md)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+The root documentation is authoritative for shared clinician UI, activity cards, activity data, setup configuration, runtime state, search, favourites, and Build Session behaviour. Do not create frontend-only alternatives to those shared patterns without an explicitly approved architecture change.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Local development
 
-### `npm test`
+From `frontend/`:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+npm install
+npm start
+```
 
-### `npm run build`
+The development server opens at `http://localhost:3000` by default. Configure the API URL in `frontend/.env.local`:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```dotenv
+REACT_APP_BACKEND_URL=http://localhost:8000
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Verification
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Run the frontend test runner once:
 
-### `npm run eject`
+```bash
+npm test -- --watchAll=false --passWithNoTests
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Create the production build:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+npm run build
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Automated frontend coverage is currently limited. For UI work, also perform the browser checks required by [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Directory structure
 
-## Learn More
+```text
+frontend/
+|-- public/                 # Static public files and the HTML entry document
+|-- src/
+|   |-- assets/             # App, domain, and activity artwork
+|   |-- components/         # Shared shell, activity cards, navigation, and UI primitives
+|   |-- contexts/           # Authentication and Build Session state
+|   |-- hooks/              # Reusable React hooks
+|   |-- lib/                # Themes, activity metadata, search, favourites, and navigation helpers
+|   |-- pages/              # Route-level clinician and public screens
+|   |-- App.js              # Route definitions and shared-shell selection
+|   |-- index.js            # React application entry point
+|   `-- index.css           # Shared visual and layout styles
+|-- craco.config.js         # Create React App overrides
+|-- package.json            # Frontend dependencies and verified scripts
+`-- tailwind.config.js      # Tailwind configuration
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Keep route-level composition in `pages/`, reusable UI in `components/`, shared state in `contexts/`, and central activity/theme/search helpers in `lib/`. Inspect the existing owner before introducing another source of truth.

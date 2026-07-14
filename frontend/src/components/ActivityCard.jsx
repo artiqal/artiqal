@@ -1,5 +1,5 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   BookOpen,
@@ -327,7 +327,13 @@ function ReferenceCardVisual({ kind }) {
 
         {kind === "voicemail" ? (
           <span className="cat-card-reference-voicemail">
-            <img src={voicemailCardIllustration} alt="" className="cat-card-reference-image" loading="lazy" />
+            <img
+              src={voicemailCardIllustration}
+              alt=""
+              className="cat-card-reference-image"
+              loading="lazy"
+              draggable="false"
+            />
           </span>
         ) : null}
 
@@ -357,6 +363,7 @@ function ActivityInfoValue({ value }) {
 
 export function ActivityCard({ activity, className = "", delayIndex = 0 }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const categorySlug = activity?.category || "all-activities";
   const isVoicemailCard = activity?.slug === "voicemails";
   const isSfaToolCard = activity?.slug === "sfa-tool";
@@ -378,7 +385,7 @@ export function ActivityCard({ activity, className = "", delayIndex = 0 }) {
       ? ACTIVITY_CARD_LABELS[activity.slug]
     : activity?.categoryName || theme.name || categoryMeta?.name || categorySlug;
   const summary = isVoicemailCard
-    ? "Listen to realistic voicemail messages and answer targeted questions."
+    ? "Listen to realistic voicemails and answer targeted questions."
     : isSfaToolCard
       ? "Explore features of a target word to support naming, associations, and word retrieval."
     : activity?.summary || activity?.description || "Guided communication practice.";
@@ -490,6 +497,25 @@ export function ActivityCard({ activity, className = "", delayIndex = 0 }) {
     []
   );
 
+  const startActivity = () => {
+    navigate(href, { state: { from: getLocationSnapshot(location) } });
+  };
+
+  const handleStart = (event) => {
+    event.stopPropagation();
+    startActivity();
+  };
+
+  const handleStartKeyDown = (event) => {
+    if (event.key !== "Enter" && event.key !== " " && event.key !== "Spacebar") {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    startActivity();
+  };
+
   return (
     <article
       className={`cat-card activity-card-soft${useReferenceCard ? " cat-card--reference" : ""} fade-up delay-${(delayIndex % 4) + 1} group ${className}`.trim()}
@@ -529,15 +555,16 @@ export function ActivityCard({ activity, className = "", delayIndex = 0 }) {
             ) : null}
           </span>
           {/* Activity navigation stays Start-button-only so card bodies remain passive across all activity lists. */}
-          <Link
-            to={href}
-            state={{ from: getLocationSnapshot(location) }}
+          <button
+            type="button"
             className="cat-card-start-button"
             aria-label={`Start ${displayTitle}`}
+            onClick={handleStart}
+            onKeyDown={handleStartKeyDown}
           >
             Start
             <ArrowRight size={15} />
-          </Link>
+          </button>
         </div>
       </div>
       {hasActivityInfo ? (

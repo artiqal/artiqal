@@ -1,4 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { getSessionActivityKey } from "@/lib/sessionActivityIdentity";
+
+export { getSessionActivityKey } from "@/lib/sessionActivityIdentity";
 
 const KEY = "concentric_active_session_v1";
 const SessionContext = createContext(null);
@@ -69,12 +72,23 @@ export function SessionProvider({ children }) {
   const logActivity = useCallback((a) => {
     setActive((s) => {
       if (!s) return s;
-      const key = `${a.category}/${a.activity_slug}`;
-      const exists = s.activities.some((x) => `${x.category}/${x.activity_slug}` === key);
+      const key = getSessionActivityKey(a);
+      const exists = s.activities.some((x) => getSessionActivityKey(x) === key);
       if (exists) return s;
       return {
         ...s,
         activities: [...s.activities, { ...a, started_at: new Date().toISOString() }],
+      };
+    });
+  }, []);
+
+  const removeActivity = useCallback((activity) => {
+    setActive((s) => {
+      if (!s) return s;
+      const key = getSessionActivityKey(activity);
+      return {
+        ...s,
+        activities: s.activities.filter((item) => getSessionActivityKey(item) !== key),
       };
     });
   }, []);
@@ -105,7 +119,7 @@ export function SessionProvider({ children }) {
 
   const stats = active
     ? {
-        activities: new Set(active.activities.map((a) => `${a.category}/${a.activity_slug}`)).size,
+        activities: new Set(active.activities.map(getSessionActivityKey)).size,
         total: active.attempts.length,
         correct: active.attempts.filter((a) => a.correct).length,
         incorrect: active.attempts.filter((a) => !a.correct).length,
@@ -122,6 +136,7 @@ export function SessionProvider({ children }) {
     end,
     cancel,
     logActivity,
+    removeActivity,
     logAttempt,
     logCue,
   };

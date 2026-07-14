@@ -3772,7 +3772,7 @@ ACTIVITIES_BY_CATEGORY = {
         {
             "slug": "voicemails",
             "title": "Listening to a Voicemail",
-            "summary": "Listen to realistic voicemail messages and answer targeted questions.",
+            "summary": "Listen to realistic voicemails and answer targeted questions.",
             "duration_min": 20,
             "type": "reading-leveled",
             "primary_category": "auditory-comprehension",
@@ -4566,7 +4566,7 @@ ACTIVITIES_BY_CATEGORY = {
                     },
                     "pink": {
                         "key": "pink",
-                        "title": "Bonus",
+                        "title": "Extended",
                         "blurb": "10 automated phone menu tasks with one scenario-based decision each. Clients choose the correct number or action.",
                         "best_for": "Clients practising phone navigation, auditory scanning, and option selection.",
                         "questions_per_letter": 1,

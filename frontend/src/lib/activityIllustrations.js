@@ -1,4 +1,4 @@
-import voicemailIllustration from "@/assets/activity-card-voicemail.png";
+import voicemailIllustration from "@/assets/activity-card-voicemail-phone.png";
 import voicemailPageIllustration from "@/assets/activity-page-voicemail.png";
 
 const ACTIVITY_ILLUSTRATIONS_BY_SLUG = {
