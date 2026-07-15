@@ -13,21 +13,32 @@ spec.loader.exec_module(content)
 CATEGORIES = content.CATEGORIES
 ACTIVITIES_BY_CATEGORY = content.ACTIVITIES_BY_CATEGORY
 
+ALLOWED_PREVIEW_ORIGINS = {
+    "http://127.0.0.1:4173",
+    "http://localhost:4173",
+}
+
 
 class PreviewApiHandler(BaseHTTPRequestHandler):
+    def send_cors_headers(self):
+        origin = self.headers.get("Origin")
+        if origin in ALLOWED_PREVIEW_ORIGINS:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Access-Control-Allow-Credentials", "true")
+            self.send_header("Vary", "Origin")
+
     def send_json(self, payload, status=200):
         data = json.dumps(payload).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "http://127.0.0.1:4173")
-        self.send_header("Access-Control-Allow-Credentials", "true")
+        self.send_cors_headers()
         self.send_header("Cache-Control", "no-cache")
         self.end_headers()
         self.wfile.write(data)
 
     def do_OPTIONS(self):
         self.send_response(204)
-        self.send_header("Access-Control-Allow-Origin", "http://127.0.0.1:4173")
+        self.send_cors_headers()
         self.send_header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "*")
         self.end_headers()
