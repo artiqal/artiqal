@@ -29,7 +29,7 @@
     "backend": "100%",
     "frontend": "not tested (per request)"
   },
-  "test_credentials": "Admin: admin@concentric.app / Concentric123! (verified working). /app/memory/test_credentials.md not present -- main agent should consider creating it.",
+  "test_credentials": "Historical shared credentials removed; current live tests require explicit environment configuration.",
   "seed_data_creation": "Tests create transient TEST_/dup_/test_ users via /api/auth/register; not cleaned up but use unique uuid suffixes so no collisions across runs.",
   "retest_needed": false,
   "main_agent_can_self_test": true,

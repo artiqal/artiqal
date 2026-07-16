@@ -7,9 +7,9 @@ Endpoints under test:
 - DELETE /api/sessions/{id}
 
 Notes:
-- POST /api/sessions invokes Claude Sonnet 4.5 to generate the SOAP-Objective text.
-  This call can take 10-30s, so we use a generous timeout (120s) on POST.
-- Frontend public URL is taken from REACT_APP_BACKEND_URL env var.
+- POST /api/sessions generates a deterministic local objective by default.
+- An explicitly AI-enabled server may take longer, so POST keeps a generous timeout.
+- The backend URL and administrator credentials must be provided explicitly.
 """
 
 import os
@@ -17,16 +17,23 @@ import uuid
 import requests
 import pytest
 
-BASE_URL = os.environ.get(
-    "REACT_APP_BACKEND_URL",
-    "https://concentric-hub.preview.emergentagent.com",
+BASE_URL = (
+    os.environ.get("BACKEND_TEST_URL")
+    or os.environ.get("REACT_APP_BACKEND_URL")
+    or ""
 ).rstrip("/")
 API = f"{BASE_URL}/api"
 
-ADMIN_EMAIL = "admin@concentric.app"
-ADMIN_PASSWORD = "Concentric123!"
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "").strip()
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "").strip()
 
-POST_TIMEOUT = 120  # SOAP generation via Claude can be slow
+if not BASE_URL or not ADMIN_EMAIL or not ADMIN_PASSWORD:
+    pytest.skip(
+        "Live backend integration tests require BACKEND_TEST_URL, ADMIN_EMAIL, and ADMIN_PASSWORD",
+        allow_module_level=True,
+    )
+
+POST_TIMEOUT = 120  # Allows for an explicitly AI-enabled backend target.
 
 
 # ---------- Fixtures ----------

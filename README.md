@@ -79,11 +79,24 @@ DB_NAME=artiqal
 JWT_SECRET=replace-with-a-secure-secret
 FRONTEND_URL=http://localhost:3000
 
-# Optional integrations and local seed credentials
+# Optional external AI integrations
 EMERGENT_LLM_KEY=
-ADMIN_EMAIL=
-ADMIN_PASSWORD=
+ENABLE_EXTERNAL_AI_SESSION_NOTES=false
+
+# Optional one-time administrator bootstrap; omit both unless needed
+# ADMIN_EMAIL=owner@example.com
+# ADMIN_PASSWORD=choose-a-unique-password
 ```
+
+Administrator bootstrap is disabled unless both `ADMIN_EMAIL` and `ADMIN_PASSWORD` are
+set to non-empty values. Startup creates the configured administrator only when that
+email does not already exist; it never changes an existing password.
+
+Saving a session produces a deterministic local objective summary by default. External
+AI generation for that summary requires both `ENABLE_EXTERNAL_AI_SESSION_NOTES=true`
+and `EMERGENT_LLM_KEY`. The TTS, transcription, and scenario-generation endpoints are
+separate explicit integrations and may still contact the configured provider when a
+user invokes those controls.
 
 Then install and run the API:
 
@@ -251,6 +264,18 @@ npm run build
 ```bash
 python -m pytest backend/tests
 ```
+
+The local administrator and session-note safety checks are deterministic and do not
+require MongoDB or an external provider:
+
+```bash
+python -m unittest backend/tests/test_backend_safety.py
+```
+
+The older live API integration suites are skipped unless `BACKEND_TEST_URL`,
+`ADMIN_EMAIL`, and `ADMIN_PASSWORD` are explicitly supplied. Their direct TTS,
+transcription, and scenario-generation checks additionally require
+`RUN_EXTERNAL_AI_TESTS=true`.
 
 Optional static checks supported by the installed backend toolchain:
 

@@ -6,11 +6,22 @@ import uuid
 import requests
 import pytest
 
-BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://concentric-hub.preview.emergentagent.com").rstrip("/")
+BASE_URL = (
+    os.environ.get("BACKEND_TEST_URL")
+    or os.environ.get("REACT_APP_BACKEND_URL")
+    or ""
+).rstrip("/")
 API = f"{BASE_URL}/api"
 
-ADMIN_EMAIL = "admin@concentric.app"
-ADMIN_PASSWORD = "Concentric123!"
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "").strip()
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "").strip()
+RUN_EXTERNAL_AI_TESTS = os.environ.get("RUN_EXTERNAL_AI_TESTS", "").strip().lower() == "true"
+
+if not BASE_URL or not ADMIN_EMAIL or not ADMIN_PASSWORD:
+    pytest.skip(
+        "Live backend integration tests require BACKEND_TEST_URL, ADMIN_EMAIL, and ADMIN_PASSWORD",
+        allow_module_level=True,
+    )
 
 
 @pytest.fixture(scope="module")
@@ -186,6 +197,10 @@ class TestAuth:
 
 
 # ---------- LLM integrations ----------
+@pytest.mark.skipif(
+    not RUN_EXTERNAL_AI_TESTS,
+    reason="External AI integration tests require RUN_EXTERNAL_AI_TESTS=true",
+)
 class TestLLMIntegrations:
     def test_tts_requires_auth(self):
         r = requests.post(f"{API}/tts", json={"text": "hello", "voice": "nova"}, timeout=15)

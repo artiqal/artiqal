@@ -18,5 +18,8 @@ Cookies: `access_token` (httpOnly, secure, samesite=none).
 ## Unified auth
 - get_current_user reads `access_token` JWT first; falls back to `session_token` against `user_sessions` collection.
 
-## Test user (seeded admin)
-- admin@concentric.app / Concentric123!
+## Optional administrator bootstrap
+- No administrator credentials are committed or created by default.
+- Set both `ADMIN_EMAIL` and `ADMIN_PASSWORD` explicitly to create a missing administrator at startup.
+- Startup never changes the password of an existing account.
+- Live integration tests require explicit `BACKEND_TEST_URL`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` values.

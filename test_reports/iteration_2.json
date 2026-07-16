@@ -28,7 +28,7 @@
     "backend": "100%",
     "frontend": "not tested (per request: backend only)"
   },
-  "test_credentials": "admin@concentric.app / Concentric123! (verified working)",
+  "test_credentials": "Historical shared credentials removed; current live tests require explicit environment configuration.",
   "seed_data_creation": "Tests create sessions with TEST_ prefixed names and delete them on teardown. One TEST_other_<hex>@example.com user is registered to verify cross-user isolation; that user is left in the DB (small footprint).",
   "retest_needed": false,
   "main_agent_can_self_test": true,

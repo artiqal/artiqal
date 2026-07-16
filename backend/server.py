@@ -24,6 +24,13 @@ from content import (
     SFA_WORDS,
     get_activity,
 )
+from admin_bootstrap import bootstrap_admin_user
+from session_objective import (
+    build_local_session_objective,
+    build_session_document,
+    build_session_facts,
+    select_session_objective,
+)
 
 # ---------- Setup ----------
 mongo_url = os.environ["MONGO_URL"]
@@ -504,29 +511,7 @@ async def _generate_soap_objective(payload: SaveSessionIn, summary: dict, user: 
     """Use Claude Sonnet 4.5 to write a SOAP-objective-style narrative from session data."""
     from emergentintegrations.llm.chat import LlmChat, UserMessage
 
-    minutes = max(1, round(payload.duration_sec / 60))
-    lines = [
-        f"Session length: ~{minutes} min ({payload.duration_sec}s).",
-        f"Activities completed: {summary['totals']['activities_count']}.",
-        f"Total responses: {summary['totals']['attempts_total']} "
-        f"({summary['totals']['attempts_correct']} correct, "
-        f"{summary['totals']['attempts_incorrect']} incorrect"
-        + (f", {summary['totals']['accuracy_pct']}% accuracy" if summary['totals']['accuracy_pct'] is not None else "")
-        + ").",
-        f"Cues / hints used: {summary['totals']['cues_used']}.",
-    ]
-    if payload.patient_label:
-        lines.insert(0, f"Patient: {payload.patient_label}.")
-    if payload.notes:
-        lines.append(f"Clinician notes: {payload.notes}")
-    lines.append("Per activity:")
-    for a in summary["per_activity"]:
-        cue_break = ", ".join(f"{k}:{v}" for k, v in a["cue_types"].items()) or "0"
-        lines.append(
-            f"- {a['activity_title']} ({a['category']}): "
-            f"{a['attempts_correct']}/{a['attempts_total']} correct, cues={a['cues_used']} [{cue_break}]"
-        )
-    facts = "\n".join(lines)
+    facts = build_session_facts(payload, summary)
 
     chat = LlmChat(
         api_key=EMERGENT_LLM_KEY,
@@ -547,34 +532,28 @@ async def _generate_soap_objective(payload: SaveSessionIn, summary: dict, user: 
         return text.strip()
     except Exception as e:
         logger.exception("SOAP generation failed")
-        # Fallback: deterministic textual summary
-        return (
-            "Patient participated in a structured aphasia therapy session. "
-            + facts.replace("\n", " ")
-        )
+        return build_local_session_objective(payload, summary)
 
 
 @api_router.post("/sessions")
 async def save_session(payload: SaveSessionIn, user: dict = Depends(get_current_user)):
     summary = _summarize_session(payload)
-    soap = await _generate_soap_objective(payload, summary, user)
+    soap = await select_session_objective(
+        payload=payload,
+        summary=summary,
+        user=user,
+        external_generator=_generate_soap_objective,
+        api_key=EMERGENT_LLM_KEY,
+    )
     session_id = f"sess_{uuid.uuid4().hex[:14]}"
-    doc = {
-        "session_id": session_id,
-        "user_id": user["user_id"],
-        "name": payload.name.strip(),
-        "patient_label": payload.patient_label,
-        "notes": payload.notes,
-        "started_at": payload.started_at,
-        "ended_at": payload.ended_at,
-        "duration_sec": payload.duration_sec,
-        "activities": [a.model_dump() for a in payload.activities],
-        "attempts": [a.model_dump() for a in payload.attempts],
-        "cues": [c.model_dump() for c in payload.cues],
-        "summary": summary,
-        "soap_objective": soap,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    }
+    doc = build_session_document(
+        payload=payload,
+        summary=summary,
+        objective=soap,
+        user=user,
+        session_id=session_id,
+        created_at=datetime.now(timezone.utc).isoformat(),
+    )
     await db.sessions.insert_one(doc)
     doc.pop("_id", None)
     return doc
@@ -642,25 +621,12 @@ async def startup():
     await db.sessions.create_index([("user_id", 1), ("created_at", -1)])
     await db.sessions.create_index("session_id", unique=True)
 
-    admin_email = os.environ.get("ADMIN_EMAIL", "admin@concentric.app").lower()
-    admin_password = os.environ.get("ADMIN_PASSWORD", "Concentric123!")
-    existing = await db.users.find_one({"email": admin_email})
-    if not existing:
-        await db.users.insert_one({
-            "user_id": f"user_{uuid.uuid4().hex[:12]}",
-            "email": admin_email,
-            "name": "Concentric Admin",
-            "password_hash": hash_password(admin_password),
-            "auth_provider": "email",
-            "picture": None,
-            "role": "admin",
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        })
-    elif not existing.get("password_hash") or not verify_password(admin_password, existing["password_hash"]):
-        await db.users.update_one(
-            {"email": admin_email},
-            {"$set": {"password_hash": hash_password(admin_password), "auth_provider": "email"}},
-        )
+    await bootstrap_admin_user(
+        users=db.users,
+        hash_password=hash_password,
+        environ=os.environ,
+        logger=logger,
+    )
     logger.info("Startup complete")
 
 
