@@ -6,38 +6,13 @@ import { matchesAnswer } from "@/lib/answerMatch";
 import { useSmartBack } from "@/lib/navigationHistory";
 import { useSession } from "@/contexts/SessionContext";
 import { getActivitySetupConfig } from "@/lib/activitySetupConfig";
-import { getSessionActivityKey } from "@/lib/sessionActivityIdentity";
-import {
-  getAvailableVoicemailItems,
-  getClampedVoicemailItemCount,
-  getRequestedVoicemailQuestionCount,
-  selectVoicemailItems,
-  selectVoicemailQuestions,
-} from "@/lib/voicemailSelection";
-import {
-  applyVoicemailActivityOverrides,
-  buildVoicemailRuntimeSearchParams,
-  createDefaultVoicemailSetup,
-  createVoicemailSessionActivity,
-  isVoicemailSetupValid,
-  normalizeVoicemailSetupSelection,
-} from "@/lib/voicemailSetup";
+import { applyVoicemailActivityOverrides } from "@/lib/voicemailSetup";
 import { AudioControls } from "@/components/AudioControls";
+import { VoicemailActivity } from "@/components/activities/VoicemailActivity";
 import { LetterheadView } from "@/components/Letterheads";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import difficultyLevelAmberIcon from "@/assets/difficulty-level-amber.png";
-import difficultyLevelGreenIcon from "@/assets/difficulty-level-green.png";
-import difficultyLevelPinkIcon from "@/assets/difficulty-level-pink.png";
-import difficultyLevelRedIcon from "@/assets/difficulty-level-red.png";
 import {
   ArrowLeft,
   ArrowRight,
@@ -69,7 +44,6 @@ import {
   RefreshCw,
   SlidersHorizontal,
   Tag,
-  ShoppingBag,
   XCircle,
 } from "lucide-react";
 
@@ -1068,6 +1042,20 @@ function renderActivity(a) {
     case "reading":
       return <ReadingExercise activity={a} />;
     case "reading-leveled":
+      if (a.slug === "voicemails") {
+        return (
+          <VoicemailActivity
+            activity={a}
+            levelThemes={LEVEL_THEME}
+            sharedComponents={{
+              BreadcrumbHeader,
+              CompletionScreen,
+              ComplexityDots,
+              ReadingExercise,
+            }}
+          />
+        );
+      }
       return <LeveledReadingExercise activity={a} />;
     case "ai-reading":
       return <AIReadingExercise activity={a} />;
@@ -1817,44 +1805,15 @@ const LEVEL_ICON = {
   pink: Star,
 };
 
-const VOICEMAIL_LEVEL_ICON_ASSETS = {
-  green: difficultyLevelGreenIcon,
-  amber: difficultyLevelAmberIcon,
-  red: difficultyLevelRedIcon,
-  pink: difficultyLevelPinkIcon,
-};
-
 function LeveledReadingExercise({ activity }) {
   const navigate = useNavigate();
   const smartBack = useSmartBack();
   const [searchParams, setSearchParams] = useSearchParams();
   const level = searchParams.get("level");
-  const themePackId = searchParams.get("pack") || "mixed-bag";
-  const languageId = searchParams.get("language") || "en";
-  const requestedItemCount = Number.parseInt(searchParams.get("count") || "", 10);
-  const requestedQuestionsPerVoicemail = Number.parseInt(searchParams.get("questions") || "", 10);
   const letterId = searchParams.get("letter");
   const isDone = searchParams.get("done") === "1";
   const levels = activity.content.levels || EMPTY_LEVELS;
-  const { active, isActive, start: startSession, logActivity, removeActivity } = useSession();
-  const setupConfig = getActivitySetupConfig(activity.slug);
-  const [setupSelection, setSetupSelection] = useState(() =>
-    createDefaultVoicemailSetup(setupConfig),
-  );
-
-  useEffect(() => {
-    setSetupSelection((current) => {
-      if (!setupConfig) return current;
-      const normalized = normalizeVoicemailSetupSelection(
-        setupConfig,
-        activity.content.levels || {},
-        current,
-      );
-      return Object.keys(normalized).every((key) => normalized[key] === current[key])
-        ? current
-        : normalized;
-    });
-  }, [activity.content.levels, setupConfig]);
+  const { logActivity } = useSession();
 
   // Per-run stats accumulator: keyed by `${level}:${letterId}:${qid}` for dedupe.
   const statsRef = useRef({
@@ -1927,30 +1886,7 @@ function LeveledReadingExercise({ activity }) {
   }, [fullscreen]);
 
   const lv = level && levels[level] ? levels[level] : null;
-  const configuredItems = lv && setupConfig
-    ? getAvailableVoicemailItems(lv, themePackId, languageId)
-    : (lv?.letters || []);
-  const safeItemCount = getClampedVoicemailItemCount(
-    requestedItemCount,
-    configuredItems.length,
-  );
-  const letters = setupConfig
-    ? selectVoicemailItems(lv, {
-        themePackId,
-        languageId,
-        itemCount: safeItemCount,
-      })
-    : configuredItems;
-  const safeQuestionsPerVoicemail = getRequestedVoicemailQuestionCount(
-    requestedQuestionsPerVoicemail,
-  );
-  const runtimeVoicemailSelection = {
-    difficultyId: lv?.key || level || "",
-    themePackId,
-    languageId,
-    itemCount: safeItemCount,
-    questionsPerVoicemail: safeQuestionsPerVoicemail,
-  };
+  const letters = lv?.letters || [];
   const letter = lv ? letters.find((l) => String(l.id) === String(letterId)) : null;
   const currentIdx = letter ? letters.findIndex((l) => String(l.id) === String(letterId)) : -1;
   const hasNext = currentIdx >= 0 && currentIdx < letters.length - 1;
@@ -2003,189 +1939,41 @@ function LeveledReadingExercise({ activity }) {
   };
 
   const goHub = () => navigate("/dashboard");
-  const goActivitiesLibrary = () => navigate("/all-activities");
   const goCategory = () => navigate(`/category/${activity.category}`);
   const goDifficulty = () => setSearchParams({});
   const goLevelOverview = (key) => setSearchParams({ level: key });
-  const goLetter1OfLevel = (key) => {
-    const lvObj = levels[key];
-    const first = lvObj && lvObj.letters && lvObj.letters[0];
-    if (first) setSearchParams({ level: key, letter: String(first.id) });
-    else setSearchParams({ level: key });
-  };
-
-  const updateSetupSelection = (next) => {
-    setSetupSelection((current) => ({ ...current, ...next }));
-  };
-
-  const normalizedSetupSelection = setupConfig
-    ? normalizeVoicemailSetupSelection(setupConfig, levels, setupSelection)
-    : setupSelection;
-  const selectedSetupLevel = levels[normalizedSetupSelection.difficultyId];
-  const selectedThemePack = setupConfig?.themePacks.find(
-    (pack) => pack.id === normalizedSetupSelection.themePackId && pack.available,
-  );
-  const selectedLanguage = setupConfig?.languages.find(
-    (language) => language.id === normalizedSetupSelection.languageId && language.available,
-  );
-  const availableSetupItems = getAvailableVoicemailItems(
-    selectedSetupLevel,
-    normalizedSetupSelection.themePackId,
-    normalizedSetupSelection.languageId,
-  );
-  const selectedSetupItems = selectVoicemailItems(
-    selectedSetupLevel,
-    normalizedSetupSelection,
-  );
-  const validatedItemCount = selectedSetupItems.length;
-  const validatedQuestionsPerVoicemail = normalizedSetupSelection.questionsPerVoicemail;
-  const validatedSetupSelection = {
-    ...normalizedSetupSelection,
-    itemCount: validatedItemCount,
-  };
-  const isSetupValid = isVoicemailSetupValid({
-    config: setupConfig,
-    levels,
-    selection: normalizedSetupSelection,
-    availableItemCount: availableSetupItems.length,
-  });
-  const configuredSessionActivity = createVoicemailSessionActivity(
-    activity,
-    validatedSetupSelection,
-  );
-  const configuredSessionKey = getSessionActivityKey(configuredSessionActivity);
-  const isConfiguredInSession = Boolean(
-    active?.activities?.some((item) => getSessionActivityKey(item) === configuredSessionKey),
-  );
-
-  const startConfiguredActivity = () => {
-    if (!isSetupValid) return;
-    const first = selectedSetupItems[0];
-    if (!first) return;
-    setSearchParams(buildVoicemailRuntimeSearchParams(
-      validatedSetupSelection,
-      { letterId: first.id },
-    ));
-  };
-
-  const addConfiguredActivityToSession = () => {
-    if (!isSetupValid) return;
-    if (isConfiguredInSession) {
-      removeActivity(configuredSessionActivity);
-      return;
-    }
-    if (!isActive) startSession();
-    logActivity(configuredSessionActivity);
-  };
-
   const hubCrumb = { label: "Hub", onClick: goHub };
   const categoryCrumb = { label: categoryName, onClick: goCategory };
   const activityCrumb = { label: activity.title, onClick: goDifficulty };
-  const isVoicemailActivity = activity.slug === "voicemails";
-  const rootCrumb = isVoicemailActivity
-    ? { label: "Activities Library", onClick: goActivitiesLibrary }
-    : hubCrumb;
-  const domainCrumb = isVoicemailActivity
-    ? { label: "Functional Tasks", onClick: goCategory }
-    : categoryCrumb;
-  const currentActivityCrumb = isVoicemailActivity
-    ? { label: "Listening to Voicemail", onClick: goDifficulty }
-    : activityCrumb;
   const levelCrumb = lv ? { label: lv.title, onClick: () => goLevelOverview(lv.key) } : null;
-
-  const returnToVoicemailSetup = () => {
-    if (lv) {
-      setSetupSelection((current) => normalizeVoicemailSetupSelection(
-        setupConfig,
-        levels,
-        {
-          ...current,
-          difficultyId: lv.key,
-          themePackId,
-          languageId,
-          itemCount: safeItemCount || current.itemCount,
-          questionsPerVoicemail:
-            safeQuestionsPerVoicemail || current.questionsPerVoicemail,
-        },
-      ));
-    }
-    setSearchParams({}, { replace: true });
-  };
-
-  useEffect(() => {
-    if (isVoicemailActivity && lv && !letter && !isDone) {
-      setSetupSelection((current) => normalizeVoicemailSetupSelection(
-        setupConfig,
-        levels,
-        {
-          ...current,
-          difficultyId: lv.key,
-          themePackId,
-          languageId,
-          itemCount: safeItemCount || current.itemCount,
-          questionsPerVoicemail:
-            safeQuestionsPerVoicemail || current.questionsPerVoicemail,
-        },
-      ));
-      setSearchParams({}, { replace: true });
-    }
-  }, [isVoicemailActivity, lv, letter, isDone, themePackId, languageId, safeItemCount, safeQuestionsPerVoicemail, setSearchParams, setupConfig, levels]);
 
   // Compute breadcrumb crumbs + back behaviour for the current step
   let crumbs;
   let onBack;
   if (!lv) {
-    crumbs = isVoicemailActivity
-      ? [rootCrumb, domainCrumb, "Listening to Voicemail"]
-      : [rootCrumb, domainCrumb, currentActivityCrumb, "Choose difficulty level"];
+    crumbs = [hubCrumb, categoryCrumb, activityCrumb, "Choose difficulty level"];
     onBack = smartBack;
   } else if (isDone) {
-    crumbs = [rootCrumb, domainCrumb, currentActivityCrumb, levelCrumb, "Complete"];
-    onBack = isVoicemailActivity
-      ? returnToVoicemailSetup
-      : () => setSearchParams({ level: lv.key });
+    crumbs = [hubCrumb, categoryCrumb, activityCrumb, levelCrumb, "Complete"];
+    onBack = () => setSearchParams({ level: lv.key });
   } else if (!letter) {
-    crumbs = [rootCrumb, domainCrumb, currentActivityCrumb, lv.title];
+    crumbs = [hubCrumb, categoryCrumb, activityCrumb, lv.title];
     onBack = () => setSearchParams({});
   } else {
-    crumbs = [rootCrumb, domainCrumb, currentActivityCrumb, levelCrumb, `${itemLabelSingular} ${letter.id}`];
-    onBack = isVoicemailActivity
-      ? returnToVoicemailSetup
-      : () => setSearchParams({ level: lv.key });
+    crumbs = [hubCrumb, categoryCrumb, activityCrumb, levelCrumb, `${itemLabelSingular} ${letter.id}`];
+    onBack = () => setSearchParams({ level: lv.key });
   }
 
-  const top = (
-    <BreadcrumbHeader
-      crumbs={crumbs}
-      onBack={onBack}
-      className={isVoicemailActivity && !lv ? "voicemail-difficulty-breadcrumb" : ""}
-    />
-  );
+  const top = <BreadcrumbHeader crumbs={crumbs} onBack={onBack} />;
 
   if (!lv) {
     return (
       <>
         {top}
-        <div className={isVoicemailActivity ? "mt-2" : "mt-5"}>
+        <div className="mt-5">
           <DifficultyPicker
             activity={activity}
-            selectedLevel={setupSelection.difficultyId}
-            onSelect={(difficultyId) => updateSetupSelection({ difficultyId })}
-            setupOptions={setupConfig ? {
-              config: setupConfig,
-              selection: normalizedSetupSelection,
-              selectedLevelData: selectedSetupLevel,
-              selectedThemePack,
-              selectedLanguage,
-              availableItemCount: availableSetupItems.length,
-              validatedItemCount,
-              validatedQuestionsPerVoicemail,
-              isValid: isSetupValid,
-              isInSession: isConfiguredInSession,
-              onChange: updateSetupSelection,
-              onStart: startConfiguredActivity,
-              onAddToSession: addConfiguredActivityToSession,
-            } : null}
+            onSelect={(key) => setSearchParams({ level: key })}
           />
         </div>
       </>
@@ -2204,14 +1992,7 @@ function LeveledReadingExercise({ activity }) {
             onReplay={() => {
               resetStats();
               const first = letters[0];
-              if (first) setSearchParams(
-                isVoicemailActivity
-                  ? buildVoicemailRuntimeSearchParams(
-                      runtimeVoicemailSelection,
-                      { letterId: first.id },
-                    )
-                  : { level: lv.key, letter: String(first.id) },
-              );
+              if (first) setSearchParams({ level: lv.key, letter: String(first.id) });
             }}
           />
         </div>
@@ -2220,7 +2001,6 @@ function LeveledReadingExercise({ activity }) {
   }
 
   if (!letter) {
-    if (isVoicemailActivity) return null;
     return (
       <>
         {top}
@@ -2244,28 +2024,15 @@ function LeveledReadingExercise({ activity }) {
     content: {
       text: letter.text,
       letterhead: letter.letterhead,
-      questions: selectVoicemailQuestions(letter, safeQuestionsPerVoicemail),
+      questions: letter.questions,
     },
   };
 
   const onNext = () => {
     if (hasNext) {
-      setSearchParams(
-        isVoicemailActivity
-          ? buildVoicemailRuntimeSearchParams(runtimeVoicemailSelection, {
-              letterId: letters[currentIdx + 1].id,
-            })
-          : { level: lv.key, letter: String(letters[currentIdx + 1].id) },
-      );
+      setSearchParams({ level: lv.key, letter: String(letters[currentIdx + 1].id) });
     } else {
-      setSearchParams(
-        isVoicemailActivity
-          ? buildVoicemailRuntimeSearchParams(
-              runtimeVoicemailSelection,
-              { done: true },
-            )
-          : { level: lv.key, done: "1" },
-      );
+      setSearchParams({ level: lv.key, done: "1" });
     }
   };
 
@@ -2294,14 +2061,7 @@ function LeveledReadingExercise({ activity }) {
       onToggleFullscreen={toggleFullscreen}
       onAttempt={handleAttempt}
       onHint={handleHint}
-      onEnd={() => setSearchParams(
-        isVoicemailActivity
-          ? buildVoicemailRuntimeSearchParams(
-              runtimeVoicemailSelection,
-              { done: true },
-            )
-          : { level: lv.key, done: "1" },
-      )}
+      onEnd={() => setSearchParams({ level: lv.key, done: "1" })}
       layout={
         activity.slug === "prescription-medication-labels"
           ? "stacked"
@@ -2662,12 +2422,9 @@ function CompletionScreen({ level, summary, onChangeLevel, onReplay }) {
   );
 }
 
-function DifficultyPicker({ activity, onSelect, selectedLevel = "", setupOptions = null }) {
+function DifficultyPicker({ activity, onSelect }) {
   const levels = activity.content.levels || {};
   const order = ["green", "amber", "red", "pink"];
-  const isVoicemailActivity = activity.slug === "voicemails";
-  const voicemailSummary =
-    "Practice functional listening comprehension with realistic voicemail messages.";
   // Item label is shared across levels for an activity; default to "letter".
   const firstLevel = order.map((k) => levels[k]).find(Boolean) || {};
   const itemSing = (firstLevel.item_label_singular || "Letter").toLowerCase();
@@ -2678,50 +2435,18 @@ function DifficultyPicker({ activity, onSelect, selectedLevel = "", setupOptions
       ? "sm:grid-cols-2 lg:grid-cols-4"
       : "sm:grid-cols-3";
 
-  if (isVoicemailActivity && setupOptions) {
-    return (
-      <VoicemailSetup
-        activity={activity}
-        levels={levels}
-        visibleLevels={visibleLevels}
-        selectedLevel={selectedLevel}
-        onSelectLevel={onSelect}
-        {...setupOptions}
-      />
-    );
-  }
-
   return (
-    <div
-      className={isVoicemailActivity ? "voicemail-difficulty-picker" : undefined}
-      data-testid="difficulty-picker"
-    >
-      <div
-        className={isVoicemailActivity ? "voicemail-difficulty-header" : "mb-5"}
-        data-testid="difficulty-section-header"
-      >
-        {isVoicemailActivity ? (
-          <div className="voicemail-difficulty-intro">
-            <div className="voicemail-difficulty-copy">
-              <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900">
-                {activity.title}
-              </h2>
-              <p className="voicemail-difficulty-summary">
-                {voicemailSummary}
-              </p>
-            </div>
-          </div>
-        ) : (
-          <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900">
-            {activity.title}
-          </h2>
-        )}
+    <div data-testid="difficulty-picker">
+      <div className="mb-5" data-testid="difficulty-section-header">
+        <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900">
+          {activity.title}
+        </h2>
         <p className="voicemail-difficulty-level-label mt-1.5 text-sm font-display font-semibold text-zinc-600">
-          {isVoicemailActivity ? "Choose difficulty" : "Choose difficulty level:"}
+          Choose difficulty level:
         </p>
       </div>
 
-      <div className={`grid ${gridCols} ${isVoicemailActivity ? "voicemail-difficulty-grid" : "gap-4"} items-stretch`}>
+      <div className={`grid ${gridCols} gap-4 items-stretch`}>
         {visibleLevels
           .map((k) => {
             const lv = levels[k];
@@ -2730,7 +2455,7 @@ function DifficultyPicker({ activity, onSelect, selectedLevel = "", setupOptions
             return (
               <div
                 key={k}
-                className={`diff-card rounded-2xl flex flex-col h-full ${isVoicemailActivity ? "voicemail-difficulty-card" : "p-5"} ${selectedLevel === k ? "is-selected" : ""}`}
+                className="diff-card rounded-2xl flex flex-col h-full p-5"
                 style={{
                   background: theme.cardBg,
                   border: `1.5px solid ${theme.cardBorder}`,
@@ -2741,16 +2466,6 @@ function DifficultyPicker({ activity, onSelect, selectedLevel = "", setupOptions
                   "--level-pill-border": theme.pillBorder,
                 }}
                 data-testid={`difficulty-card-${k}`}
-                role={isVoicemailActivity ? "radio" : undefined}
-                aria-checked={isVoicemailActivity ? selectedLevel === k : undefined}
-                tabIndex={isVoicemailActivity ? 0 : undefined}
-                onClick={isVoicemailActivity ? () => onSelect(k) : undefined}
-                onKeyDown={isVoicemailActivity ? (event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    onSelect(k);
-                  }
-                } : undefined}
               >
                 <div className="flex-1 flex flex-col">
                   <div className="difficulty-card-top-row flex items-center justify-between gap-2">
@@ -2792,7 +2507,7 @@ function DifficultyPicker({ activity, onSelect, selectedLevel = "", setupOptions
                       </div>
                       <p className="mt-0.5 text-zinc-700 leading-relaxed">{lv.best_for}</p>
                     </div>
-                    {lv.est_minutes && !isVoicemailActivity ? (
+                    {lv.est_minutes ? (
                       <div className="difficulty-time-pill inline-flex items-center gap-1.5 text-[11px] font-display font-semibold text-zinc-700 mt-1 rounded-full bg-white/70 px-2.5 py-1" style={{ border: `1px solid ${theme.cardBorder}` }} data-testid={`est-minutes-${k}`}>
                         <Clock className="w-3 h-3" />
                         {lv.est_minutes}
@@ -2801,42 +2516,29 @@ function DifficultyPicker({ activity, onSelect, selectedLevel = "", setupOptions
                   </div>
                 </div>
 
-                {isVoicemailActivity ? (
-                  <div
-                    className="difficulty-select-state mt-5 inline-flex items-center justify-center gap-2"
-                    style={{ color: theme.cardCta, borderColor: theme.cardBorder }}
-                    data-testid={`difficulty-${k}`}
-                  >
-                    {selectedLevel === k ? <CheckCircle2 className="w-4 h-4" /> : null}
-                    {selectedLevel === k ? "Selected" : `Select ${lv.title}`}
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => onSelect(k)}
-                    data-testid={`difficulty-${k}`}
-                    className="difficulty-start-btn mt-5 inline-flex items-center justify-center gap-2 h-11 rounded-full font-display font-semibold text-white transition hover:brightness-110"
-                    style={{ background: theme.cardCta }}
-                  >
-                    Start {lv.title} <ArrowRight className="w-4 h-4" />
-                  </button>
-                )}
-                {!isVoicemailActivity ? (
-                  <button
-                    type="button"
-                    onClick={() => printAllLabels({ activity, level: lv })}
-                    disabled={!(lv.letters || []).length}
-                    data-testid={`print-pdf-${k}`}
-                    className="difficulty-print-btn mt-2 inline-flex items-center justify-center gap-2 h-10 rounded-full font-display font-semibold text-zinc-800 bg-white/70 hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ border: `1.5px solid ${theme.cardBorder}` }}
-                    title={(lv.letters || []).length
-                      ? `Print all ${(lv.letters || []).length} ${itemPlur} as a PDF handout`
-                      : `No ${itemPlur} available yet`}
-                  >
-                    <Printer className="w-4 h-4" />
-                    Print
-                  </button>
-                ) : null}
+                <button
+                  type="button"
+                  onClick={() => onSelect(k)}
+                  data-testid={`difficulty-${k}`}
+                  className="difficulty-start-btn mt-5 inline-flex items-center justify-center gap-2 h-11 rounded-full font-display font-semibold text-white transition hover:brightness-110"
+                  style={{ background: theme.cardCta }}
+                >
+                  Start {lv.title} <ArrowRight className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => printAllLabels({ activity, level: lv })}
+                  disabled={!(lv.letters || []).length}
+                  data-testid={`print-pdf-${k}`}
+                  className="difficulty-print-btn mt-2 inline-flex items-center justify-center gap-2 h-10 rounded-full font-display font-semibold text-zinc-800 bg-white/70 hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ border: `1.5px solid ${theme.cardBorder}` }}
+                  title={(lv.letters || []).length
+                    ? `Print all ${(lv.letters || []).length} ${itemPlur} as a PDF handout`
+                    : `No ${itemPlur} available yet`}
+                >
+                  <Printer className="w-4 h-4" />
+                  Print
+                </button>
               </div>
             );
           })}
@@ -2845,300 +2547,14 @@ function DifficultyPicker({ activity, onSelect, selectedLevel = "", setupOptions
   );
 }
 
-function VoicemailSetup({
-  activity,
-  levels,
-  visibleLevels,
-  selectedLevel,
-  onSelectLevel,
-  ...setupOptions
-}) {
-  const voicemailSummary =
-    "Practice functional listening comprehension with realistic voicemail messages.";
 
-  return (
-    <div className="voicemail-setup" data-testid="difficulty-picker">
-      <div className="voicemail-setup-layout">
-        <header className="voicemail-setup-intro">
-          <h2>{activity.title}</h2>
-        </header>
-
-        <aside className="voicemail-level-selector" aria-label="Choose difficulty">
-          <p className="voicemail-setup-description">{voicemailSummary}</p>
-
-          <div className="voicemail-level-list" role="radiogroup" aria-label="Difficulty level">
-            {visibleLevels.map((key) => {
-              const level = levels[key];
-              const theme = LEVEL_THEME[key];
-              const iconAsset = VOICEMAIL_LEVEL_ICON_ASSETS[key];
-              const selected = selectedLevel === key;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  role="radio"
-                  aria-checked={selected}
-                  className={`voicemail-level-option ${selected ? "is-selected" : ""}`}
-                  style={{
-                    "--level-accent": theme.dot,
-                    "--level-border": theme.cardBorder,
-                    "--level-soft": theme.pillBg,
-                    "--level-glow": theme.glow,
-                  }}
-                  onClick={() => onSelectLevel(key)}
-                  data-testid={`difficulty-${key}`}
-                >
-                  <img src={iconAsset} alt="" aria-hidden="true" />
-                  <strong>{level.title}</strong>
-                  <ComplexityDots level={theme.complexity} color={theme.dot} neon={theme.neon} />
-                </button>
-              );
-            })}
-          </div>
-          <p className="voicemail-level-help">
-            <Sparkles aria-hidden="true" />
-            Choose a level to view its details and configure your activity.
-          </p>
-        </aside>
-
-        <ActivitySetupOptions {...setupOptions} />
-      </div>
-    </div>
-  );
-}
-
-function ActivitySetupOptions({
-  config,
-  selection,
-  selectedLevelData,
-  selectedThemePack,
-  selectedLanguage,
-  availableItemCount,
-  validatedItemCount,
-  validatedQuestionsPerVoicemail,
-  isValid,
-  isInSession,
-  onChange,
-  onStart,
-  onAddToSession,
-}) {
-  const availableThemePacks = config.themePacks.filter((pack) => pack.available);
-  const availableLanguages = config.languages.filter((language) => language.available);
-  const selectedLevelKey = selection.difficultyId;
-  const theme = LEVEL_THEME[selectedLevelKey] || LEVEL_THEME.green;
-  const iconAsset = VOICEMAIL_LEVEL_ICON_ASSETS[selectedLevelKey];
-  const levelTitle = selectedLevelData?.title || "Choose difficulty";
-  const packLabel = selectedThemePack?.label || "Choose theme pack";
-  const languageLabel = selectedLanguage?.label || "Choose language";
-  const countLabel = `${validatedItemCount || selection.itemCount} ${validatedItemCount === 1 ? "voicemail" : "voicemails"}`;
-  const questionCount = validatedQuestionsPerVoicemail || selection.questionsPerVoicemail;
-  const questionLabel = `${questionCount} ${questionCount === 1 ? "question" : "questions"} each`;
-
-  return (
-    <section
-      className="voicemail-expanded-card"
-      style={{
-        "--level-accent": theme.dot,
-        "--level-border": theme.cardBorder,
-        "--level-soft": theme.pillBg,
-        "--level-glow": theme.glow,
-        "--level-cta": theme.cardCta,
-      }}
-      data-testid="voicemail-setup-options"
-    >
-      <div className="voicemail-expanded-header">
-        <span className="voicemail-expanded-title">
-          <img src={iconAsset} alt="" aria-hidden="true" />
-          <strong>{levelTitle}</strong>
-        </span>
-        <ComplexityDots level={theme.complexity} color={theme.dot} neon={theme.neon} />
-      </div>
-
-      <div className="voicemail-expanded-copy">
-        <div>
-          <h3>Content:</h3>
-          <p>{selectedLevelData?.blurb}</p>
-        </div>
-        <div>
-          <h3>Suited to:</h3>
-          <p>{selectedLevelData?.best_for}</p>
-        </div>
-      </div>
-
-      <div className="voicemail-expanded-controls">
-        <div className="voicemail-pack-control">
-          <span id="voicemail-theme-pack-label">Theme pack</span>
-          <Select
-            value={selection.themePackId}
-            onValueChange={(themePackId) => onChange({ themePackId })}
-          >
-            <SelectTrigger
-              className="voicemail-select-shell"
-              aria-labelledby="voicemail-theme-pack-label"
-              data-testid="theme-pack-select"
-            >
-              <span className="voicemail-select-value">
-                <ShoppingBag aria-hidden="true" />
-                <SelectValue />
-              </span>
-            </SelectTrigger>
-            <SelectContent className="voicemail-select-menu">
-              {availableThemePacks.map((pack) => (
-                <SelectItem key={pack.id} value={pack.id}>{pack.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="voicemail-pack-control">
-          <span id="voicemail-language-label">Language</span>
-          <Select
-            value={selection.languageId}
-            onValueChange={(languageId) => onChange({ languageId })}
-          >
-            <SelectTrigger
-              className="voicemail-select-shell"
-              aria-labelledby="voicemail-language-label"
-              data-testid="language-select"
-            >
-              <span className="voicemail-select-value">
-                <Globe aria-hidden="true" />
-                <SelectValue />
-              </span>
-            </SelectTrigger>
-            <SelectContent className="voicemail-select-menu">
-              {availableLanguages.map((language) => (
-                <SelectItem key={language.id} value={language.id}>{language.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <fieldset className="voicemail-count-fieldset">
-          <legend>Number of voicemails</legend>
-          <SetupSegmentedControl
-            values={config.itemCounts}
-            value={selection.itemCount}
-            label="Number of voicemails"
-            testIdPrefix="item-count"
-            onChange={(itemCount) => onChange({ itemCount })}
-          />
-        </fieldset>
-
-        <fieldset className="voicemail-count-fieldset">
-          <legend>Questions per voicemail</legend>
-          <SetupSegmentedControl
-            values={config.questionCounts}
-            value={selection.questionsPerVoicemail}
-            label="Questions per voicemail"
-            testIdPrefix="question-count"
-            onChange={(questionsPerVoicemail) => onChange({ questionsPerVoicemail })}
-          />
-        </fieldset>
-      </div>
-
-      {selection.itemCount > availableItemCount && availableItemCount > 0 ? (
-        <p className="activity-setup-availability">
-          {availableItemCount} available for this selection. The activity will use all available items.
-        </p>
-      ) : null}
-
-      <div className="activity-setup-summary" aria-label="Activity configuration summary">
-        <strong>{countLabel} <b>·</b> {questionLabel} <b>·</b> {languageLabel} <b>·</b> {packLabel}</strong>
-      </div>
-
-      <div className="activity-setup-actions">
-          <button
-            type="button"
-            className={`activity-setup-secondary ${isInSession ? "is-in-session" : ""}`}
-            onClick={onAddToSession}
-            disabled={!isValid}
-            aria-pressed={isInSession}
-            aria-label={isInSession ? "Remove configured activity from session" : "Add configured activity to session"}
-            data-testid="add-voicemail-to-session"
-          >
-            {isInSession ? <CheckCircle2 /> : <Plus />}
-            {isInSession ? "Remove from session" : "Add to session"}
-          </button>
-          <button
-            type="button"
-            className="activity-setup-primary"
-            onClick={onStart}
-            disabled={!isValid}
-            data-testid="start-configured-voicemail"
-          >
-            Start activity <ArrowRight />
-          </button>
-      </div>
-    </section>
-  );
-}
-
-function SetupSegmentedControl({ values, value, label, testIdPrefix, onChange }) {
-  const selectedIndex = Math.max(0, values.indexOf(value));
-  const handleKeyDown = (event, index) => {
-    const direction = event.key === "ArrowRight" || event.key === "ArrowDown"
-      ? 1
-      : event.key === "ArrowLeft" || event.key === "ArrowUp"
-        ? -1
-        : 0;
-    if (!direction) return;
-
-    event.preventDefault();
-    const nextIndex = (index + direction + values.length) % values.length;
-    onChange(values[nextIndex]);
-    event.currentTarget.parentElement?.querySelectorAll("button")[nextIndex]?.focus();
-  };
-
-  return (
-    <div
-      className="item-count-control"
-      role="radiogroup"
-      aria-label={label}
-      style={{
-        "--segment-count": values.length,
-        "--selected-index": selectedIndex,
-      }}
-    >
-      <span className="segmented-selection-indicator" aria-hidden="true" />
-      {values.map((option, index) => (
-        <button
-          key={option}
-          type="button"
-          role="radio"
-          aria-checked={value === option}
-          className={value === option ? "is-selected" : ""}
-          onClick={() => onChange(option)}
-          onKeyDown={(event) => handleKeyDown(event, index)}
-          data-testid={`${testIdPrefix}-${option}`}
-        >
-          {option}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function LetterPicker({ activity, level, onPickLetter, onChangeLevel }) {
+function LetterPicker({ level, onPickLetter, onChangeLevel }) {
   const theme = LEVEL_THEME[level.key];
   const target = level.target_letter_count || (level.letters || []).length || 0;
   const ready = (level.letters || []).length;
   const itemSing = level.item_label_singular || "Letter";
   const itemPlur = level.item_label_plural || "letters";
-  const isVoicemailActivity = activity.slug === "voicemails";
-
-  const subtitleText = (() => {
-    if (!isVoicemailActivity) {
-      return `${level.questions_per_letter} questions per ${itemSing.toLowerCase()}.`;
-    }
-    const counts = (level.letters || []).map((l) => (l.questions || []).length);
-    const min = counts.length ? Math.min(...counts) : level.questions_per_letter;
-    const max = counts.length ? Math.max(...counts) : level.questions_per_letter;
-    const qLabel = min === max
-      ? `${min} ${min === 1 ? "question" : "questions"} each`
-      : `${min}–${max} questions each`;
-    return `${ready} ${itemPlur} · ${qLabel}`;
-  })();
+  const subtitleText = `${level.questions_per_letter} questions per ${itemSing.toLowerCase()}.`;
 
   return (
     <div data-testid="letter-picker">
@@ -3187,118 +2603,33 @@ function LetterPicker({ activity, level, onPickLetter, onChangeLevel }) {
         </div>
       ) : (
         <ul className="mt-7 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {(level.letters || []).map((l, idx) =>
-            isVoicemailActivity ? (
-              <VoicemailListCard
-                key={l.id}
-                level={level}
-                item={l}
-                index={idx}
-                itemSing={itemSing}
-                onPick={() => onPickLetter(l.id)}
-              />
-            ) : (
-              <li key={l.id}>
-                <button
-                  type="button"
-                  onClick={() => onPickLetter(l.id)}
-                  data-testid={`letter-${l.id}`}
-                  className="w-full text-left rounded-2xl border border-zinc-200 bg-white p-5 hover:border-indigo-300 hover:shadow-sm transition"
-                >
-                  <div className="text-xs uppercase tracking-[0.18em] font-semibold" style={{ color: theme.pillFg }}>
-                    {itemSing} {l.id}
-                  </div>
-                  <div className="font-display font-bold text-lg mt-1">{l.title}</div>
-                  {l.summary ? (
-                    <div className="text-sm text-zinc-600 mt-1 leading-relaxed">{l.summary}</div>
-                  ) : null}
-                  <div className="mt-3 text-xs text-zinc-500 font-semibold">
-                    {(l.questions || []).length} questions
-                  </div>
-                </button>
-              </li>
-            )
-          )}
+          {(level.letters || []).map((l) => (
+            <li key={l.id}>
+              <button
+                type="button"
+                onClick={() => onPickLetter(l.id)}
+                data-testid={`letter-${l.id}`}
+                className="w-full text-left rounded-2xl border border-zinc-200 bg-white p-5 hover:border-indigo-300 hover:shadow-sm transition"
+              >
+                <div className="text-xs uppercase tracking-[0.18em] font-semibold" style={{ color: theme.pillFg }}>
+                  {itemSing} {l.id}
+                </div>
+                <div className="font-display font-bold text-lg mt-1">{l.title}</div>
+                {l.summary ? (
+                  <div className="text-sm text-zinc-600 mt-1 leading-relaxed">{l.summary}</div>
+                ) : null}
+                <div className="mt-3 text-xs text-zinc-500 font-semibold">
+                  {(l.questions || []).length} questions
+                </div>
+              </button>
+            </li>
+          ))}
         </ul>
       )}
     </div>
   );
 }
 
-// Per-level, per-index emoji mapping for the voicemail activity
-const VOICEMAIL_EMOJI = {
-  green: ["🏥", "💊", "🎂", "📦", "✂️", "🎨", "🩸", "🚕", "📚", "📬"],
-  amber: ["📅", "💊", "🚐", "🎂", "🐶", "📚", "🏋️", "🦷", "☕", "✂️"],
-  red:   ["🎂", "🔐", "🔑", "🐕", "🩺", "💡", "💊", "🔧", "🚑", "💳"],
-  pink:  ["🏥", "💊", "🏨", "🏛️", "📦", "🦷", "🍽️", "🔐", "🎬", "✂️"],
-};
-
-// Soft pastel backgrounds cycled across the 10 cards
-const VOICEMAIL_PASTELS = [
-  "#FCE7F3", // pink
-  "#DBEAFE", // sky
-  "#FEF3C7", // amber
-  "#DCFCE7", // mint
-  "#E0E7FF", // indigo
-  "#FFE4E6", // rose
-  "#FEF9C3", // lemon
-  "#CFFAFE", // cyan
-  "#F3E8FF", // violet
-  "#FFEDD5", // peach
-];
-
-function VoicemailListCard({ level, item, index, itemSing, onPick }) {
-  const emoji = (VOICEMAIL_EMOJI[level.key] || [])[index] || "📞";
-  const pastel = VOICEMAIL_PASTELS[index % VOICEMAIL_PASTELS.length];
-  const qCount = (item.questions || []).length;
-
-  return (
-    <li>
-      <button
-        type="button"
-        onClick={onPick}
-        data-testid={`letter-${item.id}`}
-        className="group relative w-full text-left rounded-2xl border border-zinc-200/80 bg-white p-5 hover:border-indigo-300 hover:shadow-md transition flex flex-col h-[232px]"
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div
-            className="w-12 h-12 rounded-xl grid place-items-center text-2xl shrink-0"
-            style={{ background: pastel }}
-            aria-hidden="true"
-          >
-            <span>{emoji}</span>
-          </div>
-          <div className="text-[10px] uppercase tracking-[0.18em] font-semibold text-zinc-400 mt-1">
-            {itemSing} {item.id}
-          </div>
-        </div>
-
-        <div className="mt-4 min-h-0 flex-1">
-          <div className="font-display font-bold text-[17px] leading-snug text-zinc-900 line-clamp-1">
-            {item.title}
-          </div>
-          {item.summary ? (
-            <div className="text-[13px] text-zinc-500 mt-1 leading-snug line-clamp-2">
-              {item.summary}
-            </div>
-          ) : null}
-        </div>
-
-        <div className="pt-3 flex items-end justify-between">
-          <div className="text-xs text-zinc-400 font-medium">
-            {qCount} {qCount === 1 ? "question" : "questions"}
-          </div>
-          <span
-            className="inline-grid place-items-center w-7 h-7 rounded-full bg-zinc-50 border border-zinc-200 text-zinc-500 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-600 transition"
-            aria-hidden="true"
-          >
-            <ArrowRight className="w-3.5 h-3.5" />
-          </span>
-        </div>
-      </button>
-    </li>
-  );
-}
 
 function QuestionCard({ q, picked, onPick, qid }) {
   return (
