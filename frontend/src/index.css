@@ -2578,7 +2578,7 @@ h6,
 .activities-hub-category-row {
   position: relative;
   z-index: 1;
-  padding: 2px 4px 8px;
+  padding: 2px 4px 28px;
   display: flex;
   gap: 14px;
   overflow-x: auto;
@@ -2594,7 +2594,8 @@ h6,
 }
 .activities-hub-carousel-arrow {
   position: absolute;
-  top: calc(50% + 4px);
+  /* Keep controls centred on the cards, excluding the row's shadow breathing room. */
+  top: calc(50% - 6px);
   z-index: 3;
   width: 31px;
   height: 31px;
@@ -4135,7 +4136,6 @@ h6,
   --hub-scrollbar-gutter: 16px;
   --hub-header-offset: 8px;
   --hub-header-row-height: 70px;
-  --hub-brand-optical-offset: 3px;
   --hub-topbar-anchor-rail-width: 236px;
   position: relative;
   isolation: isolate;
@@ -4217,7 +4217,7 @@ h6,
   justify-content: flex-start;
   gap: 9px;
   align-self: start;
-  margin-top: calc(var(--hub-header-offset) + var(--hub-brand-optical-offset));
+  margin-top: 0;
   color: #09091e;
   border: 0;
   border-radius: 999px;
@@ -4264,8 +4264,11 @@ h6,
   --hub-content-straight-edge-inset: clamp(14px, 1.1vw, 20px);
   /* Canonical clinician frame: page content aligns to the flat lower span of the floating top pill. */
   --hub-topbar-frame-start: calc(var(--hub-topbar-left-offset) - var(--hub-topbar-left-extension));
-  --hub-content-frame-start: calc(var(--hub-topbar-left-offset) + var(--hub-content-straight-edge-inset));
-  --hub-content-frame-end: calc(var(--hub-topbar-right-inset) + var(--hub-content-straight-edge-inset));
+  --hub-content-frame-left-anchor: var(--hub-topbar-left-offset);
+  --hub-content-frame-right-anchor: var(--hub-topbar-right-inset);
+  --hub-content-frame-inset: var(--hub-content-straight-edge-inset);
+  --hub-content-frame-start: calc(var(--hub-content-frame-left-anchor) + var(--hub-content-frame-inset));
+  --hub-content-frame-end: calc(var(--hub-content-frame-right-anchor) + var(--hub-content-frame-inset));
   --hub-topbar-height: 56px;
   --hub-topbar-content-gap: 14px;
   position: relative;
@@ -4276,19 +4279,17 @@ h6,
   margin-left: calc(var(--hub-topbar-bleed) * -1);
   padding-left: var(--hub-topbar-bleed);
   background: transparent;
-  overflow-y: auto;
-  overflow-x: hidden;
-  overscroll-behavior: none;
-  overscroll-behavior-y: none;
-  scrollbar-gutter: stable;
+  overflow: hidden;
   isolation: isolate;
 }
 .hub-app-column::before {
   content: "";
   display: none;
 }
-.hub-topbar-safe-occluder {
-  display: none;
+.hub-content-viewport,
+.hub-content-scroller {
+  min-width: 0;
+  min-height: 0;
 }
 .hub-content-stage {
   position: relative;
@@ -7086,27 +7087,43 @@ h6,
     right var(--sidebar-motion-duration, 360ms) var(--sidebar-motion-ease, cubic-bezier(0.16, 1, 0.3, 1));
 }
 @media (min-width: 961px) {
+  .hub-app-column {
+    --hub-content-frame-left-anchor: var(--hub-topbar-frame-start);
+    --hub-content-frame-inset: calc(var(--hub-topbar-left-extension) + var(--hub-content-straight-edge-inset));
+  }
+
+  .hub-shell-brand {
+    position: absolute;
+    top: calc(var(--hub-shell-pad-top) + var(--hub-header-offset));
+    left: 0;
+  }
+
+  .hub-left-rail > .hub-sidebar {
+    grid-row: 2;
+  }
+
   .hub-app-column::before {
     display: none;
   }
 
-  .hub-topbar-safe-occluder {
-    display: block;
-    position: fixed;
-    top: var(--hub-shell-pad-top);
-    left: calc(
-      var(--hub-shell-viewport-inset) +
-      var(--hub-shell-pad-left) +
-      var(--hub-topbar-anchor-rail-width) +
-      var(--hub-shell-gap) +
-      var(--hub-topbar-frame-start)
-    );
-    right: calc(var(--hub-shell-viewport-inset) + var(--hub-shell-pad-right) + var(--hub-topbar-right-inset));
-    /* Covers only the header-safe space above the pill; the pill itself handles rounded occlusion below. */
-    height: calc(var(--hub-header-offset) + var(--hub-shell-gap) - 1px);
-    z-index: 85;
-    pointer-events: none;
-    background: linear-gradient(135deg, #eef3fc 0%, #f2f3fb 54%, #f5eff9 100%);
+  .hub-content-viewport {
+    position: absolute;
+    top: calc(var(--hub-shell-pad-top) + var(--hub-header-offset) + var(--hub-topbar-height));
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+  }
+
+  .hub-content-scroller {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    padding-left: var(--hub-topbar-bleed);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: none;
+    scrollbar-gutter: stable;
   }
 
   .hub-topbar {
@@ -7125,7 +7142,17 @@ h6,
   }
 
   .hub-content-stage {
-    padding-top: calc(var(--hub-topbar-height) + var(--hub-topbar-content-gap));
+    padding-top: 0;
+  }
+
+  .hub-content-stage .clinician-page {
+    /* Preserve the existing page position while the viewport clips at the pill's bottom edge. */
+    padding-top: calc(
+      var(--clinician-page-pad-y) +
+      var(--hub-topbar-content-gap) -
+      var(--hub-shell-pad-top) -
+      var(--hub-header-offset)
+    ) !important;
   }
 }
 .hub-topbar::before {

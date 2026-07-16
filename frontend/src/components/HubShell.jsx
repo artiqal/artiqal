@@ -22,10 +22,11 @@ export function HubShell({ children, previewMode = false, onPreviewAction }) {
     const target = event.target;
     if (!shell || !(target instanceof Element)) return;
 
-    const mainScroller = shell.querySelector(".hub-app-column");
+    const mainScroller = shell.querySelector(".hub-content-scroller");
     if (!mainScroller) return;
 
-    if (target.closest(".hub-app-column")) return;
+    if (target.closest(".hub-content-scroller")) return;
+    if (mainScroller.scrollHeight <= mainScroller.clientHeight) return;
 
     const horizontalScroller = target.closest(".activities-hub-category-row");
     if (horizontalScroller && Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
@@ -72,8 +73,11 @@ export function HubShell({ children, previewMode = false, onPreviewAction }) {
       </div>
       <div className="hub-app-column">
         <HubTopbar previewMode={previewMode} onPreviewAction={onPreviewAction} />
-        <div className="hub-topbar-safe-occluder" aria-hidden="true" />
-        <div className="hub-content-stage">{children}</div>
+        <div className="hub-content-viewport">
+          <div className="hub-content-scroller">
+            <div className="hub-content-stage">{children}</div>
+          </div>
+        </div>
       </div>
     </div>
     </ActivitySortProvider>
