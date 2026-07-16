@@ -2,6 +2,7 @@ import { ACTIVITY_SETUP_CONFIGS } from "./activitySetupConfig";
 import { getSessionActivityKey } from "./sessionActivityIdentity";
 import {
   applyVoicemailActivityOverrides,
+  buildVoicemailRuntimeSearchParams,
   createVoicemailSessionActivity,
   normalizeVoicemailSetupSelection,
 } from "./voicemailSetup";
@@ -74,4 +75,37 @@ test("different voicemail configurations produce distinct session identities", (
   });
 
   expect(getSessionActivityKey(first)).not.toBe(getSessionActivityKey(second));
+});
+
+test("recorded runtime item IDs do not change the configured session identity", () => {
+  const activity = {
+    category: "functional-communication",
+    slug: "voicemails",
+    title: "Listening to a Voicemail",
+  };
+  const first = createVoicemailSessionActivity(activity, {
+    ...validSelection,
+    itemIds: [8, 3, 6],
+  });
+  const second = createVoicemailSessionActivity(activity, {
+    ...validSelection,
+    itemIds: [6, 3, 8],
+  });
+
+  expect(getSessionActivityKey(first)).toBe(getSessionActivityKey(second));
+});
+
+test("runtime URLs record the selected item set for stable reconstruction", () => {
+  expect(buildVoicemailRuntimeSearchParams({
+    ...validSelection,
+    itemIds: [8, 3, 6],
+  }, { letterId: 8 })).toEqual({
+    level: "amber",
+    pack: "mixed-bag",
+    language: "en",
+    count: "6",
+    questions: "4",
+    items: "8,3,6",
+    letter: "8",
+  });
 });

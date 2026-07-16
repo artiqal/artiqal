@@ -44,6 +44,14 @@ const LEVEL_ICON_ASSETS = {
 const VOICEMAIL_SUMMARY =
   "Practice functional listening comprehension with realistic voicemail messages.";
 
+function parseRuntimeItemIds(value) {
+  if (!value) return [];
+  return value
+    .split(",")
+    .map((itemId) => itemId.trim())
+    .filter(Boolean);
+}
+
 function createEmptyStats() {
   return {
     startedAt: null,
@@ -72,6 +80,7 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
     searchParams.get("questions") || "",
     10,
   );
+  const requestedItemIds = parseRuntimeItemIds(searchParams.get("items"));
   const letterId = searchParams.get("letter");
   const isDone = searchParams.get("done") === "1";
   const levels = activity.content.levels || EMPTY_LEVELS;
@@ -142,14 +151,33 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
     requestedItemCount,
     availableRuntimeItems.length,
   );
-  const runtimeItems = selectedLevel
+  let runtimeItems = selectedLevel
     ? selectVoicemailItems(selectedLevel, {
         difficultyId: selectedLevel.key,
         themePackId,
         languageId,
         itemCount: safeItemCount,
+        itemIds: requestedItemIds,
       })
     : [];
+  // Older runtime URLs did not record their selected item set. Keep a valid
+  // bookmarked item in the reconstructed set, then persist the resolved set
+  // on the next navigation.
+  if (
+    selectedLevel
+    && letterId
+    && !requestedItemIds.length
+    && !runtimeItems.some((item) => String(item.id) === String(letterId))
+    && availableRuntimeItems.some((item) => String(item.id) === String(letterId))
+  ) {
+    runtimeItems = selectVoicemailItems(selectedLevel, {
+      difficultyId: selectedLevel.key,
+      themePackId,
+      languageId,
+      itemCount: safeItemCount,
+      itemIds: [letterId, ...runtimeItems.map((item) => item.id)],
+    });
+  }
   const safeQuestionsPerVoicemail = getRequestedVoicemailQuestionCount(
     requestedQuestionsPerVoicemail,
   );
@@ -159,6 +187,7 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
     languageId,
     itemCount: safeItemCount,
     questionsPerVoicemail: safeQuestionsPerVoicemail,
+    itemIds: runtimeItems.map((item) => item.id),
   };
   const voicemail = selectedLevel
     ? runtimeItems.find((item) => String(item.id) === String(letterId))
@@ -219,6 +248,7 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
   const validatedSetupSelection = {
     ...normalizedSetupSelection,
     itemCount: validatedItemCount,
+    itemIds: selectedSetupItems.map((item) => item.id),
   };
   const isSetupValid = isVoicemailSetupValid({
     config: setupConfig,
@@ -326,7 +356,7 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
       domainCrumb,
       activityCrumb,
       levelCrumb,
-      `${itemLabelSingular} ${voicemail?.id || ""}`,
+      `${itemLabelSingular} ${currentIndex >= 0 ? currentIndex + 1 : ""}`,
     ];
     onBack = returnToSetup;
   }
@@ -403,6 +433,7 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
           <CompletionScreen
             level={selectedLevel}
             summary={computeSummary()}
+            replayLabel="Restart from Voicemail 1"
             onChangeLevel={() => {
               resetStats();
               setSearchParams({});
@@ -460,7 +491,7 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
         returnToSetup();
       }}
       levelLabel={{
-        text: `${selectedLevel.title} \u00b7 ${itemLabelSingular} ${voicemail.id} of ${runtimeItems.length}`,
+        text: `${selectedLevel.title} \u00b7 ${itemLabelSingular} ${currentIndex + 1} of ${runtimeItems.length}`,
         color: theme.pillFg,
         border: theme.pillBorder,
         shadow: theme.glow,
@@ -468,6 +499,7 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
         dot: theme.dot,
         dotMuted: theme.pillBorder,
         complexity: theme.complexity || 1,
+        showComplexity: selectedLevel.key !== "pink",
       }}
       onNext={goNext}
       nextLabel={hasNext ? `Next ${itemLabelPlural.replace(/s$/, "")}` : "Finish"}
@@ -500,6 +532,40 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
   );
 }
 
+function VoicemailLevelIndicator({
+  levelKey,
+  theme,
+  ComplexityDots,
+  showModeLabel = true,
+  showModeComplexity = false,
+}) {
+  if (levelKey === "pink") {
+    return (
+      <>
+        {showModeLabel ? (
+          <span
+            className="voicemail-level-mode-indicator text-[10px] uppercase tracking-[0.12em] font-display font-bold"
+            style={{ color: theme.dot }}
+            aria-label="Phone menu mode"
+            data-testid="phone-menu-mode-indicator"
+          >
+            Phone menu
+          </span>
+        ) : null}
+        {showModeComplexity ? (
+          <span aria-hidden="true">
+            <ComplexityDots level={theme.complexity} color={theme.dot} neon={theme.neon} />
+          </span>
+        ) : null}
+      </>
+    );
+  }
+
+  return (
+    <ComplexityDots level={theme.complexity} color={theme.dot} neon={theme.neon} />
+  );
+}
+
 function VoicemailSetup({
   activity,
   levels,
@@ -518,9 +584,9 @@ function VoicemailSetup({
           <h2>{activity.title}</h2>
         </header>
 
-        <aside className="voicemail-level-selector" aria-label="Choose difficulty">
+        <aside className="voicemail-level-selector" aria-label="Choose level or mode">
           <p className="voicemail-setup-description">{VOICEMAIL_SUMMARY}</p>
-          <div className="voicemail-level-list" role="radiogroup" aria-label="Difficulty level">
+          <div className="voicemail-level-list" role="radiogroup" aria-label="Activity level or mode">
             {visibleLevels.map((key) => {
               const level = levels[key];
               const theme = levelThemes[key];
@@ -543,14 +609,20 @@ function VoicemailSetup({
                 >
                   <img src={LEVEL_ICON_ASSETS[key]} alt="" aria-hidden="true" />
                   <strong>{level.title}</strong>
-                  <ComplexityDots level={theme.complexity} color={theme.dot} neon={theme.neon} />
+                  <VoicemailLevelIndicator
+                    levelKey={key}
+                    theme={theme}
+                    ComplexityDots={ComplexityDots}
+                    showModeLabel={key !== "pink"}
+                    showModeComplexity={key === "pink"}
+                  />
                 </button>
               );
             })}
           </div>
           <p className="voicemail-level-help">
             <Sparkles aria-hidden="true" />
-            Choose a level to view its details and configure your activity.
+            Choose a level or phone-menu mode to configure your activity.
           </p>
         </aside>
 
@@ -592,6 +664,7 @@ function ActivitySetupOptions({
   const countLabel = `${itemCount} ${itemCount === 1 ? "voicemail" : "voicemails"}`;
   const questionCount = validatedQuestionsPerVoicemail || selection.questionsPerVoicemail;
   const questionLabel = `${questionCount} ${questionCount === 1 ? "question" : "questions"} each`;
+  const summaryText = [countLabel, questionLabel, languageLabel, packLabel].join(" · ");
 
   return (
     <section
@@ -610,7 +683,11 @@ function ActivitySetupOptions({
           <img src={LEVEL_ICON_ASSETS[selectedLevelKey]} alt="" aria-hidden="true" />
           <strong>{levelTitle}</strong>
         </span>
-        <ComplexityDots level={theme.complexity} color={theme.dot} neon={theme.neon} />
+        <VoicemailLevelIndicator
+          levelKey={selectedLevelKey}
+          theme={theme}
+          ComplexityDots={ComplexityDots}
+        />
       </div>
 
       <div className="voicemail-expanded-copy">
@@ -704,8 +781,8 @@ function ActivitySetupOptions({
 
       <div className="activity-setup-summary" aria-label="Activity configuration summary">
         <strong>
-          {countLabel} <b>\u00b7</b> {questionLabel} <b>\u00b7</b> {languageLabel}{" "}
-          <b>\u00b7</b> {packLabel}
+          {summaryText.split(/( · )/).map((part, index) =>
+            part === " · " ? <b key={`separator-${index}`}>{part}</b> : part)}
         </strong>
       </div>
 

@@ -203,9 +203,7 @@ describe("Listening to a Voicemail setup-to-runtime flow", () => {
     await click('[data-testid="question-count-4"]');
 
     expect(container.querySelector('[aria-label="Activity configuration summary"]').textContent)
-      .toContain("6 voicemails");
-    expect(container.querySelector('[aria-label="Activity configuration summary"]').textContent)
-      .toContain("4 questions each");
+      .toBe("6 voicemails · 4 questions each · English (UK/US) · Mixed Bag");
 
     await click('[data-testid="add-voicemail-to-session"]');
     await settle();
@@ -233,14 +231,18 @@ describe("Listening to a Voicemail setup-to-runtime flow", () => {
 
     const runtimeChanges = getSearchChanges().filter((change) => change.params.letter);
     expect(runtimeChanges).toHaveLength(2);
-    expect(runtimeChanges[0].params).toEqual({
+    expect(runtimeChanges[0].params).toMatchObject({
       level: "amber",
       pack: "mixed-bag",
       language: "en",
       count: "6",
       questions: "4",
-      letter: "1",
     });
+    const recordedItemIds = runtimeChanges[0].params.items.split(",");
+    expect(recordedItemIds).toHaveLength(6);
+    expect(new Set(recordedItemIds).size).toBe(6);
+    expect(recordedItemIds[0]).not.toBe("1");
+    expect(runtimeChanges[0].params.letter).toBe(recordedItemIds[0]);
     expect(container.querySelector('[data-testid="level-pill"]').textContent)
       .toContain("Intermediate");
     expect(container.querySelector('[data-testid="level-pill"]').textContent)
@@ -250,7 +252,9 @@ describe("Listening to a Voicemail setup-to-runtime flow", () => {
     session = readSession();
     expect(session.activities.filter((item) => item.activity_slug === "voicemails")).toHaveLength(1);
     expect(
-      session.activities.filter((item) => item.activity_slug === "voicemails-amber-1"),
+      session.activities.filter(
+        (item) => item.activity_slug === `voicemails-amber-${recordedItemIds[0]}`,
+      ),
     ).toHaveLength(1);
   });
 
@@ -265,6 +269,46 @@ describe("Listening to a Voicemail setup-to-runtime flow", () => {
       .toContain("Voicemail 1 of 2");
     expect(container.querySelector('[data-testid="reading-questions"]').children).toHaveLength(2);
     expect(getSearchChanges()).toEqual([]);
+  });
+
+  test("reconstructs a recorded non-leading item order from the URL", async () => {
+    setInitialSearch(
+      "?level=green&pack=mixed-bag&language=en&count=3&questions=3&items=5,2,6&letter=2",
+    );
+
+    await renderFlow();
+
+    expect(container.querySelector('[data-testid="voicemail-letterhead"]').textContent)
+      .toContain("green caller 2");
+    expect(container.querySelector('[data-testid="level-pill"]').textContent)
+      .toContain("Voicemail 2 of 3");
+    expect(getSearchChanges()).toEqual([]);
+  });
+
+  test("uses Voicemail wording in the completion replay action", async () => {
+    setInitialSearch(
+      "?level=green&pack=mixed-bag&language=en&count=2&questions=3&items=5,2&done=1",
+    );
+
+    await renderFlow();
+
+    expect(container.querySelector('[data-testid="completion-replay"]').textContent)
+      .toContain("Restart from Voicemail 1");
+    expect(container.querySelector('[data-testid="completion-replay"]').textContent)
+      .not.toContain("Letter");
+  });
+
+  test("presents a clean Extended option while identifying Phone menu in setup details", async () => {
+    await renderFlow();
+
+    await click('[data-testid="difficulty-pink"]');
+
+    const pinkOption = container.querySelector('[data-testid="difficulty-pink"]');
+    expect(pinkOption.textContent.trim()).toBe("Extended");
+    expect(pinkOption.querySelector('[data-testid="phone-menu-mode-indicator"]')).toBeNull();
+    expect(pinkOption.querySelector('[data-testid="complexity-dots-3"]')).not.toBeNull();
+    expect(container.querySelector('[data-testid="voicemail-setup-options"] [data-testid="phone-menu-mode-indicator"]'))
+      .not.toBeNull();
   });
 
   test("returns incomplete runtime navigation to setup with its valid configuration preserved", async () => {

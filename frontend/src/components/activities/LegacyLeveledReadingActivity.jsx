@@ -608,7 +608,13 @@ function printAllLabels({ activity, level }) {
   w.document.close();
 }
 
-export function LegacyLeveledReadingCompletionScreen({ level, summary, onChangeLevel, onReplay }) {
+export function LegacyLeveledReadingCompletionScreen({
+  level,
+  summary,
+  onChangeLevel,
+  onReplay,
+  replayLabel = "Restart from Letter 1",
+}) {
   const theme = LEGACY_LEVEL_THEME[level.key];
   const stats = summary || {
     lettersAttempted: 0,
@@ -698,7 +704,7 @@ export function LegacyLeveledReadingCompletionScreen({ level, summary, onChangeL
           className="rounded-full font-display h-11 px-5"
           data-testid="completion-replay"
         >
-          <RefreshCw className="w-4 h-4 mr-2" /> Restart from Letter 1
+          <RefreshCw className="w-4 h-4 mr-2" /> {replayLabel}
         </Button>
         <Link
           to="/dashboard"

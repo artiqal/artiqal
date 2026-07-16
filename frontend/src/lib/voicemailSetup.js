@@ -107,6 +107,9 @@ export function buildVoicemailRuntimeSearchParams(
   selection,
   { letterId, done = false } = {},
 ) {
+  const itemIds = Array.isArray(selection.itemIds)
+    ? selection.itemIds.filter((itemId) => itemId !== undefined && itemId !== null)
+    : [];
   return {
     level: selection.difficultyId,
     pack: selection.themePackId,
@@ -115,6 +118,7 @@ export function buildVoicemailRuntimeSearchParams(
     ...(selection.questionsPerVoicemail
       ? { questions: String(selection.questionsPerVoicemail) }
       : {}),
+    ...(itemIds.length ? { items: itemIds.map(String).join(",") } : {}),
     ...(letterId !== undefined && letterId !== null
       ? { letter: String(letterId) }
       : {}),

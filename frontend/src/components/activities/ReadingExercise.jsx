@@ -85,24 +85,26 @@ export function ReadingExercise({ activity, onChangeLevel, levelLabel, onNext, n
               }}
               data-testid="level-pill"
             >
-              <span
-                aria-hidden="true"
-                className="inline-flex items-center justify-center gap-1 rounded-full px-1.5 py-1"
-                style={{ background: levelLabel.dotsBg }}
-              >
-                {[0, 1, 2].map((i) => (
-                  <span
-                    key={i}
-                    className="inline-block w-1.5 h-1.5 rounded-full"
-                    style={{
-                      background:
-                        i < (levelLabel.complexity || 1)
-                          ? levelLabel.dot
-                          : levelLabel.dotMuted,
-                    }}
-                  />
-                ))}
-              </span>
+              {levelLabel.showComplexity !== false ? (
+                <span
+                  aria-hidden="true"
+                  className="inline-flex items-center justify-center gap-1 rounded-full px-1.5 py-1"
+                  style={{ background: levelLabel.dotsBg }}
+                >
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      className="inline-block w-1.5 h-1.5 rounded-full"
+                      style={{
+                        background:
+                          i < (levelLabel.complexity || 1)
+                            ? levelLabel.dot
+                            : levelLabel.dotMuted,
+                      }}
+                    />
+                  ))}
+                </span>
+              ) : null}
               {levelLabel.text}
             </span>
           ) : <span />}
