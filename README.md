@@ -130,6 +130,32 @@ Create `frontend/.env.local`:
 REACT_APP_BACKEND_URL=http://localhost:8000
 ```
 
+The public contact form posts to the backend at `/api/contact`. Configure delivery
+in `backend/.env`; these values are never exposed to the frontend:
+
+```dotenv
+RESEND_API_KEY=re_replace_with_a_sending_key
+CONTACT_FROM_EMAIL=Artiqal <contact@example.com>
+CONTACT_TO_EMAIL=contact@example.com
+CONTACT_SUBJECT_PREFIX=[Artiqal Website]
+CONTACT_RATE_LIMIT_MAX_REQUESTS=5
+CONTACT_RATE_LIMIT_WINDOW_SECONDS=900
+```
+
+All four values are required, and the sender must use a domain verified in Resend.
+The form sends through Resend's single-email API and supports up to five optional,
+validated PDF, PNG, JPG, DOC, or DOCX attachments. Each file may be up to 10 MB,
+with a 25 MB combined limit. When delivery is not configured
+or Resend does not confirm the request, the API reports an error and does not present
+the message as sent.
+
+The Contact endpoint applies a per-IP sliding-window limit. The default is five valid,
+successfully delivered submissions per 900 seconds; the two rate-limit variables above
+may be adjusted per deployment. Invalid requests and delivery failures do not consume
+capacity. Production deployments behind a reverse proxy must configure the application
+server and proxy to supply a trustworthy client address. Artiqal does not trust arbitrary
+`X-Forwarded-For` values in application code.
+
 Install and run the frontend:
 
 ```bash

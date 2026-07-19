@@ -4,6 +4,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
 
+import asyncio
 import os
 import uuid
 import logging
@@ -13,10 +14,11 @@ import httpx
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List
 
-from fastapi import FastAPI, APIRouter, Request, Response, HTTPException, Depends, UploadFile, File
+from fastapi import FastAPI, APIRouter, Request, Response, HTTPException, Depends, UploadFile, File, Form
+from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ValidationError
 
 from content import (
     CATEGORIES,
@@ -25,6 +27,19 @@ from content import (
     get_activity,
 )
 from admin_bootstrap import bootstrap_admin_user
+from contact_delivery import (
+    MAX_ATTACHMENT_BYTES,
+    MAX_CONTACT_ATTACHMENTS,
+    MAX_TOTAL_ATTACHMENT_BYTES,
+    ContactAttachmentValidationError,
+    ContactDeliveryConfigurationError,
+    ContactDeliveryError,
+    ContactMessage,
+    ContactRateLimiter,
+    build_contact_rate_limit_response,
+    deliver_contact_message,
+    validate_contact_attachments,
+)
 from session_objective import (
     build_local_session_objective,
     build_session_document,
@@ -47,6 +62,82 @@ api_router = APIRouter(prefix="/api")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+contact_rate_limiter = ContactRateLimiter.from_environment(os.environ)
+
+
+@api_router.post("/contact", status_code=202)
+async def submit_contact_message(
+    request: Request,
+    fullName: str = Form(...),
+    contactType: str = Form(...),
+    email: str = Form(...),
+    subject: str = Form(...),
+    message: str = Form(...),
+    honeypot: str = Form(""),
+    attachments: Optional[List[UploadFile]] = File(None),
+):
+    try:
+        payload = ContactMessage(
+            fullName=fullName,
+            contactType=contactType,
+            email=email,
+            subject=subject,
+            message=message,
+            honeypot=honeypot,
+        )
+    except ValidationError:
+        raise HTTPException(status_code=422, detail="Invalid contact form data.")
+
+    if payload.honeypot:
+        return {"status": "accepted"}
+
+    uploaded_attachments = [attachment for attachment in (attachments or []) if attachment.filename]
+    attachment_specs = []
+    try:
+        if len(uploaded_attachments) > MAX_CONTACT_ATTACHMENTS:
+            raise HTTPException(status_code=400, detail="You can attach up to 5 files.")
+        combined_size = 0
+        for attachment in uploaded_attachments:
+            attachment_content = await attachment.read(MAX_ATTACHMENT_BYTES + 1)
+            if len(attachment_content) > MAX_ATTACHMENT_BYTES:
+                raise HTTPException(status_code=413, detail="Attachments must be 10 MB or smaller.")
+            combined_size += len(attachment_content)
+            if combined_size > MAX_TOTAL_ATTACHMENT_BYTES:
+                raise HTTPException(
+                    status_code=413,
+                    detail="Attachments must be 25 MB or smaller in total.",
+                )
+            attachment_specs.append(
+                (attachment.filename, attachment.content_type or "", attachment_content)
+            )
+        validated_attachments = validate_contact_attachments(attachment_specs)
+    except ContactAttachmentValidationError as error:
+        raise HTTPException(status_code=400, detail=str(error))
+    finally:
+        await asyncio.gather(*(attachment.close() for attachment in (attachments or [])))
+
+    rate_limit_key = request.client.host if request.client else "unknown"
+    rate_limit_decision = contact_rate_limiter.acquire(rate_limit_key)
+    if not rate_limit_decision.allowed:
+        payload, headers = build_contact_rate_limit_response(rate_limit_decision)
+        return JSONResponse(status_code=429, content=payload, headers=headers)
+
+    try:
+        await asyncio.to_thread(
+            deliver_contact_message,
+            payload,
+            os.environ,
+            validated_attachments,
+        )
+    except ContactDeliveryConfigurationError:
+        contact_rate_limiter.release(rate_limit_decision)
+        logger.warning("Contact delivery is not configured")
+        raise HTTPException(status_code=503, detail="Contact message delivery is not configured.")
+    except ContactDeliveryError:
+        contact_rate_limiter.release(rate_limit_decision)
+        logger.exception("Contact message delivery failed")
+        raise HTTPException(status_code=502, detail="Contact message delivery failed.")
+    return {"status": "accepted"}
 
 
 # ---------- Models ----------
