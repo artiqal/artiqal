@@ -35,8 +35,10 @@ class VoicemailContentIntegrityTests(unittest.TestCase):
         activity = get_activity("functional-communication", "voicemails")
         content_text = "\n".join(_all_strings(activity))
 
-        self.assertIsNone(re.search(r"(?:Ã|â[€“”™]|�)", content_text))
+        self.assertIsNone(re.search(r"(?:Â|Ã|â[€“”™]|�)", content_text))
         self.assertIn("Café", content_text)
+        self.assertIn("Hannah · table booking update", content_text)
+        self.assertIn("£100 fine", content_text)
 
     def test_voicemail_duration_metadata_matches_audited_audio_assets(self):
         activity = get_activity("functional-communication", "voicemails")

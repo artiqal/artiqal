@@ -1,5 +1,37 @@
 import { getValidSetupItemCount } from "./activitySetupConfig";
 
+const LEGACY_SELECTION_SEED = "voicemail-legacy-v1";
+const PHONE_MENU_DIFFICULTY_ID = "pink";
+const DEFAULT_INTERACTION_MODE = "single";
+export const VOICEMAIL_INTERACTION_MODES = Object.freeze(["single", "multiple"]);
+let fallbackSeedSequence = 0;
+
+export function isVoicemailPhoneMenuMode(difficultyId) {
+  return difficultyId === PHONE_MENU_DIFFICULTY_ID;
+}
+
+export function hasConfigurableVoicemailQuestions(difficultyId) {
+  return !isVoicemailPhoneMenuMode(difficultyId);
+}
+
+export function normalizeVoicemailInteractionMode(value) {
+  return VOICEMAIL_INTERACTION_MODES.includes(value) ? value : DEFAULT_INTERACTION_MODE;
+}
+
+export function normalizeVoicemailSelectionSeed(value) {
+  const normalized = String(value || "").trim();
+  return normalized || LEGACY_SELECTION_SEED;
+}
+
+export function createVoicemailSelectionSeed() {
+  if (typeof globalThis.crypto?.randomUUID === "function") {
+    return `v1-${globalThis.crypto.randomUUID()}`;
+  }
+
+  fallbackSeedSequence += 1;
+  return `v1-${Date.now().toString(36)}-${fallbackSeedSequence.toString(36)}`;
+}
+
 function getAvailableOption(options, requestedId, defaultId) {
   const availableOptions = (options || []).filter((option) => option.available);
   return availableOptions.find((option) => option.id === requestedId)
@@ -31,13 +63,15 @@ export function applyVoicemailActivityOverrides(data, category, config) {
   };
 }
 
-export function createDefaultVoicemailSetup(config) {
+export function createDefaultVoicemailSetup(config, selectionSeed = LEGACY_SELECTION_SEED) {
   return {
     difficultyId: config?.defaultDifficultyId || "",
     themePackId: config?.defaultThemePackId || "",
     languageId: config?.defaultLanguageId || "en",
     itemCount: config ? getValidSetupItemCount(config, config.defaultItemCount) : 1,
     questionsPerVoicemail: config?.defaultQuestionsPerVoicemail || 3,
+    interactionMode: DEFAULT_INTERACTION_MODE,
+    selectionSeed: normalizeVoicemailSelectionSeed(selectionSeed),
   };
 }
 
@@ -69,6 +103,8 @@ export function normalizeVoicemailSetupSelection(config, levels, selection = {})
     languageId: language?.id || "",
     itemCount: getValidSetupItemCount(config, requested.itemCount),
     questionsPerVoicemail,
+    interactionMode: normalizeVoicemailInteractionMode(requested.interactionMode),
+    selectionSeed: normalizeVoicemailSelectionSeed(requested.selectionSeed),
   };
 }
 
@@ -89,6 +125,8 @@ export function isVoicemailSetupValid({
 }
 
 export function createVoicemailSessionActivity(activity, selection) {
+  const includeQuestionCount = hasConfigurableVoicemailQuestions(selection.difficultyId);
+  const includeInteractionMode = isVoicemailPhoneMenuMode(selection.difficultyId);
   return {
     category: activity.category,
     activity_slug: activity.slug,
@@ -98,7 +136,13 @@ export function createVoicemailSessionActivity(activity, selection) {
       themePackId: selection.themePackId,
       languageId: selection.languageId,
       itemCount: selection.itemCount,
-      questionsPerVoicemail: selection.questionsPerVoicemail,
+      ...(includeQuestionCount
+        ? { questionsPerVoicemail: selection.questionsPerVoicemail }
+        : {}),
+      ...(includeInteractionMode
+        ? { interactionMode: normalizeVoicemailInteractionMode(selection.interactionMode) }
+        : {}),
+      selectionSeed: normalizeVoicemailSelectionSeed(selection.selectionSeed),
     },
   };
 }
@@ -107,6 +151,8 @@ export function buildVoicemailRuntimeSearchParams(
   selection,
   { letterId, done = false } = {},
 ) {
+  const includeQuestionCount = hasConfigurableVoicemailQuestions(selection.difficultyId);
+  const includeInteractionMode = isVoicemailPhoneMenuMode(selection.difficultyId);
   const itemIds = Array.isArray(selection.itemIds)
     ? selection.itemIds.filter((itemId) => itemId !== undefined && itemId !== null)
     : [];
@@ -115,8 +161,14 @@ export function buildVoicemailRuntimeSearchParams(
     pack: selection.themePackId,
     language: selection.languageId,
     count: String(selection.itemCount),
-    ...(selection.questionsPerVoicemail
+    ...(includeQuestionCount && selection.questionsPerVoicemail
       ? { questions: String(selection.questionsPerVoicemail) }
+      : {}),
+    ...(includeInteractionMode
+      ? { interaction: normalizeVoicemailInteractionMode(selection.interactionMode) }
+      : {}),
+    ...(selection.selectionSeed
+      ? { seed: normalizeVoicemailSelectionSeed(selection.selectionSeed) }
       : {}),
     ...(itemIds.length ? { items: itemIds.map(String).join(",") } : {}),
     ...(letterId !== undefined && letterId !== null

@@ -21,6 +21,8 @@ const validSelection = {
   languageId: "en",
   itemCount: 6,
   questionsPerVoicemail: 4,
+  interactionMode: "single",
+  selectionSeed: "session-seed-42",
 };
 
 test("valid voicemail setup values remain unchanged", () => {
@@ -77,6 +79,69 @@ test("different voicemail configurations produce distinct session identities", (
   expect(getSessionActivityKey(first)).not.toBe(getSessionActivityKey(second));
 });
 
+test("Extended treats its fixed decisions as content rather than question configuration", () => {
+  const activity = {
+    category: "functional-communication",
+    slug: "voicemails",
+    title: "Listening to a Voicemail",
+  };
+  const first = createVoicemailSessionActivity(activity, {
+    ...validSelection,
+    difficultyId: "pink",
+    questionsPerVoicemail: 1,
+  });
+  const second = createVoicemailSessionActivity(activity, {
+    ...validSelection,
+    difficultyId: "pink",
+    questionsPerVoicemail: 5,
+  });
+
+  expect(first.setup_config).not.toHaveProperty("questionsPerVoicemail");
+  expect(second.setup_config).not.toHaveProperty("questionsPerVoicemail");
+  expect(first.setup_config.interactionMode).toBe("single");
+  expect(getSessionActivityKey(first)).toBe(getSessionActivityKey(second));
+});
+
+test("Extended interaction choices produce distinct session identities", () => {
+  const activity = {
+    category: "functional-communication",
+    slug: "voicemails",
+    title: "Listening to a Voicemail",
+  };
+  const single = createVoicemailSessionActivity(activity, {
+    ...validSelection,
+    difficultyId: "pink",
+    interactionMode: "single",
+  });
+  const multiple = createVoicemailSessionActivity(activity, {
+    ...validSelection,
+    difficultyId: "pink",
+    interactionMode: "multiple",
+  });
+
+  expect(getSessionActivityKey(single)).not.toBe(getSessionActivityKey(multiple));
+});
+
+test("legacy Extended session identity defaults to Single interaction", () => {
+  const activity = {
+    category: "functional-communication",
+    slug: "voicemails",
+    title: "Listening to a Voicemail",
+  };
+  const current = createVoicemailSessionActivity(activity, {
+    ...validSelection,
+    difficultyId: "pink",
+    interactionMode: "single",
+  });
+  const legacy = {
+    ...current,
+    setup_config: { ...current.setup_config },
+  };
+  delete legacy.setup_config.interactionMode;
+
+  expect(getSessionActivityKey(legacy)).toBe(getSessionActivityKey(current));
+});
+
 test("recorded runtime item IDs do not change the configured session identity", () => {
   const activity = {
     category: "functional-communication",
@@ -95,6 +160,23 @@ test("recorded runtime item IDs do not change the configured session identity", 
   expect(getSessionActivityKey(first)).toBe(getSessionActivityKey(second));
 });
 
+test("selection seeds are stored in configuration without changing clinician setup identity", () => {
+  const activity = {
+    category: "functional-communication",
+    slug: "voicemails",
+    title: "Listening to a Voicemail",
+  };
+  const first = createVoicemailSessionActivity(activity, validSelection);
+  const second = createVoicemailSessionActivity(activity, {
+    ...validSelection,
+    selectionSeed: "session-seed-99",
+  });
+
+  expect(first.setup_config.selectionSeed).toBe("session-seed-42");
+  expect(second.setup_config.selectionSeed).toBe("session-seed-99");
+  expect(getSessionActivityKey(first)).toBe(getSessionActivityKey(second));
+});
+
 test("runtime URLs record the selected item set for stable reconstruction", () => {
   expect(buildVoicemailRuntimeSearchParams({
     ...validSelection,
@@ -105,7 +187,36 @@ test("runtime URLs record the selected item set for stable reconstruction", () =
     language: "en",
     count: "6",
     questions: "4",
+    seed: "session-seed-42",
     items: "8,3,6",
     letter: "8",
+  });
+});
+
+test("Extended runtime URLs omit the hidden standard question count", () => {
+  expect(buildVoicemailRuntimeSearchParams({
+    ...validSelection,
+    difficultyId: "pink",
+    itemIds: [8, 3, 6],
+  }, { letterId: 8 })).toEqual({
+    level: "pink",
+    pack: "mixed-bag",
+    language: "en",
+    count: "6",
+    interaction: "single",
+    seed: "session-seed-42",
+    items: "8,3,6",
+    letter: "8",
+  });
+});
+
+test("Extended runtime URLs preserve the selected interaction mode", () => {
+  expect(buildVoicemailRuntimeSearchParams({
+    ...validSelection,
+    difficultyId: "pink",
+    interactionMode: "multiple",
+  })).toMatchObject({
+    level: "pink",
+    interaction: "multiple",
   });
 });

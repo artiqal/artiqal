@@ -29,7 +29,7 @@ export const ACTIVITY_SETUP_CONFIGS = {
       pink: {
         title: "Extended",
         blurb:
-          "Automated phone menu tasks with scenario-based decisions. Clients choose the correct number or action.",
+          "Scenario-based automated phone menus. Navigate realistic call systems and choose the correct option to reach the intended service.",
         best_for:
           "Clients practising phone navigation, auditory scanning, and option selection.",
       },

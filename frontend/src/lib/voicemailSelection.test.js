@@ -28,15 +28,25 @@ const selection = {
   themePackId: "mixed-bag",
   languageId: "en",
   itemCount: 3,
+  selectionSeed: "seed-alpha",
 };
 
-test("voicemail item selection is reproducible without always taking source-leading items", () => {
+test("voicemail item selection is reproducible for the same explicit seed", () => {
   const first = selectVoicemailItems(level, selection).map((item) => item.id);
   const second = selectVoicemailItems(level, selection).map((item) => item.id);
 
   expect(first).toEqual(second);
   expect(first).toHaveLength(3);
   expect(first).not.toEqual([1, 2, 3]);
+});
+
+test("different explicit seeds produce different reproducible voicemail selections", () => {
+  const first = selectVoicemailItems(level, selection).map((item) => item.id);
+  const secondSelection = { ...selection, selectionSeed: "seed-bravo" };
+  const second = selectVoicemailItems(level, secondSelection).map((item) => item.id);
+
+  expect(second).toEqual(selectVoicemailItems(level, secondSelection).map((item) => item.id));
+  expect(second).not.toEqual(first);
 });
 
 test("recorded item IDs reconstruct the same configured session order", () => {
@@ -50,7 +60,7 @@ test("requested voicemail count is clamped to matching unique availability", () 
   expect(selectVoicemailItems(level, { ...selection, itemCount: 10 })).toHaveLength(5);
 });
 
-test("question selection draws from the full pool and includes later action prompts", () => {
+test("question selection draws a balanced seeded mix from the full pool", () => {
   const item = {
     id: 11,
     questions: [
@@ -58,16 +68,35 @@ test("question selection draws from the full pool and includes later action prom
       makeQuestion("What was the message about?"),
       makeQuestion("What day is the appointment?"),
       makeQuestion("Where should the listener go?"),
-      makeQuestion("What reference number was given?"),
-      makeQuestion("What should the listener do if their symptoms get worse?"),
+      makeQuestion("Why was the appointment moved?"),
+      makeQuestion("What should the listener do if the clinic is closed?"),
+      makeQuestion("Which symptoms require urgent medical advice?"),
     ],
   };
 
-  const selectedPrompts = selectVoicemailQuestions(item, 3).map((question) => question.q);
+  const selectedPrompts = selectVoicemailQuestions(item, 5, "balanced-seed")
+    .map((question) => question.q);
 
-  expect(selectedPrompts).toContain("What was the message about?");
-  expect(selectedPrompts).toContain("What should the listener do if their symptoms get worse?");
-  expect(selectedPrompts).not.toEqual(item.questions.slice(0, 3).map((question) => question.q));
+  expect(selectedPrompts).toContain("What should the listener do if the clinic is closed?");
+  expect(selectedPrompts).toContain("Which symptoms require urgent medical advice?");
+  expect(selectedPrompts.some((prompt) => prompt.startsWith("Who ") || prompt.startsWith("What ")))
+    .toBe(true);
+  expect(selectedPrompts).not.toEqual(item.questions.slice(0, 5).map((question) => question.q));
+});
+
+test("question selection is reproducible by seed and can vary the recall subset", () => {
+  const item = {
+    id: 12,
+    questions: Array.from({ length: 8 }, (_, index) => makeQuestion(`Recall ${index + 1}`)),
+  };
+
+  const first = selectVoicemailQuestions(item, 3, "question-seed-a").map((question) => question.q);
+  const repeated = selectVoicemailQuestions(item, 3, "question-seed-a")
+    .map((question) => question.q);
+  const second = selectVoicemailQuestions(item, 3, "question-seed-b").map((question) => question.q);
+
+  expect(repeated).toEqual(first);
+  expect(second).not.toEqual(first);
 });
 
 test("deterministic option reordering preserves correct answers without mutating content", () => {
@@ -78,8 +107,8 @@ test("deterministic option reordering preserves correct answers without mutating
   };
   const canonicalQuestions = JSON.parse(JSON.stringify(item.questions));
 
-  const first = selectVoicemailQuestions(item, 6);
-  const second = selectVoicemailQuestions(item, 6);
+  const first = selectVoicemailQuestions(item, 6, "option-seed");
+  const second = selectVoicemailQuestions(item, 6, "option-seed");
 
   expect(first).toEqual(second);
   first.forEach((question, index) => {

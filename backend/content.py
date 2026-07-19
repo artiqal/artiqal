@@ -4256,7 +4256,7 @@ ACTIVITIES_BY_CATEGORY = {
                                 "letterhead": {
                                     "format": "voicemail",
                                     "caller_name": "The Corner Café",
-                                    "caller_subtitle": "Hannah Â· table booking update",
+                                    "caller_subtitle": "Hannah · table booking update",
                                     "phone_number": "01632 965 022",
                                     "time_label": "Saturday, 5:12 PM",
                                     "duration": "0:34",
@@ -4459,7 +4459,7 @@ ACTIVITIES_BY_CATEGORY = {
                                     {"q": "What went wrong with the payment?", "options": ["The reference number was entered incorrectly, so the payment has not been matched to his account", "The payment was sent twice", "The bank rejected the payment"], "answer": 0},
                                     {"q": "What should Daniel not do?", "options": ["Make another payment", "Call the billing team", "Open his next bill"], "answer": 0},
                                     {"q": "What number should Daniel call?", "options": ["680 5014 3498", "0300 134 8532", "0808 196 6800"], "answer": 0},
-                                    {"q": "What might happen if Daniel does not call back?", "options": ["He may receive an automatic reminder letter next week", "His electricity will be cut off the same day", "He will be charged a Â£100 fine"], "answer": 0},
+                                    {"q": "What might happen if Daniel does not call back?", "options": ["He may receive an automatic reminder letter next week", "His electricity will be cut off the same day", "He will be charged a £100 fine"], "answer": 0},
                                 ],
                             },
                             {

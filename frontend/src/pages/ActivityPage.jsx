@@ -200,7 +200,7 @@ function ComplexityDots({ level, color, neon = false }) {
                   background: color,
                   boxShadow: neon
                     ? `0 0 6px ${color}, 0 0 12px ${color}aa`
-                    : undefined,
+                    : `0 0 5px ${color}70, 0 0 9px ${color}30`,
                 }
               : { background: "#D4D4D8" }
           }

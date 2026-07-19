@@ -4,7 +4,12 @@ export const SETUP_IDENTITY_FIELDS = [
   "languageId",
   "itemCount",
   "questionsPerVoicemail",
+  "interactionMode",
 ];
+
+const SETUP_IDENTITY_DEFAULTS = {
+  interactionMode: "single",
+};
 
 export function getSessionActivityKey(activity) {
   const activityKey = `${activity?.category || ""}/${activity?.activity_slug || ""}`;
@@ -12,7 +17,7 @@ export function getSessionActivityKey(activity) {
   if (!setupConfig) return activityKey;
 
   const configurationKey = SETUP_IDENTITY_FIELDS
-    .map((field) => `${field}:${setupConfig[field] ?? ""}`)
+    .map((field) => `${field}:${setupConfig[field] ?? SETUP_IDENTITY_DEFAULTS[field] ?? ""}`)
     .join("|");
   return `${activityKey}|${configurationKey}`;
 }
