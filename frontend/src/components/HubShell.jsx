@@ -2,18 +2,13 @@ import React, { useCallback, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { HubSidebar } from "@/components/HubSidebar";
 import { HubTopbar } from "@/components/HubTopbar";
-import { Logo } from "@/components/Logo";
+import { BrandLockup } from "@/components/Logo";
 import { ActivitySortProvider } from "@/contexts/ActivitySortContext";
 
 export function HubShell({ children, previewMode = false, onPreviewAction }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const shellRef = useRef(null);
-  const brand = (
-    <>
-      <Logo size={32} />
-      <b>artiqal</b>
-    </>
-  );
+  const brand = <BrandLockup logoSize={32} />;
 
   const handleShellWheel = useCallback((event) => {
     if (!event.deltaY || event.defaultPrevented) return;

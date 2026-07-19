@@ -1,12 +1,15 @@
 import React from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SessionProvider } from "@/contexts/SessionContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Toaster } from "@/components/ui/sonner";
 
 import LandingPage from "@/pages/LandingPage";
+import ContactPage from "@/pages/ContactPage";
+import TermsPage from "@/pages/TermsPage";
+import PrivacyPage from "@/pages/PrivacyPage";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
@@ -20,8 +23,9 @@ import SessionSummary from "@/pages/SessionSummary";
 import ExplorePage from "@/pages/ExplorePage";
 import ActivitySearchPage from "@/pages/ActivitySearchPage";
 import { HubShell } from "@/components/HubShell";
+import { RouteScrollRestoration } from "@/components/RouteScrollRestoration";
 
-function AppRouter() {
+export function AppRouter() {
   const location = useLocation();
   // Synchronous OAuth callback detection — must happen before normal routes
   if (location.hash?.includes("session_id=")) {
@@ -31,6 +35,11 @@ function AppRouter() {
   const routeTree = (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      {/* Temporary single-entry route until the unified access experience is built. */}
+      <Route path="/access-library" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route
@@ -126,6 +135,7 @@ export default function App() {
   return (
     <div className="App">
       <BrowserRouter>
+        <RouteScrollRestoration />
         <AuthProvider>
           <SessionProvider>
             <AppRouter />

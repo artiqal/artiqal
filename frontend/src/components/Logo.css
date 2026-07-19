@@ -1,0 +1,15 @@
+.artiqal-brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  flex: none;
+  color: inherit;
+  font-family: "Outfit", sans-serif;
+}
+
+.artiqal-brand-lockup b {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+}
