@@ -140,6 +140,14 @@ CONTACT_TO_EMAIL=contact@example.com
 CONTACT_SUBJECT_PREFIX=[Artiqal Website]
 CONTACT_RATE_LIMIT_MAX_REQUESTS=5
 CONTACT_RATE_LIMIT_WINDOW_SECONDS=900
+
+# Password reset delivery (uses the same Resend account)
+PASSWORD_RESET_URL=http://localhost:3000/reset-password
+PASSWORD_RESET_FROM_EMAIL=Artiqal <contact@example.com>
+PASSWORD_RESET_SUPPORT_EMAIL=support@example.com
+PASSWORD_RESET_TOKEN_TTL_SECONDS=3600
+PASSWORD_RESET_RATE_LIMIT_MAX_REQUESTS=5
+PASSWORD_RESET_RATE_LIMIT_WINDOW_SECONDS=900
 ```
 
 All four values are required, and the sender must use a domain verified in Resend.
@@ -155,6 +163,17 @@ may be adjusted per deployment. Invalid requests and delivery failures do not co
 capacity. Production deployments behind a reverse proxy must configure the application
 server and proxy to supply a trustworthy client address. Artiqal does not trust arbitrary
 `X-Forwarded-For` values in application code.
+
+Password reset requests always return the same accepted response for known, unknown,
+and Google-only accounts. Eligible email/password accounts receive a single-use link;
+only a SHA-256 hash of the token is stored, and MongoDB's TTL index removes expired
+token records. Resetting a password invalidates existing JWTs and stored login sessions.
+The password-reset limiter uses the direct client address and safe defaults of five
+requests per 900 seconds. It is process-local, so a production deployment with multiple
+workers should replace it with a shared rate-limit store. If Artiqal is deployed behind
+a reverse proxy, configure that trusted proxy and the application server to provide the
+real client address; the application deliberately does not trust arbitrary
+`X-Forwarded-For` headers.
 
 Install and run the frontend:
 

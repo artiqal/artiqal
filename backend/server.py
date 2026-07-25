@@ -14,11 +14,11 @@ import httpx
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List
 
-from fastapi import FastAPI, APIRouter, Request, Response, HTTPException, Depends, UploadFile, File, Form
+from fastapi import BackgroundTasks, FastAPI, APIRouter, Request, Response, HTTPException, Depends, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import BaseModel, EmailStr, Field, ValidationError
+from pydantic import BaseModel, EmailStr, Field, ValidationError, field_validator
 
 from content import (
     CATEGORIES,
@@ -39,6 +39,19 @@ from contact_delivery import (
     build_contact_rate_limit_response,
     deliver_contact_message,
     validate_contact_attachments,
+)
+from password_reset import (
+    GENERIC_PASSWORD_RESET_MESSAGE,
+    INVALID_PASSWORD_RESET_MESSAGE,
+    PasswordResetConfigurationError,
+    PasswordResetDeliveryError,
+    PasswordResetRateLimiter,
+    build_password_reset_rate_limit_response,
+    consume_password_reset_token,
+    create_password_reset_dispatch,
+    deliver_password_reset_email,
+    ensure_password_reset_indexes,
+    revoke_password_reset_dispatch,
 )
 from session_objective import (
     build_local_session_objective,
@@ -63,6 +76,7 @@ api_router = APIRouter(prefix="/api")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 contact_rate_limiter = ContactRateLimiter.from_environment(os.environ)
+password_reset_rate_limiter = PasswordResetRateLimiter.from_environment(os.environ)
 
 
 @api_router.post("/contact", status_code=202)
@@ -152,6 +166,24 @@ class LoginIn(BaseModel):
     password: str
 
 
+class ForgotPasswordIn(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordIn(BaseModel):
+    token: str = Field(min_length=32, max_length=512)
+    newPassword: str = Field(min_length=8, max_length=128)
+
+    @field_validator("newPassword")
+    @classmethod
+    def validate_password(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("Password cannot be blank")
+        if len(value.encode("utf-8")) > 72:
+            raise ValueError("Password must be 72 bytes or fewer")
+        return value
+
+
 class GoogleSessionIn(BaseModel):
     session_id: str
 
@@ -213,10 +245,11 @@ def verify_password(plain: str, hashed: str) -> bool:
     return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
 
 
-def create_access_token(user_id: str, email: str) -> str:
+def create_access_token(user_id: str, email: str, auth_version: int = 0) -> str:
     payload = {
         "sub": user_id,
         "email": email,
+        "ver": auth_version,
         "exp": datetime.now(timezone.utc) + timedelta(days=7),
         "type": "access",
     }
@@ -261,7 +294,7 @@ async def get_current_user(request: Request) -> dict:
             payload = jwt.decode(access_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
             if payload.get("type") == "access":
                 user = await db.users.find_one({"user_id": payload["sub"]}, {"_id": 0, "password_hash": 0})
-                if user:
+                if user and payload.get("ver", 0) == user.get("auth_version", 0):
                     return user
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
             pass
@@ -297,11 +330,12 @@ async def register(payload: RegisterIn, response: Response):
         "name": payload.name.strip(),
         "password_hash": hash_password(payload.password),
         "auth_provider": "email",
+        "auth_version": 0,
         "picture": None,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.users.insert_one(doc)
-    token = create_access_token(user_id, email)
+    token = create_access_token(user_id, email, doc["auth_version"])
     set_access_cookie(response, token)
     return public_user(doc)
 
@@ -314,9 +348,68 @@ async def login(payload: LoginIn, response: Response):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     if not verify_password(payload.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    token = create_access_token(user["user_id"], email)
+    token = create_access_token(user["user_id"], email, user.get("auth_version", 0))
     set_access_cookie(response, token)
     return public_user(user)
+
+
+async def _process_password_reset_request(email: str) -> None:
+    dispatch = None
+    try:
+        dispatch = await create_password_reset_dispatch(
+            users=db.users,
+            reset_tokens=db.password_reset_tokens,
+            email=email,
+            environ=os.environ,
+        )
+        if not dispatch:
+            return
+        await asyncio.to_thread(deliver_password_reset_email, dispatch, os.environ)
+    except PasswordResetConfigurationError:
+        if dispatch:
+            await revoke_password_reset_dispatch(db.password_reset_tokens, dispatch)
+        logger.warning("Password reset email delivery is not configured")
+    except PasswordResetDeliveryError:
+        if dispatch:
+            await revoke_password_reset_dispatch(db.password_reset_tokens, dispatch)
+        logger.exception("Password reset email delivery failed")
+    except Exception:
+        if dispatch:
+            await revoke_password_reset_dispatch(db.password_reset_tokens, dispatch)
+        logger.exception("Password reset request processing failed")
+
+
+@api_router.post("/auth/forgot-password", status_code=202)
+async def forgot_password(
+    payload: ForgotPasswordIn,
+    request: Request,
+    background_tasks: BackgroundTasks,
+):
+    client_key = request.client.host if request.client else "unknown"
+    rate_limit_decision = password_reset_rate_limiter.check(client_key)
+    if not rate_limit_decision.allowed:
+        content, headers = build_password_reset_rate_limit_response(rate_limit_decision)
+        return JSONResponse(status_code=429, content=content, headers=headers)
+
+    background_tasks.add_task(_process_password_reset_request, str(payload.email))
+    return {"message": GENERIC_PASSWORD_RESET_MESSAGE}
+
+
+@api_router.post("/auth/reset-password")
+async def reset_password(payload: ResetPasswordIn, response: Response):
+    password_was_reset = await consume_password_reset_token(
+        reset_tokens=db.password_reset_tokens,
+        users=db.users,
+        user_sessions=db.user_sessions,
+        raw_token=payload.token,
+        new_password=payload.newPassword,
+        hash_password=hash_password,
+    )
+    if not password_was_reset:
+        raise HTTPException(status_code=400, detail=INVALID_PASSWORD_RESET_MESSAGE)
+
+    clear_auth_cookies(response)
+    return {"message": "Your password has been reset successfully."}
 
 
 @api_router.post("/auth/logout")
@@ -358,6 +451,7 @@ async def google_session(payload: GoogleSessionIn, response: Response):
             "name": name,
             "picture": picture,
             "auth_provider": "google",
+            "auth_version": 0,
             "password_hash": None,
             "created_at": datetime.now(timezone.utc).isoformat(),
         }
@@ -709,6 +803,7 @@ async def startup():
     await db.users.create_index("email", unique=True)
     await db.users.create_index("user_id", unique=True)
     await db.user_sessions.create_index("session_token", unique=True)
+    await ensure_password_reset_indexes(db.password_reset_tokens)
     await db.sessions.create_index([("user_id", 1), ("created_at", -1)])
     await db.sessions.create_index("session_id", unique=True)
 

@@ -11,6 +11,8 @@ import ContactPage from "@/pages/ContactPage";
 import TermsPage from "@/pages/TermsPage";
 import PrivacyPage from "@/pages/PrivacyPage";
 import Login from "@/pages/Login";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import CategoryPage from "@/pages/CategoryPage";
@@ -41,6 +43,8 @@ export function AppRouter() {
       {/* Temporary single-entry route until the unified access experience is built. */}
       <Route path="/access-library" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/register" element={<Register />} />
       <Route
         path="/dashboard"
