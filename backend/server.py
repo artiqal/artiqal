@@ -59,6 +59,7 @@ from session_objective import (
     build_session_facts,
     select_session_objective,
 )
+from voicemail_content_provider import get_voicemail_activity
 
 # ---------- Setup ----------
 mongo_url = os.environ["MONGO_URL"]
@@ -530,6 +531,8 @@ async def get_activity_detail(category: str, activity_slug: str):
     activity = get_activity(category, activity_slug)
     if not activity:
         raise HTTPException(status_code=404, detail="Activity not found")
+    if category == "functional-communication" and activity_slug == "voicemails":
+        return await get_voicemail_activity(activity, os.environ)
     return activity
 
 
