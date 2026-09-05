@@ -237,6 +237,16 @@ Known legacy behaviour: `ActivityPage` also logs non-reading-leveled activities 
 9. Confirm the detail route resolves using the owning backend category, even if `primary_category` changes visual/filter membership.
 10. Verify library, primary category, Functional Tasks when applicable, search, favourites, information panel, Start-only navigation, direct URL, refresh, Back, and session duplicate prevention.
 
+### Free-tier activity guardrails
+
+- Give each new active runtime a clear owner under `frontend/src/components/activities/`; keep `ActivityPage.jsx` focused on route loading, normalization, shared shell, and dispatch.
+- Keep activity-specific styles beside their owner. Add rules to `frontend/src/index.css` only when they are genuinely global or shared across established consumers.
+- Keep activity-specific clinical and content rules in one owner or data source rather than duplicating them across frontend components.
+- Reuse existing activity, session, navigation, and answer-rendering infrastructure where it matches the required behaviour; do not create a parallel framework for a single activity.
+- Extend the current metadata owner instead of introducing another hard-coded activity map. Where legacy backend/frontend duplication remains, do not add a third source.
+- Add focused behavioural coverage for every new activity, including its route dispatch, core interaction, progression or completion, and session logging where applicable.
+- Treat the current Supabase Green voicemail slice as a pilot. Do not generalise it into a final cross-activity schema until additional activity requirements justify that design.
+
 ## Known legacy exceptions and drift risks
 
 - Historical `Concentric` identifiers remain only where renaming would risk compatibility (session IDs and the local-storage session key), in legacy asset-host URLs, test filenames, and clearly marked historical documents.
