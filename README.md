@@ -150,7 +150,8 @@ PASSWORD_RESET_RATE_LIMIT_MAX_REQUESTS=5
 PASSWORD_RESET_RATE_LIMIT_WINDOW_SECONDS=900
 ```
 
-All four values are required, and the sender must use a domain verified in Resend.
+The Resend key, Contact sender, recipient, and subject prefix are required for the
+Contact form, and the sender must use a domain verified in Resend.
 The form sends through Resend's single-email API and supports up to five optional,
 validated PDF, PNG, JPG, DOC, or DOCX attachments. Each file may be up to 10 MB,
 with a 25 MB combined limit. When delivery is not configured
