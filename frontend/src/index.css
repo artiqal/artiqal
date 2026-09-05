@@ -463,6 +463,7 @@ h6,
   }
 }
 .cat-card {
+  --activity-card-actions-right: 12px;
   position: relative;
   display: block;
   width: var(--activity-card-width, 205px);
@@ -588,11 +589,11 @@ h6,
     color 160ms ease;
 }
 .cat-card-favourite {
-  right: 15px;
+  right: var(--activity-card-actions-right);
   overflow: visible;
 }
 .cat-card-info-button {
-  right: 39px;
+  right: calc(var(--activity-card-actions-right) + 24px);
   color: #172033;
 }
 .cat-card-favourite:hover,
@@ -2070,6 +2071,7 @@ h6,
     justify-content: start;
   }
   .cat-card {
+    --activity-card-actions-right: 11px;
     width: var(--activity-card-width, min(205px, 100%));
     min-height: 318px;
     height: 318px;
@@ -2080,11 +2082,9 @@ h6,
   }
   .cat-card-favourite {
     top: 8px;
-    right: 14px;
   }
   .cat-card-info-button {
     top: 8px;
-    right: 38px;
   }
   .cat-card-info-panel {
     top: 40px;
