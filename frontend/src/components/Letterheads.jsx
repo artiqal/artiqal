@@ -1,5 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ChevronDown, Eraser, FileText, Globe, Highlighter, Mail, MapPin, Pause, Phone, Play, Voicemail } from "lucide-react";
+import {
+  ChevronDown,
+  Eraser,
+  FileText,
+  Globe,
+  Highlighter,
+  Info,
+  Mail,
+  MapPin,
+  Pause,
+  Phone,
+  PhoneCall,
+  Play,
+  Share2,
+  SkipBack,
+  Trash2,
+  UserRound,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 
 /* ---------- Shared body block ---------- */
 function LetterBody({ letterhead, className = "" }) {
@@ -1726,15 +1745,21 @@ function callerInitials(name) {
 
 const VOICEMAIL_SPEEDS = [0.75, 1, 1.25];
 
-function VoicemailCard({ letterhead, replayNonce = 0 }) {
+function VoicemailCard({
+  letterhead,
+  replayNonce = 0,
+  onPrevious,
+  hasPrevious = false,
+}) {
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [showTranscript, setShowTranscript] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [muted, setMuted] = useState(false);
   const [speedIdx, setSpeedIdx] = useState(1); // index into VOICEMAIL_SPEEDS
 
-  const accent = letterhead.avatar_color || "#4F46E5";
   const hasAudio = Boolean(letterhead.audio_url);
   const isPhoneMenu = letterhead.format === "phone-menu";
   // For comprehension voicemails (Foundational / Intermediate / Complex),
@@ -1757,10 +1782,13 @@ function VoicemailCard({ letterhead, replayNonce = 0 }) {
     if (!a) return;
     a.pause();
     a.currentTime = 0;
+    a.muted = false;
     setPlaying(false);
     setCurrent(0);
     setDuration(0);
     setShowTranscript(false);
+    setShowDetails(false);
+    setMuted(false);
     setSpeedIdx(1);
   }, [letterhead.audio_url]);
 
@@ -1779,6 +1807,13 @@ function VoicemailCard({ letterhead, replayNonce = 0 }) {
   }, [replayNonce]);
 
   const cycleSpeed = () => setSpeedIdx((i) => (i + 1) % VOICEMAIL_SPEEDS.length);
+
+  const toggleMuted = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.muted = !audio.muted;
+    setMuted(audio.muted);
+  };
 
   const togglePlay = () => {
     const a = audioRef.current;
@@ -1851,159 +1886,162 @@ function VoicemailCard({ letterhead, replayNonce = 0 }) {
     setCurrent(ratio * duration);
   };
 
+  const remainingTime = duration
+    ? `-${formatTime(Math.max(0, duration - current))}`
+    : shownDuration
+    ? `-${shownDuration}`
+    : "-0:00";
+
   return (
-    <div
-      className="rounded-3xl w-full overflow-hidden"
-      style={{
-        border: "1px solid rgba(199, 210, 254, 0.6)",
-        boxShadow:
-          "0 22px 50px -28px rgba(124,58,237,0.28), 0 2px 8px -2px rgba(236,72,153,0.10)",
-        background:
-          "linear-gradient(160deg, #F5F3FF 0%, #FAFAFF 30%, #FFFFFF 55%, #FDF2F8 100%)",
-      }}
-    >
-      {/* Top strip — phone notification style */}
-      <div className="px-6 sm:px-7 pt-5 flex items-center justify-between">
-        <div className="inline-flex items-center gap-2">
-          {isPhoneMenu ? (
-            <Phone className="w-4 h-4 text-indigo-600" aria-hidden="true" />
+    <div className="voicemail-player-card">
+      <div className="voicemail-player-caller">
+        <div className="voicemail-player-avatar" aria-hidden="true">
+          {hideCallerIdentity ? (
+            <UserRound className="w-10 h-10" strokeWidth={1.7} />
           ) : (
-            <Voicemail className="w-4 h-4 text-indigo-600" aria-hidden="true" />
+            <span className="font-display text-lg font-extrabold">{initials}</span>
           )}
-          <span className="text-[12px] font-display font-bold uppercase tracking-[0.22em] text-indigo-600">
-            {headerLabel}
-          </span>
         </div>
-        {headerTimeLabel ? (
-          <span className="text-[12px] font-display font-bold uppercase tracking-[0.22em] text-indigo-400">
-            {headerTimeLabel}
-          </span>
-        ) : null}
+
+        <div className="voicemail-player-caller-copy">
+          <h2>{displayCallerName}</h2>
+          <p>{displayPhoneNumber || "Private number"}</p>
+          {displaySubtitle ? <p>{displaySubtitle}</p> : null}
+          {headerTimeLabel ? <p>{letterhead.time_label}</p> : null}
+        </div>
+
+        <span className="voicemail-player-call-icon" aria-hidden="true">
+          <PhoneCall className="w-6 h-6" fill="currentColor" />
+        </span>
       </div>
 
-      {/* Caller block */}
-      <div className="px-6 sm:px-7 pt-5 pb-5 flex items-start gap-5">
-        <div
-          className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-full grid place-items-center font-display font-extrabold text-white"
-          style={{
-            background: "#4F46E5",
-            fontSize: 22,
-            letterSpacing: 1,
-            boxShadow:
-              "0 12px 30px -10px rgba(79,70,229,0.45), inset 0 1px 0 rgba(255,255,255,0.18)",
-          }}
-          aria-hidden="true"
-        >
-          {initials}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="font-display font-extrabold text-zinc-900 text-xl sm:text-[26px] leading-tight truncate">
-            {displayCallerName}
-          </div>
-          {displaySubtitle ? (
-            <div className="text-sm sm:text-[15px] text-zinc-500 mt-1.5">
-              {displaySubtitle}
-            </div>
-          ) : null}
-          {(displayPhoneNumber || shownDuration) ? (
-            <div className="mt-3 text-[13px] sm:text-sm text-zinc-500 inline-flex items-center gap-2 flex-wrap">
-              {displayPhoneNumber ? (
-                <span className="inline-flex items-center gap-2">
-                  <Phone className="w-3.5 h-3.5" />
-                  <span className="tabular-nums">{displayPhoneNumber}</span>
-                </span>
-              ) : null}
-              {displayPhoneNumber && shownDuration ? (
-                <span className="text-zinc-300">·</span>
-              ) : null}
-              {shownDuration ? <span className="tabular-nums">{shownDuration}</span> : null}
-            </div>
-          ) : null}
-        </div>
-      </div>
+      <div className="voicemail-player-audio-shell">
+        <div className="voicemail-player-audio-row">
+          <button
+            type="button"
+            onClick={togglePlay}
+            disabled={!hasAudio}
+            data-testid="voicemail-play-button"
+            aria-label={playing ? "Pause voicemail" : "Play voicemail"}
+            className="voicemail-player-primary-play"
+          >
+            {playing ? (
+              <Pause className="w-6 h-6" aria-hidden="true" />
+            ) : (
+              <Play className="w-6 h-6 translate-x-px" fill="currentColor" aria-hidden="true" />
+            )}
+          </button>
 
-      {/* Player row */}
-      <div className="px-6 sm:px-7 pb-5 flex items-center gap-4">
-        <button
-          type="button"
-          onClick={togglePlay}
-          disabled={!hasAudio}
-          data-testid="voicemail-play-button"
-          aria-label={playing ? "Pause voicemail" : "Play voicemail"}
-          className="flex-shrink-0 w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-full grid place-items-center text-white transition disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
-          style={{
-            background: "linear-gradient(135deg, #7C3AED 0%, #4F46E5 60%, #2563EB 100%)",
-            boxShadow:
-              "0 18px 36px -12px rgba(79,70,229,0.55), inset 0 1px 0 rgba(255,255,255,0.25)",
-          }}
-        >
-          {playing ? (
-            <Pause className="w-7 h-7" />
-          ) : (
-            <Play className="w-7 h-7 translate-x-[2px]" fill="currentColor" />
-          )}
-        </button>
-
-        {/* Waveform + times */}
-        <div className="flex-1 min-w-0">
           <div
             ref={waveRef}
             onClick={onWaveClick}
-            role="slider"
-            aria-label="Seek voicemail"
-            aria-valuemin={0}
-            aria-valuemax={1000}
-            aria-valuenow={progressValue}
-            data-testid="voicemail-scrubber"
-            className={`relative h-10 sm:h-12 flex items-center gap-[3px] ${
-              hasAudio && duration ? "cursor-pointer" : "cursor-not-allowed"
-            }`}
+            aria-hidden="true"
+            className={`voicemail-player-waveform ${hasAudio && duration ? "is-seekable" : ""}`}
           >
-            {waveHeights.map((h, i) => {
-              const played = i < playedBars;
-              // Bar colour interpolates blue → pink along the waveform.
-              const t = i / Math.max(1, WAVE_BARS - 1); // 0..1 left→right
-              // Lerp between #2563EB (blue) and #EC4899 (pink).
-              const r = Math.round(0x25 + (0xEC - 0x25) * t);
-              const g = Math.round(0x63 + (0x48 - 0x63) * t);
-              const b = Math.round(0xEB + (0x99 - 0xEB) * t);
-              const barColour = `rgb(${r}, ${g}, ${b})`;
+            {waveHeights.map((height, index) => {
+              const played = index < playedBars;
+              const interpolation = index / Math.max(1, WAVE_BARS - 1);
+              const red = Math.round(0x25 + (0xEC - 0x25) * interpolation);
+              const green = Math.round(0x63 + (0x48 - 0x63) * interpolation);
+              const blue = Math.round(0xEB + (0x99 - 0xEB) * interpolation);
               return (
                 <span
-                  key={i}
-                  className="flex-1 rounded-full"
+                  key={index}
                   style={{
-                    height: `${Math.round(h * 100)}%`,
-                    background: played ? barColour : barColour,
-                    opacity: played ? 1 : 0.32,
-                    transition: "opacity 120ms ease",
+                    height: `${Math.round(height * 100)}%`,
+                    background: `rgb(${red}, ${green}, ${blue})`,
+                    opacity: played ? 1 : 0.3,
                   }}
                 />
               );
             })}
           </div>
-          <div className="mt-2 flex items-center justify-between text-[12px] font-mono tabular-nums text-zinc-400">
-            <span>{formatTime(current)}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
+
+          <button
+            type="button"
+            onClick={cycleSpeed}
+            disabled={!hasAudio}
+            data-testid="voicemail-speed-button"
+            aria-label={`Playback speed ${VOICEMAIL_SPEEDS[speedIdx]}x. Click to change.`}
+            title="Change playback speed"
+            className="voicemail-player-speed"
+          >
+            {VOICEMAIL_SPEEDS[speedIdx]}×
+          </button>
         </div>
 
-        {/* Speed pill */}
+        <div className="voicemail-player-times" aria-hidden="true">
+          <span>{formatTime(current)}</span>
+          <span>{remainingTime}</span>
+        </div>
+      </div>
+
+      <div className="voicemail-player-timeline">
+        <span>{formatTime(current)}</span>
+        <input
+          type="range"
+          min="0"
+          max="1000"
+          step="1"
+          value={progressValue}
+          onChange={onSeek}
+          disabled={!hasAudio || !duration}
+          aria-label="Voicemail timeline"
+          data-testid="voicemail-scrubber"
+        />
+        <span>{remainingTime}</span>
+      </div>
+
+      <div className="voicemail-player-media-controls" aria-label="Voicemail media controls">
         <button
           type="button"
-          onClick={cycleSpeed}
-          disabled={!hasAudio}
-          data-testid="voicemail-speed-button"
-          aria-label={`Playback speed ${VOICEMAIL_SPEEDS[speedIdx]}x. Click to change.`}
-          title="Click to change playback speed"
-          className="flex-shrink-0 grid place-items-center w-14 h-14 rounded-2xl bg-white text-zinc-700 font-display font-bold text-[14px] tabular-nums transition disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-50"
-          style={{
-            border: "1px solid rgba(224, 231, 255, 0.9)",
-            boxShadow:
-              "0 8px 20px -10px rgba(79,70,229,0.22), 0 1px 0 rgba(255,255,255,0.6) inset",
-          }}
+          disabled
+          aria-label="Share voicemail unavailable"
+          title="Share unavailable"
         >
-          {VOICEMAIL_SPEEDS[speedIdx]}×
+          <Share2 className="w-5 h-5" aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          onClick={onPrevious}
+          disabled={!hasPrevious || !onPrevious}
+          aria-label="Previous voicemail"
+          data-testid="previous-voicemail-button"
+        >
+          <SkipBack className="w-5 h-5" fill="currentColor" aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          onClick={togglePlay}
+          disabled={!hasAudio}
+          aria-label={playing ? "Pause voicemail" : "Play voicemail"}
+        >
+          {playing ? (
+            <Pause className="w-6 h-6" fill="currentColor" aria-hidden="true" />
+          ) : (
+            <Play className="w-6 h-6" fill="currentColor" aria-hidden="true" />
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={toggleMuted}
+          disabled={!hasAudio}
+          aria-label={muted ? "Unmute voicemail" : "Mute voicemail"}
+          aria-pressed={muted}
+        >
+          {muted ? (
+            <VolumeX className="w-5 h-5" aria-hidden="true" />
+          ) : (
+            <Volume2 className="w-5 h-5" aria-hidden="true" />
+          )}
+        </button>
+        <button
+          type="button"
+          disabled
+          aria-label="Delete voicemail unavailable"
+          title="Delete unavailable"
+        >
+          <Trash2 className="w-5 h-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -2020,35 +2058,69 @@ function VoicemailCard({ letterhead, replayNonce = 0 }) {
         />
       ) : null}
 
-      {/* Transcript toggle */}
-      <div className="px-6 sm:px-7 pb-6">
-        <button
-          type="button"
-          onClick={() => setShowTranscript((v) => !v)}
-          disabled={!letterhead.transcript}
-          data-testid="voicemail-transcript-toggle"
-          className="inline-flex items-center gap-2 text-sm font-display font-semibold rounded-full pl-3.5 pr-5 py-2.5 bg-white text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{
-            border: "1px solid rgba(224, 231, 255, 0.9)",
-            boxShadow:
-              "0 8px 20px -10px rgba(79,70,229,0.22), 0 1px 0 rgba(255,255,255,0.6) inset",
-          }}
-          aria-expanded={showTranscript}
-        >
-          <FileText className="w-4 h-4" />
-          {showTranscript ? "Hide transcript" : "Show transcript"}
-        </button>
+      <div className="voicemail-player-bottom">
+        <div className="voicemail-player-bottom-actions">
+          <button
+            type="button"
+            onClick={() => setShowTranscript((value) => !value)}
+            disabled={!letterhead.transcript}
+            data-testid="voicemail-transcript-toggle"
+            aria-expanded={showTranscript}
+            aria-controls="voicemail-transcript-panel"
+          >
+            <FileText className="w-4 h-4" aria-hidden="true" />
+            {showTranscript ? "Hide transcript" : "Show transcript"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowDetails((value) => !value)}
+            aria-expanded={showDetails}
+            aria-controls="voicemail-caller-details"
+            data-testid="voicemail-caller-details-toggle"
+          >
+            <Info className="w-4 h-4" aria-hidden="true" />
+            Caller details
+          </button>
+        </div>
+
         {showTranscript && letterhead.transcript ? (
           <div
-            className="mt-3 rounded-xl p-4 text-[13px] sm:text-[14px] leading-relaxed text-zinc-800 whitespace-pre-line"
-            style={{ background: "#FFFFFF", border: "1px dashed #CBD5E1" }}
+            id="voicemail-transcript-panel"
+            className="voicemail-player-drawer whitespace-pre-line"
             data-testid="voicemail-transcript"
           >
             {letterhead.transcript}
           </div>
         ) : null}
+
+        {showDetails ? (
+          <div
+            id="voicemail-caller-details"
+            className="voicemail-player-drawer"
+            data-testid="voicemail-caller-details"
+          >
+            {hideCallerIdentity ? (
+              <p>
+                Caller identity is hidden during this listening task. Listen for who called
+                and why.
+              </p>
+            ) : (
+              <dl className="voicemail-player-detail-list">
+                <dt>Caller</dt>
+                <dd>{letterhead.caller_name || "Unknown Caller"}</dd>
+                <dt>Number</dt>
+                <dd>{letterhead.phone_number || "Not provided"}</dd>
+                <dt>Context</dt>
+                <dd>{letterhead.caller_subtitle || headerLabel}</dd>
+                <dt>Received</dt>
+                <dd>{letterhead.time_label || "Not provided"}</dd>
+              </dl>
+            )}
+          </div>
+        ) : null}
+
         {!hasAudio ? (
-          <div className="mt-3 text-[12px] text-zinc-500 italic">Audio coming soon.</div>
+          <p className="voicemail-player-audio-unavailable">Audio coming soon.</p>
         ) : null}
       </div>
     </div>
@@ -2226,7 +2298,12 @@ const VARIANTS = {
   "throatmin-pkg": ThroatminPackageLabel,
 };
 
-export function LetterheadView({ letterhead, replayNonce = 0 }) {
+export function LetterheadView({
+  letterhead,
+  replayNonce = 0,
+  onPrevious,
+  hasPrevious = false,
+}) {
   const key = letterhead.variant || (letterhead.logo === "orion" ? "orion" : "orion");
   const Component = VARIANTS[key] || OrionLetterhead;
   const scrollRef = useRef(null);
@@ -2319,7 +2396,12 @@ export function LetterheadView({ letterhead, replayNonce = 0 }) {
         style={{ maxWidth: "640px" }}
         data-testid="letterhead"
       >
-        <VoicemailCard letterhead={letterhead} replayNonce={replayNonce} />
+        <VoicemailCard
+          letterhead={letterhead}
+          replayNonce={replayNonce}
+          onPrevious={onPrevious}
+          hasPrevious={hasPrevious}
+        />
       </div>
     );
   }

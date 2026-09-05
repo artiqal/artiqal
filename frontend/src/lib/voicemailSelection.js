@@ -165,12 +165,18 @@ export function getAvailableVoicemailItems(
   level,
   themePackId,
   languageId = "en",
+  interactionMode = "single",
 ) {
   if (!level || themePackId !== "mixed-bag") return [];
 
+  const requestedInteractionMode = interactionMode === "multiple" ? "multiple" : "single";
   const seenIds = new Set();
   return (level.letters || []).filter((item) => {
     if ((item.languageId || "en") !== languageId) return false;
+    if (level.key === "pink") {
+      const itemInteractionMode = item.interactionMode === "multiple" ? "multiple" : "single";
+      if (itemInteractionMode !== requestedInteractionMode) return false;
+    }
     if (item.id === undefined || item.id === null) return true;
 
     const stableId = String(item.id);
@@ -194,6 +200,7 @@ export function selectVoicemailItems(level, selection) {
     level,
     selection.themePackId,
     selection.languageId,
+    selection.interactionMode,
   );
   const itemCount = getClampedVoicemailItemCount(
     selection.itemCount,

@@ -1,4 +1,5 @@
 import {
+  getAvailableVoicemailItems,
   getClampedVoicemailQuestionCount,
   selectVoicemailItems,
   selectVoicemailQuestions,
@@ -58,6 +59,30 @@ test("recorded item IDs reconstruct the same configured session order", () => {
 
 test("requested voicemail count is clamped to matching unique availability", () => {
   expect(selectVoicemailItems(level, { ...selection, itemCount: 10 })).toHaveLength(5);
+});
+
+test("pink single interaction returns existing unlabelled voicemail content", () => {
+  const pinkLevel = { ...level, key: "pink" };
+
+  expect(getAvailableVoicemailItems(pinkLevel, "mixed-bag", "en", "single"))
+    .toHaveLength(5);
+  expect(selectVoicemailItems(pinkLevel, {
+    ...selection,
+    difficultyId: "pink",
+    interactionMode: "single",
+  })).toHaveLength(3);
+});
+
+test("pink multiple interaction returns no items without falling back to single content", () => {
+  const pinkLevel = { ...level, key: "pink" };
+
+  expect(getAvailableVoicemailItems(pinkLevel, "mixed-bag", "en", "multiple"))
+    .toEqual([]);
+  expect(selectVoicemailItems(pinkLevel, {
+    ...selection,
+    difficultyId: "pink",
+    interactionMode: "multiple",
+  })).toEqual([]);
 });
 
 test("question selection draws a balanced seeded mix from the full pool", () => {

@@ -198,6 +198,34 @@ describe("Listening to a Voicemail setup-to-runtime flow", () => {
     return element;
   };
 
+  const enterText = async (selector, value) => {
+    const input = container.querySelector(selector);
+    expect(input).not.toBeNull();
+    const valueSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      "value",
+    ).set;
+    await act(async () => {
+      valueSetter.call(input, value);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await settle();
+    return input;
+  };
+
+  const pressEnter = async (selector) => {
+    const input = container.querySelector(selector);
+    expect(input).not.toBeNull();
+    await act(async () => {
+      input.dispatchEvent(new KeyboardEvent("keydown", {
+        bubbles: true,
+        cancelable: true,
+        key: "Enter",
+      }));
+    });
+    await settle();
+  };
+
   const readSession = () =>
     JSON.parse(container.querySelector('[data-testid="session-state"]').textContent || "null");
 
@@ -245,7 +273,26 @@ describe("Listening to a Voicemail setup-to-runtime flow", () => {
       .toContain("Intermediate");
     expect(container.querySelector('[data-testid="level-pill"]').textContent)
       .toContain("Voicemail 1 of 6");
-    expect(container.querySelector('[data-testid="reading-questions"]').children).toHaveLength(4);
+    expect(container.querySelector('[data-testid="reading-questions"]').children).toHaveLength(1);
+    expect(container.querySelector('[data-testid="voicemail-question-progress"]').getAttribute("aria-label"))
+      .toBe("1 of 4 questions");
+
+    const firstPrompt = container.querySelector('[data-testid="question-0-prompt"]').textContent;
+    await enterText('[data-testid="question-0-input"]', "Correct");
+    await pressEnter('[data-testid="question-0-input"]');
+
+    expect(container.querySelector('[data-testid="question-0-input"]').disabled).toBe(true);
+    expect(container.querySelector('[data-testid="question-0-feedback"]').textContent)
+      .toContain("Correct");
+
+    await click('[data-testid="question-0-submit"]');
+    await settle();
+
+    expect(container.querySelector('[data-testid="question-0"]')).toBeNull();
+    expect(container.querySelector('[data-testid="question-1-prompt"]').textContent)
+      .not.toBe(firstPrompt);
+    expect(container.querySelector('[data-testid="voicemail-question-progress"]').getAttribute("aria-label"))
+      .toBe("2 of 4 questions");
 
   });
 
@@ -322,12 +369,20 @@ describe("Listening to a Voicemail setup-to-runtime flow", () => {
 
     expect(setupOptions.querySelector('[data-testid="interaction-multiple"]').getAttribute("aria-checked"))
       .toBe("true");
+    expect(setupOptions.querySelector('[data-testid="voicemail-interaction-unavailable"]').textContent)
+      .toBe("Multiple-interaction voicemails are not available yet.");
+    expect(setupOptions.querySelector('[data-testid="start-configured-voicemail"]').disabled)
+      .toBe(true);
     expect(Array.from(
       setupOptions.querySelectorAll(".voicemail-setup-summary-line"),
       (line) => line.textContent,
     )).toEqual([
-      "6 phone menus · Multiple decisions · English (UK/US) · Mixed Bag",
+      "0 phone menus · Multiple decisions · English (UK/US) · Mixed Bag",
     ]);
+
+    await click('[data-testid="start-configured-voicemail"]');
+    await settle();
+    expect(getSearchChanges()).toEqual([]);
 
     await click('[data-testid="difficulty-amber"]');
     await finishLevelTransition();
@@ -348,7 +403,14 @@ describe("Listening to a Voicemail setup-to-runtime flow", () => {
     expect(setupOptions.querySelector('[data-testid="interaction-multiple"]').getAttribute("aria-checked"))
       .toBe("true");
     expect(setupOptions.querySelector('[data-testid="add-voicemail-to-session"]')).toBeNull();
+    expect(setupOptions.querySelector('[data-testid="start-configured-voicemail"]').disabled)
+      .toBe(true);
 
+    await click('[data-testid="interaction-single"]');
+    expect(setupOptions.querySelector('[data-testid="voicemail-interaction-unavailable"]'))
+      .toBeNull();
+    expect(setupOptions.querySelector('[data-testid="start-configured-voicemail"]').disabled)
+      .toBe(false);
     await click('[data-testid="start-configured-voicemail"]');
     await settle();
 
@@ -356,7 +418,7 @@ describe("Listening to a Voicemail setup-to-runtime flow", () => {
     expect(runtimeChange.params).toMatchObject({
       level: "pink",
       count: "6",
-      interaction: "multiple",
+      interaction: "single",
     });
     expect(runtimeChange.params).not.toHaveProperty("questions");
   });
@@ -370,11 +432,11 @@ describe("Listening to a Voicemail setup-to-runtime flow", () => {
     expect(container.querySelector('[data-testid="level-pill"]').textContent).toContain("Complex");
     expect(container.querySelector('[data-testid="level-pill"]').textContent)
       .toContain("Voicemail 1 of 2");
-    expect(container.querySelector('[data-testid="reading-questions"]').children).toHaveLength(2);
+    expect(container.querySelector('[data-testid="reading-questions"]').children).toHaveLength(1);
     expect(getSearchChanges()).toEqual([]);
   });
 
-  test("reconstructs Extended with its fixed menu decision even from a legacy question URL", async () => {
+  test("does not reconstruct multiple interaction runtime from single interaction content", async () => {
     const activity = makeVoicemailActivity();
     activity.content.levels.pink.letters.forEach((item) => {
       item.letterhead.format = "phone-menu";
@@ -385,11 +447,18 @@ describe("Listening to a Voicemail setup-to-runtime flow", () => {
     );
 
     await renderFlow(activity);
+    await settle();
 
-    expect(container.querySelector('[data-testid="difficulty-picker"]')).toBeNull();
-    expect(container.querySelector('[data-testid="level-pill"]').textContent).toContain("Extended");
-    expect(container.querySelector('[data-testid="reading-questions"]').children).toHaveLength(1);
-    expect(getSearchChanges()).toEqual([]);
+    expect(container.querySelector('[data-testid="difficulty-picker"]')).not.toBeNull();
+    expect(container.querySelector('[data-testid="reading-questions"]')).toBeNull();
+    expect(container.querySelector('[data-testid="interaction-multiple"]').getAttribute("aria-checked"))
+      .toBe("true");
+    expect(container.querySelector('[data-testid="voicemail-interaction-unavailable"]').textContent)
+      .toBe("Multiple-interaction voicemails are not available yet.");
+    expect(getSearchChanges()).toContainEqual({
+      options: { replace: true },
+      params: {},
+    });
   });
 
   test("reconstructs a recorded non-leading item order from the URL", async () => {
@@ -433,8 +502,15 @@ describe("Listening to a Voicemail setup-to-runtime flow", () => {
       .toContain("Voicemail 1 of 2");
     expect(container.querySelector('[data-testid="level-pill"]').textContent)
       .not.toContain("Letter");
-    expect(container.querySelector('[data-testid="next-letter-btn"]').textContent)
-      .toContain("Next voicemail");
+    for (let questionIndex = 0; questionIndex < 3; questionIndex += 1) {
+      await enterText(`[data-testid="question-${questionIndex}-input"]`, "Correct");
+      await pressEnter(`[data-testid="question-${questionIndex}-input"]`);
+      if (questionIndex < 2) {
+        await click(`[data-testid="question-${questionIndex}-submit"]`);
+        await settle();
+      }
+    }
+    expect(container.querySelector('[aria-label="Next voicemail"]')).not.toBeNull();
   });
 
   test("presents Extended with matching complexity dots in the option and setup header", async () => {
@@ -574,8 +650,12 @@ describe("Listening to a Voicemail setup-to-runtime flow", () => {
       container.querySelectorAll(".voicemail-setup-summary-line"),
       (line) => line.textContent,
     )).toEqual([
-      "6 phone menus · Multiple decisions · English (UK/US) · Mixed Bag",
+      "0 phone menus · Multiple decisions · English (UK/US) · Mixed Bag",
     ]);
+    expect(container.querySelector('[data-testid="voicemail-interaction-unavailable"]').textContent)
+      .toBe("Multiple-interaction voicemails are not available yet.");
+    expect(container.querySelector('[data-testid="start-configured-voicemail"]').disabled)
+      .toBe(true);
     expect(getSearchChanges()).toContainEqual({
       options: { replace: true },
       params: {},

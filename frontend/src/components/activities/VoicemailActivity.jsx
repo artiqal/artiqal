@@ -182,7 +182,7 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
 
   const selectedLevel = level && levels[level] ? levels[level] : null;
   const availableRuntimeItems = selectedLevel
-    ? getAvailableVoicemailItems(selectedLevel, themePackId, languageId)
+    ? getAvailableVoicemailItems(selectedLevel, themePackId, languageId, interactionMode)
     : [];
   const safeItemCount = getClampedVoicemailItemCount(
     requestedItemCount,
@@ -194,6 +194,7 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
         themePackId,
         languageId,
         itemCount: safeItemCount,
+        interactionMode,
         selectionSeed,
         itemIds: requestedItemIds,
       })
@@ -213,6 +214,7 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
       themePackId,
       languageId,
       itemCount: safeItemCount,
+      interactionMode,
       selectionSeed,
       itemIds: [letterId, ...runtimeItems.map((item) => item.id)],
     });
@@ -283,6 +285,7 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
     setupLevel,
     normalizedSetupSelection.themePackId,
     normalizedSetupSelection.languageId,
+    normalizedSetupSelection.interactionMode,
   );
   const selectedSetupItems = selectVoicemailItems(setupLevel, normalizedSetupSelection);
   const validatedItemCount = selectedSetupItems.length;
@@ -335,7 +338,7 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
           difficultyId: selectedLevel.key,
           themePackId,
           languageId,
-          itemCount: safeItemCount || current.itemCount,
+          itemCount: safeItemCount || requestedItemCount || current.itemCount,
           questionsPerVoicemail:
             safeQuestionsPerVoicemail || current.questionsPerVoicemail,
           interactionMode,
@@ -354,7 +357,7 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
         difficultyId: selectedLevel.key,
         themePackId,
         languageId,
-        itemCount: safeItemCount || current.itemCount,
+        itemCount: safeItemCount || requestedItemCount || current.itemCount,
         questionsPerVoicemail:
           safeQuestionsPerVoicemail || current.questionsPerVoicemail,
         interactionMode,
@@ -367,6 +370,7 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
     interactionMode,
     languageId,
     levels,
+    requestedItemCount,
     safeItemCount,
     safeQuestionsPerVoicemail,
     selectedLevel,
@@ -533,6 +537,14 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
       }),
     );
   };
+  const goPrevious = () => {
+    if (currentIndex <= 0) return;
+    setSearchParams(
+      buildVoicemailRuntimeSearchParams(runtimeSelection, {
+        letterId: runtimeItems[currentIndex - 1].id,
+      }),
+    );
+  };
   const runtimeView = (
     <ReadingExercise
       key={`${selectedLevel.key}-${voicemail.id}`}
@@ -553,6 +565,11 @@ export function VoicemailActivity({ activity, levelThemes, sharedComponents }) {
         showComplexity: selectedLevel.key !== "pink",
       }}
       onNext={goNext}
+      onPrevious={goPrevious}
+      itemProgress={{
+        current: currentIndex + 1,
+        total: runtimeItems.length,
+      }}
       nextLabel={hasNext ? `Next ${itemLabelPlural.replace(/s$/, "")}` : "Finish"}
       fullscreen={fullscreen}
       onToggleFullscreen={toggleFullscreen}
@@ -769,7 +786,9 @@ function ActivitySetupOptions({
   const levelTitle = selectedLevelData?.title || "Choose difficulty";
   const packLabel = selectedThemePack?.label || "Choose theme pack";
   const languageLabel = selectedLanguage?.label || "Choose language";
-  const itemCount = validatedItemCount || selection.itemCount;
+  const itemCount = Number.isFinite(validatedItemCount)
+    ? validatedItemCount
+    : selection.itemCount;
   const itemLabel = hasQuestionCount
     ? (itemCount === 1 ? "voicemail" : "voicemails")
     : (itemCount === 1 ? "phone menu" : "phone menus");
@@ -784,6 +803,11 @@ function ActivitySetupOptions({
     languageLabel,
     packLabel,
   ];
+  const isInteractionModeUnavailable = (
+    selectedLevelKey === "pink"
+    && selection.interactionMode === "multiple"
+    && availableItemCount === 0
+  );
 
   return (
     <section
@@ -928,7 +952,15 @@ function ActivitySetupOptions({
           </ContentTransition>
         </div>
 
-        {selection.itemCount > availableItemCount && availableItemCount > 0 ? (
+        {isInteractionModeUnavailable ? (
+          <p
+            className="activity-setup-availability"
+            role="status"
+            data-testid="voicemail-interaction-unavailable"
+          >
+            Multiple-interaction voicemails are not available yet.
+          </p>
+        ) : selection.itemCount > availableItemCount && availableItemCount > 0 ? (
           <p className="activity-setup-availability">
             {availableItemCount} available for this selection. The activity will use all available items.
           </p>

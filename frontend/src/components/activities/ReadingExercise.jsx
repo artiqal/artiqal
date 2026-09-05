@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { LetterheadView } from "@/components/Letterheads";
+import { VoicemailRuntimeWorkspace } from "@/components/activities/VoicemailRuntimeWorkspace";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSession } from "@/contexts/SessionContext";
@@ -18,7 +19,21 @@ import {
   XCircle,
 } from "lucide-react";
 
-export function ReadingExercise({ activity, onChangeLevel, levelLabel, onNext, nextLabel, fullscreen, onToggleFullscreen, onAttempt, onHint, onEnd, layout = "split" }) {
+export function ReadingExercise({
+  activity,
+  onChangeLevel,
+  levelLabel,
+  onNext,
+  onPrevious,
+  itemProgress,
+  nextLabel,
+  fullscreen,
+  onToggleFullscreen,
+  onAttempt,
+  onHint,
+  onEnd,
+  layout = "split",
+}) {
   const { text, questions, letterhead } = activity.content;
   const isPhoneMenu = letterhead?.format === "phone-menu";
   const isVoicemail = letterhead?.format === "voicemail";
@@ -73,7 +88,7 @@ export function ReadingExercise({ activity, onChangeLevel, levelLabel, onNext, n
 
   return (
     <div>
-      {onChangeLevel ? (
+      {onChangeLevel && !isVoicemail ? (
         <div className="mb-4 flex items-center justify-between flex-wrap gap-2" data-testid="leveled-reading-toolbar">
           {levelLabel ? (
             <span
@@ -185,6 +200,34 @@ export function ReadingExercise({ activity, onChangeLevel, levelLabel, onNext, n
               <LetterheadView letterhead={letterhead} replayNonce={replayNonce} />
             </div>
           </div>
+        ) : isVoicemail ? (
+          <VoicemailRuntimeWorkspace
+            activityKey={activity.slug}
+            player={(
+              <LetterheadView
+                letterhead={letterhead}
+                replayNonce={replayNonce}
+                onPrevious={onPrevious}
+                hasPrevious={(itemProgress?.current || 1) > 1}
+              />
+            )}
+            questions={questions}
+            values={values}
+            submitted={submitted}
+            hints={hints}
+            levelLabel={levelLabel}
+            nextLabel={nextLabel}
+            fullscreen={fullscreen}
+            onValueChange={(index, value) => {
+              setValues((currentValues) => ({ ...currentValues, [index]: value }));
+            }}
+            onSubmit={onSubmit}
+            onShowHint={onShowHint}
+            onNext={onNext}
+            onEnd={onEnd}
+            onChangeLevel={onChangeLevel}
+            onToggleFullscreen={onToggleFullscreen}
+          />
         ) : layout === "stacked" ? (
           <div className="space-y-6 max-w-3xl mx-auto" data-testid="reading-stacked">
             <div>
