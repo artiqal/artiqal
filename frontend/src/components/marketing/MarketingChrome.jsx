@@ -27,7 +27,7 @@ const footerGroups = [
   {
     title: "Company",
     items: [
-      { label: "About Artiqal", href: "/#about" },
+      { label: "About artiqal", href: "/#about" },
       { label: "Contact", to: "/contact" },
       { label: "Updates" },
       { label: "Accessibility" },
@@ -50,7 +50,7 @@ export function PublicNav() {
 
   return (
     <header className="landing-nav">
-      <Link className="landing-brand" to="/" aria-label="Artiqal home">
+      <Link className="landing-brand" to="/" aria-label="artiqal home">
         <BrandLockup logoSize={37} logoSrc={landingLogoMark} />
       </Link>
 
@@ -75,11 +75,11 @@ export function PublicFooter() {
     <footer className="landing-footer">
       <div className="landing-footer-inner">
         <div className="landing-footer-brand" id="about">
-          <Link className="landing-brand" to="/" aria-label="Artiqal home">
+          <Link className="landing-brand" to="/" aria-label="artiqal home">
             <BrandLockup logoSize={32} />
           </Link>
           <p>A calm clinical workspace for adult speech and language therapy.</p>
-          <small>© 2026 Artiqal. All rights reserved.</small>
+          <small>© 2026 artiqal. All rights reserved.</small>
         </div>
 
         {footerGroups.map((group) => (

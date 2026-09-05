@@ -73,7 +73,7 @@ class AdminBootstrapSafetyTests(unittest.IsolatedAsyncioTestCase):
             {
                 "user_id": "user_explicitadmin",
                 "email": "owner@example.test",
-                "name": "Concentric Admin",
+                "name": "artiqal Admin",
                 "password_hash": "hashed-value",
                 "auth_provider": "email",
                 "picture": None,

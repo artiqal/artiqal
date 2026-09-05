@@ -50,7 +50,7 @@ export function HubShell({ children, previewMode = false, onPreviewAction }) {
             type="button"
             className="hub-shell-brand"
             aria-label="artiqal home preview"
-            onClick={() => onPreviewAction?.("This is a preview of the Artiqal hub. Create a free account to open the full app.")}
+            onClick={() => onPreviewAction?.("This is a preview of the artiqal hub. Create a free account to open the full app.")}
           >
             {brand}
           </button>

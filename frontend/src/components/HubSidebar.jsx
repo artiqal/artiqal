@@ -98,7 +98,7 @@ export function HubSidebar({ collapsed: controlledCollapsed, onCollapsedChange, 
     if (href === activeHref) return;
     setActiveHref(href);
     if (previewMode) {
-      onPreviewAction?.("This is a preview of the Artiqal hub. Create a free account to use navigation and start activities.");
+      onPreviewAction?.("This is a preview of the artiqal hub. Create a free account to use navigation and start activities.");
       return;
     }
     navigate(href);

@@ -38,7 +38,7 @@ async def bootstrap_admin_user(
         {
             "user_id": user_id_factory(),
             "email": admin_email,
-            "name": "Concentric Admin",
+            "name": "artiqal Admin",
             "password_hash": hash_password(admin_password),
             "auth_provider": "email",
             "picture": None,

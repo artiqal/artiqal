@@ -71,7 +71,7 @@ JWT_ALGORITHM = "HS256"
 EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 
-app = FastAPI(title="Concentric API")
+app = FastAPI(title="artiqal API")
 api_router = APIRouter(prefix="/api")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -787,7 +787,7 @@ async def delete_session(session_id: str, user: dict = Depends(get_current_user)
 
 @api_router.get("/")
 async def root():
-    return {"app": "Concentric API", "ok": True}
+    return {"app": "artiqal API", "ok": True}
 
 
 app.include_router(api_router)

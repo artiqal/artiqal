@@ -183,7 +183,7 @@ function CoreFeaturesSection() {
 
         <article className="landing-feature-card landing-feature-library" id="activities">
           <div className="landing-library-crop">
-            <img src={activitiesPreview} alt="Current Artiqal Activities Library interface" />
+            <img src={activitiesPreview} alt="Current artiqal Activities Library interface" />
           </div>
           <h3>Ready-to-run activity library</h3>
           <p>Access a growing library of practical activities designed for adult communication goals.</p>

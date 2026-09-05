@@ -406,7 +406,7 @@ function downloadSummaryPdf(summary) {
   const html = `<!doctype html>
 <html><head>
 <meta charset="utf-8" />
-<title>Artiqal — Session Summary</title>
+<title>artiqal — Session Summary</title>
 <style>
   @page { size: A4; margin: 18mm 16mm; }
   * { box-sizing: border-box; }
@@ -435,8 +435,8 @@ function downloadSummaryPdf(summary) {
 </style>
 </head><body><div class="wrap">
   <div class="head">
-    <img class="logo-img" src="/brand/artiqal-logo-v2.png" alt="Artiqal logo" />
-    <span class="brand">Artiqal</span>
+    <img class="logo-img" src="/brand/artiqal-logo-v2.png" alt="artiqal logo" />
+    <span class="brand">artiqal</span>
     <span class="doctype">Session Summary</span>
   </div>
   <h1>${summary.taskName}</h1>
@@ -452,7 +452,7 @@ function downloadSummaryPdf(summary) {
     <div class="stat"><div class="num">${summary.correctCount} / ${summary.totalQuestions}</div><div class="lbl">Correct answers (${summary.accuracyPct}%)</div></div>
     <div class="stat"><div class="num">${summary.hintPct}%</div><div class="lbl">Hint used on questions</div></div>
   </div>
-  <div class="foot"><span>Artiqal — functional communication practice</span><span>Generated ${fmtDateTime(summary.endedAt)}</span></div>
+  <div class="foot"><span>artiqal — functional communication practice</span><span>Generated ${fmtDateTime(summary.endedAt)}</span></div>
   <div class="actions noprint">
     <button class="btn secondary" onclick="window.close()">Close</button>
     <button class="btn" onclick="window.print()">Save as PDF</button>
@@ -592,8 +592,8 @@ function printAllLabels({ activity, level }) {
   </div>
   <section class="cover">
     <div class="logo">
-      <img src="/brand/artiqal-logo-v2.png" width="36" height="36" alt="Artiqal" style="border-radius: 11px; object-fit: contain;" />
-      <span class="brand">Artiqal</span>
+      <img src="/brand/artiqal-logo-v2.png" width="36" height="36" alt="artiqal" style="border-radius: 11px; object-fit: contain;" />
+      <span class="brand">artiqal</span>
     </div>
     <div class="pill">${escapeHtml(level.title)} · ${escapeHtml(level.key.toUpperCase())}</div>
     <h1>${escapeHtml(activity.title)}</h1>

@@ -5,7 +5,7 @@ export function Logo({ size = 32, className = "", src = "/brand/artiqal-logo-v2.
   return (
     <img
       src={src}
-      alt="Artiqal logo"
+      alt="artiqal logo"
       width={size}
       height={size}
       className={className}

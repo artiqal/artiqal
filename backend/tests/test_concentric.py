@@ -1,4 +1,4 @@
-"""Backend API tests for Concentric."""
+"""Backend API tests for Artiqal."""
 import os
 import io
 import time
@@ -46,7 +46,7 @@ class TestHealth:
         assert r.status_code == 200
         data = r.json()
         assert data.get("ok") is True
-        assert data.get("app") == "Concentric API"
+        assert data.get("app") == "artiqal API"
 
 
 # ---------- Content ----------

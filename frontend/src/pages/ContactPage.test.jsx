@@ -131,7 +131,7 @@ describe("ContactPage", () => {
     await setField("fullName", "Aisha Rahman");
     await setField("contactType", "Speech-language pathologist");
     await setField("email", "aisha@example.com");
-    await setField("subject", "Artiqal activity question");
+    await setField("subject", "artiqal activity question");
     await setField("message", "I would like to learn more about the activity library.");
   }
 
@@ -161,13 +161,13 @@ describe("ContactPage", () => {
     [
       "/terms",
       "Terms of Service",
-      "These Terms of Service will explain the rules for using Artiqal, account responsibilities, subscriptions, acceptable use, intellectual property, clinical limitations, and service availability.",
+      "These Terms of Service will explain the rules for using artiqal, account responsibilities, subscriptions, acceptable use, intellectual property, clinical limitations, and service availability.",
       "This page is being prepared and is not yet the final legal agreement.",
     ],
     [
       "/privacy",
       "Privacy Policy",
-      "This Privacy Policy will explain how Artiqal collects, uses, stores, protects, and deletes personal information.",
+      "This Privacy Policy will explain how artiqal collects, uses, stores, protects, and deletes personal information.",
       "This page is being prepared and is not yet the final privacy policy.",
     ],
   ])("renders the %s placeholder route", async (pathname, heading, intro, notice) => {
@@ -198,7 +198,7 @@ describe("ContactPage", () => {
     expect(submitMessage).not.toHaveBeenCalled();
     expect(container.querySelectorAll(".contact-field-error")).toHaveLength(5);
     expect(container.textContent).toContain("Enter your full name.");
-    expect(container.textContent).toContain("Select how you’re contacting Artiqal.");
+    expect(container.textContent).toContain("Select how you’re contacting artiqal.");
     expect(container.querySelector('[name="fullName"]').getAttribute("aria-invalid")).toBe("true");
     expect(container.querySelector('#contactType').getAttribute("aria-invalid")).toBe("true");
     expect(document.activeElement).toBe(container.querySelector('[name="fullName"]'));
@@ -258,7 +258,7 @@ describe("ContactPage", () => {
       fullName: "Aisha Rahman",
       contactType: "Speech-language pathologist",
       email: "aisha@example.com",
-      subject: "Artiqal activity question",
+      subject: "artiqal activity question",
       message: "I would like to learn more about the activity library.",
       honeypot: "",
       attachments: [],

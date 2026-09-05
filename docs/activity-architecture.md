@@ -239,7 +239,7 @@ Known legacy behaviour: `ActivityPage` also logs non-reading-leveled activities 
 
 ## Known legacy exceptions and drift risks
 
-- Product naming remains "Concentric" in backend docstrings, API title/root response, test names, credentials, local-storage session key, and historical documents.
+- Historical `Concentric` identifiers remain only where renaming would risk compatibility (session IDs and the local-storage session key), in legacy asset-host URLs, test filenames, and clearly marked historical documents.
 - Backend category colours are older than `domainThemes.js`.
 - Frontend `activityCardConfig.js` duplicates some backend `ACTIVITY_CARD_METADATA` entries.
 - `activityIndex.js` contains slug-specific category and functional fallbacks.

@@ -213,7 +213,7 @@ export default function Dashboard({ previewMode = false, onPreviewAction }) {
 
   const { isActive, start: startSession } = useSession();
   const activeTaskLabel = `${todoTasks.length} ${todoTasks.length === 1 ? "task" : "tasks"}`;
-  const showPreviewNotice = (message = "This is a preview of the Artiqal hub. Create a free account to start activities.") => {
+  const showPreviewNotice = (message = "This is a preview of the artiqal hub. Create a free account to start activities.") => {
     onPreviewAction?.(message);
   };
 

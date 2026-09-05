@@ -6,7 +6,7 @@ export default function PrivacyPage() {
   return (
     <LegalPlaceholderPage
       title="Privacy Policy"
-      intro="This Privacy Policy will explain how Artiqal collects, uses, stores, protects, and deletes personal information."
+      intro="This Privacy Policy will explain how artiqal collects, uses, stores, protects, and deletes personal information."
       notice="This page is being prepared and is not yet the final privacy policy."
     />
   );

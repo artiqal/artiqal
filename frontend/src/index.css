@@ -11,7 +11,7 @@
 @tailwind utilities;
 
 :root {
-  /* Concentric design tokens */
+  /* Legacy-compatible Artiqal design tokens */
   --c-bg: #fafafa;
   --c-surface: #ffffff;
   --c-text: #0a0a0a;

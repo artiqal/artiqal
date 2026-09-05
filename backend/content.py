@@ -1,4 +1,4 @@
-﻿"""Curated static content for Concentric activities."""
+﻿"""Curated static content for Artiqal activities."""
 
 CATEGORIES = [
     {
@@ -55,7 +55,7 @@ CATEGORIES = [
         "tagline": "Browse everything",
         "color": "#4F46E5",
         "icon": "LayoutGrid",
-        "description": "Browse the full library of Concentric activities.",
+        "description": "Browse the full library of artiqal activities.",
     },
 ]
 

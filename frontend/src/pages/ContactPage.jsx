@@ -42,7 +42,7 @@ export function validateContactForm(values) {
   const errors = {};
 
   if (!values.fullName.trim()) errors.fullName = "Enter your full name.";
-  if (!values.contactType) errors.contactType = "Select how you’re contacting Artiqal.";
+  if (!values.contactType) errors.contactType = "Select how you’re contacting artiqal.";
   if (!values.email.trim()) {
     errors.email = "Enter your email address.";
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) {
@@ -182,9 +182,9 @@ export default function ContactPage({ submitMessage = submitContactMessage }) {
         <section className="contact-hero">
           <PublicNav />
           <div className="contact-hero-copy">
-            <span>Contact Artiqal</span>
+            <span>Contact artiqal</span>
             <h1>Get in touch</h1>
-            <p>Have a question, need support, or want to learn more about Artiqal? We’re here to help.</p>
+            <p>Have a question, need support, or want to learn more about artiqal? We’re here to help.</p>
           </div>
         </section>
 

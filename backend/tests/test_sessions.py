@@ -1,4 +1,4 @@
-"""Backend API tests for the NEW Concentric clinician Session Mode endpoints.
+"""Backend API tests for the Artiqal clinician Session Mode endpoints.
 
 Endpoints under test:
 - POST   /api/sessions
