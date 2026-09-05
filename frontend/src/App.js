@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 import LandingPage from "@/pages/LandingPage";
 import ContactPage from "@/pages/ContactPage";
+import PricingPage from "@/pages/PricingPage";
 import TermsPage from "@/pages/TermsPage";
 import PrivacyPage from "@/pages/PrivacyPage";
 import Login from "@/pages/Login";
@@ -38,6 +39,7 @@ export function AppRouter() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/pricing" element={<PricingPage />} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       {/* Temporary single-entry route until the unified access experience is built. */}

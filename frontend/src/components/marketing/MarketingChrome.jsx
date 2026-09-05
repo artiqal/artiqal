@@ -11,7 +11,7 @@ const footerGroups = [
     items: [
       { label: "Activities", to: "/all-activities" },
       { label: "Features", href: "/#features" },
-      { label: "Pricing", href: "/#pricing" },
+      { label: "Pricing", to: "/pricing" },
       { label: "For Clinicians", href: "/#clinicians" },
     ],
   },
@@ -56,7 +56,9 @@ export function PublicNav() {
 
       <nav aria-label="Public navigation">
         <a href={landingAnchor("about")}>About</a>
-        <a href={landingAnchor("pricing")}>Pricing</a>
+        <Link to="/pricing" aria-current={pathname === "/pricing" ? "page" : undefined}>
+          Pricing
+        </Link>
         <Link to="/contact" aria-current={pathname === "/contact" ? "page" : undefined}>
           Contact
         </Link>

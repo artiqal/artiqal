@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { PublicFooter, PublicNav } from "@/components/marketing/MarketingChrome";
+import { PricingPlans } from "@/components/marketing/PricingPlans";
 import { RotatingHeadline } from "@/components/ui/rotating-headline";
 import cloudscapeHero from "@/assets/landing-cloudscape-hero.jpg";
 import activitiesPreview from "@/assets/landing-activities-preview.jpg";
@@ -78,6 +79,7 @@ export default function LandingPage() {
 
         <WorkflowSection />
         <CoreFeaturesSection />
+        <PricingPlans />
         <FinalCta />
       </main>
 
@@ -204,7 +206,7 @@ function FeaturePoint({ icon: Icon, tone, title, text }) {
 
 function FinalCta() {
   return (
-    <section className="landing-final-cta" id="pricing">
+    <section className="landing-final-cta">
       <span>Ready when you are</span>
       <h2>Spend less time preparing.<br />Make more time for therapy.</h2>
       <p>Explore the current activity library and build calmer, more purposeful adult SLP sessions.</p>
