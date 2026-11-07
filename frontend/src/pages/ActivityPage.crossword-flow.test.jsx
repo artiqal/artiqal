@@ -90,6 +90,55 @@ describe("Crossword settings-to-runtime flow", () => {
     });
   };
 
+  const select = async (selector, value) => {
+    const element = container.querySelector(selector);
+    expect(element).not.toBeNull();
+    await act(async () => {
+      const valueSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLSelectElement.prototype,
+        "value",
+      ).set;
+      valueSetter.call(element, value);
+      element.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+  };
+
+  test("presents every existing crossword type in one settings control without removing settings", async () => {
+    await act(async () => {
+      root.render(<ActivityPage />);
+      await Promise.resolve();
+    });
+
+    const expectedTypes = [
+      "Semantic Feature Analysis (Picture Based)",
+      "Descriptions",
+      "Synonyms",
+      "Antonyms",
+      "Categories",
+      "Functional Vocabulary",
+      "Personalised Words",
+    ];
+    const typeSelect = container.querySelector('[data-testid="crossword-type-select"]');
+    const typeOptions = Array.from(typeSelect.options);
+    expect(typeOptions.map((option) => option.textContent.trim())).toEqual(expectedTypes);
+    expect(
+      container.querySelector('[data-testid="activity-page"]').classList.contains("activity-page-fit-content"),
+    ).toBe(true);
+    expect(container.querySelector(".crossword-type-selector")).toBeNull();
+    expect(container.querySelectorAll('[data-testid="crossword-type-select"]')).toHaveLength(1);
+
+    for (const type of expectedTypes) {
+      await select('[data-testid="crossword-type-select"]', type);
+      expect(typeSelect.value).toBe(type);
+    }
+
+    expect(container.querySelector(".crossword-settings-card-title h2").textContent).toBe("Crossword");
+    expect(container.querySelector('[data-testid="crossword-word-set-select"]')).not.toBeNull();
+    expect(container.querySelector('[aria-label="Number of crosswords"]')).not.toBeNull();
+    expect(container.querySelector('[aria-label="Response mode"]')).not.toBeNull();
+    expect(container.querySelector(".crossword-start-btn").textContent).toContain("Start activity");
+  });
+
   test("preserves selected settings when starting the featured crossword and adds it to the session", async () => {
     await act(async () => {
       root.render(<ActivityPage />);

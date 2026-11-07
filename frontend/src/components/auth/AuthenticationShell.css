@@ -403,6 +403,72 @@
   line-height: 1.4;
 }
 
+@media (min-width: 761px) {
+  .login-visual-copy {
+    bottom: clamp(42px, 7vh, 78px);
+  }
+
+  .login-visual-copy > span {
+    margin-bottom: 14px;
+  }
+
+  .login-visual-copy h2 {
+    font-size: clamp(2.35rem, 3.7vw, 4.4rem);
+  }
+
+  .login-visual-copy p {
+    margin-top: 18px;
+    font-size: clamp(0.96rem, 1vw, 1.08rem);
+  }
+
+  .login-auth-panel {
+    padding: clamp(34px, 5.5vh, 64px) clamp(34px, 5vw, 72px);
+  }
+
+  .login-auth-shell {
+    width: min(100%, 440px);
+  }
+
+  .login-auth-intro h1 {
+    font-size: clamp(2.25rem, 3.2vw, 3.35rem);
+  }
+
+  .login-auth-intro-icon {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 18px;
+    border-radius: 14px;
+  }
+
+  .login-google,
+  .login-reset-form {
+    margin-top: 30px;
+  }
+
+  .login-auth-panel [data-testid="google-signin-btn"],
+  .login-field input,
+  .login-auth-panel .login-submit {
+    height: 48px;
+    border-radius: 13px;
+  }
+
+  .login-divider {
+    margin: 23px 0;
+  }
+
+  .login-form {
+    gap: 17px;
+  }
+
+  .login-field {
+    gap: 7px;
+  }
+
+  .login-register-prompt {
+    margin-top: 22px;
+  }
+}
+
 @media (max-width: 1050px) {
   .login-page {
     grid-template-columns: minmax(0, 0.42fr) minmax(430px, 0.58fr);
@@ -411,15 +477,15 @@
   .login-visual-copy {
     left: 42px;
     right: 36px;
-    bottom: 56px;
+    bottom: 48px;
   }
 
   .login-visual-copy h2 {
-    font-size: clamp(2.45rem, 5.4vw, 3.75rem);
+    font-size: clamp(2.25rem, 4.6vw, 3.25rem);
   }
 
   .login-auth-panel {
-    padding-inline: clamp(34px, 5vw, 64px);
+    padding-inline: clamp(30px, 4vw, 52px);
   }
 }
 

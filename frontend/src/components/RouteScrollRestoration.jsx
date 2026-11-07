@@ -26,5 +26,12 @@ export function RouteScrollRestoration() {
 }
 
 function scrollDocumentTo({ top, left }) {
+  const hubScroller = document.querySelector(".hub-content-scroller");
+
+  if (hubScroller) {
+    hubScroller.scrollTop = top;
+    hubScroller.scrollLeft = left;
+  }
+
   window.scrollTo({ top, left, behavior: "auto" });
 }

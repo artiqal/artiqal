@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import "./CrosswordActivity.css";
 import { useNavigate } from "react-router-dom";
 import { useSmartBack } from "@/lib/navigationHistory";
 import { useSession } from "@/contexts/SessionContext";
 import { Button } from "@/components/ui/button";
+import { FocusTags } from "@/components/ui/focus-tags";
 import {
   ArrowRight,
   ChevronDown,
@@ -526,118 +528,145 @@ export function CrosswordActivity({ activity, category, BreadcrumbHeader, format
     );
   }
 
+  const setupFocus = (activity.skills || [])
+    .slice(0, 4)
+    .map((skill) => skill ? `${skill[0].toUpperCase()}${skill.slice(1)}` : skill);
+
   return (
     <section className="crossword-settings-page fade-up" data-testid="crossword-settings-page">
       {breadcrumb}
 
-      <div className="crossword-settings-heading">
-        <h1>Crossword Settings</h1>
-        <p>Configure a crossword activity for your session.</p>
-      </div>
+      <div className="crossword-setup-layout">
+        <header className="crossword-settings-heading">
+          <h1>Crossword Settings</h1>
+          <p>Configure a crossword activity for your session.</p>
+        </header>
 
-      <div className="crossword-settings-card" data-testid="crossword-settings-card">
-        <div className="crossword-settings-card-header">
-          <span className="crossword-game-tile" aria-hidden="true">
-            <Gamepad2 className="h-8 w-8" />
-          </span>
-          <div className="crossword-settings-card-title">
-            <h2>{activity.title || "Crossword"}</h2>
-          </div>
-          <span className="crossword-domain-pill">Games</span>
-        </div>
-
-        <div className="crossword-settings-divider" />
-
-        <div className="crossword-settings-grid">
-          <label className="crossword-field">
-            <span>1. Crossword type</span>
-            <span className="crossword-select-wrap">
-              <select
-                value={crosswordType}
-                onChange={(event) => setCrosswordType(event.target.value)}
-                className="crossword-select"
-                data-testid="crossword-type-select"
-              >
-                {CROSSWORD_TYPE_OPTIONS.map((option) => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
-              <ChevronDown className="h-5 w-5" aria-hidden="true" />
-            </span>
-          </label>
-
-          <label className="crossword-field">
-            <span>2. Theme / word set</span>
-            <span className="crossword-select-wrap">
-              <select
-                value={wordSet}
-                onChange={(event) => setWordSet(event.target.value)}
-                className="crossword-select"
-                data-testid="crossword-word-set-select"
-              >
-                {CROSSWORD_WORD_SET_OPTIONS.map((option) => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
-              <ChevronDown className="h-5 w-5" aria-hidden="true" />
-            </span>
-          </label>
-
-          <div className="crossword-field">
-            <span>3. Number of crosswords</span>
-            <div className="crossword-segmented" role="group" aria-label="Number of crosswords">
-              {CROSSWORD_COUNTS.map((count) => (
-                <button
-                  key={count}
-                  type="button"
-                  className={count === crosswordCount ? "is-selected" : ""}
-                  aria-pressed={count === crosswordCount}
-                  onClick={() => setCrosswordCount(count)}
-                  data-testid={`crossword-count-${count}`}
-                >
-                  {count}
-                </button>
-              ))}
+        <div className="crossword-settings-card-wrap">
+          <section className="crossword-settings-card" data-testid="crossword-settings-card">
+            <div className="crossword-settings-card-header">
+              <span className="crossword-game-tile" aria-hidden="true">
+                <Gamepad2 className="h-8 w-8" />
+              </span>
+              <div className="crossword-settings-card-title">
+                <h2>{activity.title || "Crossword"}</h2>
+              </div>
+              <span className="crossword-domain-pill">Games</span>
             </div>
-          </div>
 
-          <div className="crossword-field crossword-field-full">
-            <span>4. Response mode</span>
-            <div className="crossword-segmented crossword-segmented-wide" role="group" aria-label="Response mode">
-              {CROSSWORD_RESPONSE_MODES.map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  className={mode === responseMode ? "is-selected" : ""}
-                  aria-pressed={mode === responseMode}
-                  onClick={() => setResponseMode(mode)}
-                  data-testid={`crossword-response-${mode.toLowerCase().replace(/\s+/g, "-")}`}
-                >
-                  {mode}
-                </button>
-              ))}
+            <div className="crossword-settings-overview">
+              <div>
+                <h3>Content:</h3>
+                <p>{activity.summary || "Use clues to complete a themed crossword."}</p>
+              </div>
+              {setupFocus.length > 0 ? (
+                <div>
+                  <h3>Focus:</h3>
+                  <FocusTags items={setupFocus} />
+                </div>
+              ) : null}
             </div>
-          </div>
-        </div>
 
-        <div className="crossword-settings-footer">
-          <div className="crossword-actions">
-            <Button type="button" className="crossword-start-btn" onClick={handleStartCrossword}>
-              Start <ArrowRight className="h-4 w-4" />
-            </Button>
-            <Button type="button" className="crossword-generate-btn" onClick={handleGenerateCrossword}>
-              <Sparkles className="h-4 w-4" /> Generate crossword
-            </Button>
-            <Button type="button" variant="outline" className="crossword-add-btn" onClick={handleAddToSession}>
-              <Plus className="h-5 w-5" /> {addedToSession ? "Added to session" : "Add to session"}
-            </Button>
-          </div>
+            <div className="crossword-settings-divider" />
 
-          <div className="crossword-summary-strip" aria-label="Selected crossword settings">
-            <span><Puzzle className="h-4 w-4" /> {crosswordCount} {crosswordCount === 1 ? "crossword" : "crosswords"}</span>
-            <span><Globe className="h-4 w-4" /> {wordSet}</span>
-            <span><Keyboard className="h-4 w-4" /> {responseMode}</span>
-          </div>
+            <div className="crossword-settings-grid">
+              <div className="crossword-settings-row crossword-settings-row-type">
+                <label className="crossword-field">
+                  <span>Crossword type</span>
+                  <span className="crossword-select-wrap">
+                    <select
+                      value={crosswordType}
+                      onChange={(event) => setCrosswordType(event.target.value)}
+                      className="crossword-select"
+                      data-testid="crossword-type-select"
+                    >
+                      {CROSSWORD_TYPE_OPTIONS.map((option) => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                </label>
+
+                <label className="crossword-field">
+                  <span>Theme</span>
+                  <span className="crossword-select-wrap">
+                    <select
+                      value={wordSet}
+                      onChange={(event) => setWordSet(event.target.value)}
+                      className="crossword-select"
+                      data-testid="crossword-word-set-select"
+                    >
+                      {CROSSWORD_WORD_SET_OPTIONS.map((option) => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                </label>
+              </div>
+
+              <div className="crossword-settings-row crossword-settings-row-response">
+                <div className="crossword-field">
+                  <span>Number of crosswords</span>
+                  <div className="crossword-segmented" role="group" aria-label="Number of crosswords">
+                    {CROSSWORD_COUNTS.map((count) => (
+                      <button
+                        key={count}
+                        type="button"
+                        className={count === crosswordCount ? "is-selected" : ""}
+                        aria-pressed={count === crosswordCount}
+                        onClick={() => setCrosswordCount(count)}
+                        data-testid={`crossword-count-${count}`}
+                      >
+                        {count}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="crossword-field">
+                  <span>Response mode</span>
+                  <div className="crossword-segmented crossword-segmented-wide" role="group" aria-label="Response mode">
+                    {CROSSWORD_RESPONSE_MODES.map((mode) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        className={mode === responseMode ? "is-selected" : ""}
+                        aria-pressed={mode === responseMode}
+                        onClick={() => setResponseMode(mode)}
+                        data-testid={`crossword-response-${mode.toLowerCase().replace(/\s+/g, "-")}`}
+                      >
+                        {mode}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="crossword-settings-footer">
+              <div className="crossword-summary-strip" aria-label="Selected crossword settings">
+                <span><Puzzle className="h-4 w-4" /> {crosswordCount} {crosswordCount === 1 ? "crossword" : "crosswords"}</span>
+                <span><Globe className="h-4 w-4" /> {wordSet}</span>
+                <span><Keyboard className="h-4 w-4" /> {responseMode}</span>
+              </div>
+
+              <div className="crossword-actions">
+                <div className="crossword-secondary-actions">
+                  <Button type="button" className="crossword-generate-btn" onClick={handleGenerateCrossword}>
+                    <Sparkles className="h-4 w-4" /> Generate crossword
+                  </Button>
+                  <Button type="button" variant="outline" className="crossword-add-btn" onClick={handleAddToSession}>
+                    <Plus className="h-5 w-5" /> {addedToSession ? "Added to session" : "Add to session"}
+                  </Button>
+                </div>
+                <Button type="button" className="crossword-start-btn" onClick={handleStartCrossword}>
+                  Start activity <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     </section>

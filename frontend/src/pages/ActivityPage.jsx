@@ -84,10 +84,11 @@ export default function ActivityPage() {
     isLeveled &&
     activity.slug === "voicemails" &&
     !pageSearchParams.has("level");
+  const usesCompactSetupHeight = isVoicemailDifficultyPicker || isCrosswordSettings;
 
   return (
     <div
-      className={isVoicemailDifficultyPicker ? "activity-page-fit-content" : "min-h-screen"}
+      className={usesCompactSetupHeight ? "activity-page-fit-content" : "min-h-screen"}
       data-testid="activity-page"
     >
       <main

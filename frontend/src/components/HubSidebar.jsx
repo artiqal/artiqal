@@ -5,6 +5,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  CalendarDays,
   Grid2X2,
   Heart,
   Home,
@@ -22,6 +23,7 @@ const mainLinks = [
   { label: "Home", href: "/dashboard", icon: Home },
   { label: "Activities Library", href: "/all-activities", icon: Grid2X2, children: therapyCategoryLinks },
   { label: "Favourite Activities", href: "/explore/favourites", icon: Heart },
+  { label: "Sessions", href: "/sessions", icon: CalendarDays },
 ];
 
 const childPathMatchers = {

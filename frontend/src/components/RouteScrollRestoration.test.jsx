@@ -54,6 +54,25 @@ describe("RouteScrollRestoration", () => {
     expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "auto" });
   });
 
+  test("resets the clinician shell scroller when opening an activity route", async () => {
+    const hubScroller = document.createElement("div");
+    hubScroller.className = "hub-content-scroller";
+    hubScroller.scrollTop = 420;
+    hubScroller.scrollLeft = 18;
+    document.body.appendChild(hubScroller);
+
+    await renderRoute({
+      key: "crossword",
+      pathname: "/activity/games/crossword",
+      search: "",
+      hash: "",
+    });
+
+    expect(hubScroller.scrollTop).toBe(0);
+    expect(hubScroller.scrollLeft).toBe(0);
+    hubScroller.remove();
+  });
+
   test("resets pathname changes while leaving same-page anchors alone", async () => {
     const landing = { key: "landing", pathname: "/", search: "", hash: "" };
     await renderRoute(landing);

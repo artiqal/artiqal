@@ -24,7 +24,7 @@ export function HubTopbar({ previewMode = false, onPreviewAction }) {
     { label: "Home", to: "/dashboard", active: location.pathname === "/dashboard" },
     { label: "SLP Blueprint" },
     { label: "Help" },
-    { label: "Updates" },
+    { label: "Updates", hasUpdate: true },
   ];
 
   const handleBuildSession = () => {
@@ -43,7 +43,8 @@ export function HubTopbar({ previewMode = false, onPreviewAction }) {
               </Link>
             ) : (
               <button key={item.label} type="button" onClick={() => onPreviewAction?.(`${item.label} will be available in a future clinician workspace update.`)}>
-                {item.label}
+                <span>{item.label}</span>
+                {item.hasUpdate ? <span className="hub-topbar-update-dot" aria-label="New updates available" /> : null}
               </button>
             ),
           )}

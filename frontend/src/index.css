@@ -447,6 +447,16 @@ h6,
   align-items: stretch;
   gap: var(--activity-card-gap);
 }
+@media (min-width: 961px) {
+  .activities-card-grid {
+    --activity-card-width: 184px;
+    --activity-card-height: 280px;
+    --activity-card-media-height: 96px;
+    --activity-card-content-padding: 14px 16px 5px;
+    --activity-card-footer-height: 38px;
+    --activity-card-gap: 12px;
+  }
+}
 @media (min-width: 640px) {
   .activities-card-grid {
     grid-template-columns: repeat(auto-fill, var(--activity-card-width));
@@ -558,10 +568,12 @@ h6,
 .cat-card-functional-pill--footer {
   margin-top: 0;
   min-height: 25px;
-  padding: 0 9px;
+  max-width: 100%;
+  padding: 0 7px;
   gap: 4px;
   font-size: 8px;
   letter-spacing: 0.075em;
+  white-space: nowrap;
   box-shadow: 0 10px 20px -12px rgba(245, 158, 11, 0.72);
 }
 .cat-card-functional-pill--footer svg {
@@ -2006,18 +2018,19 @@ h6,
 .cat-card-action-row {
   width: calc(100% + 32px);
   min-height: var(--activity-card-footer-height, 44px);
+  flex: 0 0 var(--activity-card-footer-height, 44px);
   margin-left: -16px;
   margin-right: -16px;
   margin-top: 0;
-  padding: 0 14px 0 16px;
-  display: flex;
+  padding: 0 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
+  column-gap: 8px;
   border-top: 1px solid color-mix(in srgb, var(--cat-accent, #6366f1) 18%, #e8ebf3);
 }
 .cat-card-footer-slot {
   min-width: 0;
-  flex: 1 1 auto;
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
@@ -2043,6 +2056,7 @@ h6,
   font-size: 12px;
   font-weight: 700;
   line-height: 1;
+  white-space: nowrap;
   text-decoration: none;
   cursor: pointer;
 }
@@ -2109,7 +2123,7 @@ h6,
     width: calc(100% + 30px);
     margin-left: -15px;
     margin-right: -15px;
-    padding: 0 13px 0 15px;
+    padding: 0 10px;
   }
 }
 
@@ -3115,6 +3129,37 @@ h6,
   background: #151a44;
   box-shadow: 0 12px 22px -16px rgba(17, 24, 39, 0.55);
 }
+@media (min-width: 961px) {
+  .activities-hub-panel {
+    --domain-card-width: 144px;
+    --domain-card-height: 164px;
+    --domain-card-radius: 20px;
+    --domain-card-padding: 11px;
+    --domain-card-visual-height: 76px;
+    --domain-card-copy-height: 54px;
+    --domain-card-illustration-max: 80px;
+    --domain-card-blob-width: 84px;
+    --domain-card-blob-height: 70px;
+    min-height: 196px;
+    padding: 14px 16px 12px;
+  }
+  .activities-domain-head {
+    padding-inline: 18px;
+    gap: 14px;
+  }
+  .activities-hub-carousel {
+    margin-top: 10px;
+    padding-inline: 36px;
+  }
+  .activities-hub-category-row {
+    gap: 12px;
+    padding-bottom: 18px;
+  }
+  .activities-hub-panel.is-collapsed {
+    min-height: 76px;
+    padding-bottom: 16px;
+  }
+}
 @media (max-width: 1180px) {
   .activities-hub-top-grid {
     grid-template-columns: minmax(300px, 0.9fr) minmax(0, 1.1fr);
@@ -3242,13 +3287,13 @@ h6,
 
 @media (min-width: 1101px) {
   .activities-card-grid {
-    --activity-card-gap: 14px;
+    --activity-card-gap: 12px;
     width: 100%;
     display: grid;
     grid-template-columns: repeat(var(--activity-card-columns), minmax(0, 1fr));
     justify-content: stretch;
     column-gap: var(--activity-card-gap);
-    row-gap: 16px;
+    row-gap: 14px;
   }
 
   .activities-card-grid > li,
@@ -3256,6 +3301,12 @@ h6,
     min-width: 0;
     width: 100%;
     max-width: none;
+  }
+}
+
+@media (min-width: 1400px) {
+  .activities-card-grid {
+    --activity-card-columns: 6;
   }
 }
 
@@ -3832,7 +3883,7 @@ h6,
   grid-template-columns: minmax(21.5rem, 0.82fr) minmax(0, 2.18fr);
   align-items: start;
   column-gap: clamp(0.85rem, 1.6vw, 1.3rem);
-  row-gap: 0.4rem;
+  row-gap: 1.65rem;
 }
 .voicemail-setup-columns {
   grid-column: 1 / -1;
@@ -4305,16 +4356,16 @@ h6,
 
 /* ---------- Hub sidebar ---------- */
 .hub-app-shell {
-  --hub-rail-width: 236px;
-  --hub-shell-gap: 14px;
+  --hub-rail-width: 204px;
+  --hub-shell-gap: 10px;
   --hub-shell-viewport-inset: 12px;
   --hub-shell-pad-top: 12px;
   --hub-shell-pad-right: 12px;
   --hub-shell-pad-left: 14px;
   --hub-scrollbar-gutter: 16px;
   --hub-header-offset: 8px;
-  --hub-header-row-height: 70px;
-  --hub-topbar-anchor-rail-width: 236px;
+  --hub-header-row-height: 60px;
+  --hub-topbar-anchor-rail-width: 204px;
   position: relative;
   isolation: isolate;
   width: calc(100% - 24px);
@@ -4370,8 +4421,8 @@ h6,
   z-index: 1;
 }
 .hub-app-shell.is-sidebar-collapsed {
-  --hub-rail-width: 96px;
-  --hub-topbar-anchor-rail-width: 96px;
+  --hub-rail-width: 76px;
+  --hub-topbar-anchor-rail-width: 76px;
 }
 .hub-left-rail {
   position: relative;
@@ -4388,8 +4439,8 @@ h6,
 .hub-shell-brand {
   width: max-content;
   min-width: max-content;
-  height: 56px;
-  padding: 0 12px;
+  height: 50px;
+  padding: 0 10px;
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
@@ -4453,8 +4504,8 @@ h6,
   --hub-content-frame-inset: var(--hub-content-straight-edge-inset);
   --hub-content-frame-start: calc(var(--hub-content-frame-left-anchor) + var(--hub-content-frame-inset));
   --hub-content-frame-end: calc(var(--hub-content-frame-right-anchor) + var(--hub-content-frame-inset));
-  --hub-topbar-height: 56px;
-  --hub-topbar-content-gap: 14px;
+  --hub-topbar-height: 50px;
+  --hub-topbar-content-gap: 10px;
   position: relative;
   min-width: 0;
   min-height: 0;
@@ -4485,7 +4536,7 @@ h6,
   --clinician-page-max-wide: 92rem;
   --clinician-page-max-narrow: 54rem;
   --clinician-page-pad-x: clamp(1rem, 2.2vw, 2.55rem);
-  --clinician-page-pad-y: 1.65rem;
+  --clinician-page-pad-y: 1.2rem;
 }
 .hub-content-stage header[data-testid="app-header"] {
   display: none;
@@ -4504,282 +4555,9 @@ h6,
   max-width: none !important;
 }
 .hub-content-stage .clinician-page.is-compact {
-  --clinician-page-pad-y: 1.5rem;
+  --clinician-page-pad-y: 1.1rem;
 }
 
-/* Crossword settings */
-.crossword-settings-page {
-  width: 100%;
-  max-width: 68rem;
-  margin: 0;
-  color: #10132a;
-}
-.crossword-settings-heading {
-  margin-top: 0.95rem;
-}
-.crossword-settings-heading h1 {
-  margin: 0;
-  color: #10132a;
-  font-size: clamp(1.75rem, 2.25vw, 2.2rem);
-  line-height: 1;
-  font-weight: 800;
-  letter-spacing: -0.035em;
-}
-.crossword-settings-heading p {
-  margin: 0.45rem 0 0;
-  color: #667085;
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-.crossword-settings-card {
-  position: relative;
-  margin-top: 0.85rem;
-  padding: clamp(1rem, 1.7vw, 1.45rem);
-  overflow: hidden;
-  border: 1px solid rgba(22, 163, 74, 0.22);
-  border-radius: 1.35rem;
-  background:
-    radial-gradient(circle at 94% 12%, rgba(34, 197, 94, 0.08), transparent 30%),
-    radial-gradient(circle at 4% 94%, rgba(20, 184, 166, 0.06), transparent 32%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(247, 253, 250, 0.82));
-  box-shadow:
-    0 28px 72px -48px rgba(20, 83, 45, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(22px) saturate(1.12);
-  -webkit-backdrop-filter: blur(22px) saturate(1.12);
-}
-.crossword-settings-card-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-.crossword-game-tile {
-  width: 3.25rem;
-  height: 3.25rem;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  color: #16a34a;
-  border-radius: 0.82rem;
-  background:
-    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.9), transparent 42%),
-    linear-gradient(135deg, rgba(220, 252, 231, 0.95), rgba(209, 250, 229, 0.72));
-  box-shadow:
-    inset 0 0 0 1px rgba(22, 163, 74, 0.08),
-    0 16px 34px -26px rgba(22, 163, 74, 0.55);
-}
-.crossword-game-tile svg {
-  width: 1.65rem;
-  height: 1.65rem;
-}
-.crossword-settings-card-title h2 {
-  margin: 0;
-  color: #10132a;
-  font-size: clamp(1.22rem, 1.55vw, 1.5rem);
-  line-height: 1.05;
-  font-weight: 800;
-}
-.crossword-domain-pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.65rem;
-  padding: 0.22rem 0.65rem;
-  color: #15803d;
-  border-radius: 999px;
-  background: rgba(220, 252, 231, 0.8);
-  font-family: "Outfit", system-ui, sans-serif;
-  font-size: 0.78rem;
-  font-weight: 800;
-}
-.crossword-settings-divider {
-  height: 1px;
-  margin: clamp(0.85rem, 1.25vw, 1.1rem) 0;
-  background: linear-gradient(90deg, rgba(148, 163, 184, 0.28), rgba(22, 163, 74, 0.16), rgba(148, 163, 184, 0.22));
-}
-.crossword-settings-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(0.85rem, 1.5vw, 1.2rem);
-}
-.crossword-field {
-  min-width: 0;
-  display: grid;
-  gap: 0.5rem;
-  color: #10132a;
-  font-family: "Outfit", system-ui, sans-serif;
-  font-size: 0.85rem;
-  font-weight: 800;
-}
-.crossword-field-full {
-  grid-column: 1 / -1;
-}
-.crossword-select-wrap {
-  position: relative;
-  display: block;
-}
-.crossword-select-wrap svg {
-  position: absolute;
-  right: 0.85rem;
-  top: 50%;
-  width: 1rem;
-  height: 1rem;
-  color: #667085;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-.crossword-select {
-  width: 100%;
-  min-height: 2.65rem;
-  padding: 0 2.55rem 0 0.95rem;
-  color: #15172e;
-  border: 1px solid rgba(148, 163, 184, 0.42);
-  border-radius: 0.65rem;
-  outline: none;
-  appearance: none;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 10px 24px -22px rgba(15, 23, 42, 0.28);
-  font: inherit;
-  font-weight: 700;
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    background 160ms ease;
-}
-.crossword-select:focus {
-  border-color: rgba(22, 163, 74, 0.55);
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow:
-    0 0 0 4px rgba(22, 163, 74, 0.09),
-    inset 0 1px 0 rgba(255, 255, 255, 0.96);
-}
-.crossword-segmented {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  min-height: 2.65rem;
-  overflow: hidden;
-  border: 1px solid rgba(148, 163, 184, 0.42);
-  border-radius: 0.65rem;
-  background: rgba(255, 255, 255, 0.74);
-}
-.crossword-segmented-wide {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-.crossword-segmented button {
-  min-width: 0;
-  color: #596176;
-  border: 0;
-  border-right: 1px solid rgba(148, 163, 184, 0.26);
-  background: transparent;
-  font: inherit;
-  font-weight: 800;
-  transition:
-    color 160ms ease,
-    background 160ms ease,
-    box-shadow 160ms ease;
-}
-.crossword-segmented button:last-child {
-  border-right: 0;
-}
-.crossword-segmented button:hover {
-  color: #15803d;
-  background: rgba(240, 253, 244, 0.72);
-}
-.crossword-segmented button.is-selected {
-  color: #15803d;
-  background:
-    radial-gradient(circle at 30% 16%, rgba(255, 255, 255, 0.82), transparent 38%),
-    linear-gradient(135deg, rgba(240, 253, 244, 0.95), rgba(220, 252, 231, 0.78));
-  box-shadow:
-    inset 0 0 0 1px rgba(22, 163, 74, 0.44),
-    0 10px 28px -24px rgba(22, 163, 74, 0.55);
-}
-.crossword-settings-footer {
-  margin-top: clamp(1.1rem, 1.8vw, 1.45rem);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.85rem;
-}
-.crossword-actions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-}
-.crossword-start-btn,
-.crossword-generate-btn,
-.crossword-add-btn {
-  min-height: 2.75rem;
-  border-radius: 999px !important;
-  padding: 0 1.1rem !important;
-  font-family: "Outfit", system-ui, sans-serif !important;
-  font-size: 0.86rem !important;
-  font-weight: 800 !important;
-}
-.crossword-start-btn svg,
-.crossword-generate-btn svg,
-.crossword-add-btn svg {
-  width: 0.95rem;
-  height: 0.95rem;
-}
-.crossword-start-btn,
-.crossword-generate-btn {
-  color: #fff !important;
-  background: linear-gradient(135deg, #11152f, #171a3f) !important;
-  box-shadow: 0 18px 34px -22px rgba(17, 21, 47, 0.75) !important;
-}
-.crossword-start-btn {
-  background:
-    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.18), transparent 28%),
-    linear-gradient(135deg, #0f172a, #101634) !important;
-}
-.crossword-add-btn {
-  color: #17172f !important;
-  border-color: rgba(148, 163, 184, 0.38) !important;
-  background: rgba(255, 255, 255, 0.72) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
-}
-.crossword-summary-strip {
-  min-height: 2.65rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 0;
-  overflow: hidden;
-  color: #173324;
-  border-radius: 0.65rem;
-  background:
-    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.8), transparent 34%),
-    linear-gradient(135deg, rgba(240, 253, 244, 0.88), rgba(220, 252, 231, 0.58));
-  font-family: "Outfit", system-ui, sans-serif;
-  font-size: 0.78rem;
-  font-weight: 800;
-}
-.crossword-summary-strip span {
-  min-height: 1.25rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.42rem;
-  padding: 0.24rem 0.7rem;
-  border-right: 1px solid rgba(22, 101, 52, 0.12);
-  white-space: nowrap;
-}
-.crossword-summary-strip span:last-child {
-  border-right: 0;
-}
-.crossword-summary-strip svg {
-  color: #16a34a;
-}
-.crossword-start-note {
-  margin: 0.7rem 0 0;
-  color: #15803d;
-  font-family: "Outfit", system-ui, sans-serif;
-  font-size: 0.84rem;
-  font-weight: 700;
-}
 .crossword-template-area {
   margin-top: 1.05rem;
 }
@@ -5588,16 +5366,6 @@ h6,
 }
 
 @media (max-width: 980px) {
-  .crossword-settings-grid {
-    grid-template-columns: 1fr;
-  }
-  .crossword-settings-footer {
-    align-items: stretch;
-    flex-direction: column;
-  }
-  .crossword-summary-strip {
-    justify-content: flex-start;
-  }
   .crossword-template-grid {
     grid-template-columns: 1fr;
   }
@@ -5627,26 +5395,6 @@ h6,
 }
 
 @media (max-width: 640px) {
-  .crossword-settings-card-header {
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
-  .crossword-game-tile {
-    width: 3rem;
-    height: 3rem;
-  }
-  .crossword-segmented,
-  .crossword-segmented-wide {
-    grid-template-columns: 1fr;
-  }
-  .crossword-segmented button {
-    min-height: 2.55rem;
-    border-right: 0;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.24);
-  }
-  .crossword-segmented button:last-child {
-    border-bottom: 0;
-  }
   .crossword-play-card-head,
   .crossword-template-area.is-active .crossword-template-heading,
   .crossword-play-footer {
@@ -5691,9 +5439,9 @@ h6,
 }
 .hub-home-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 390px);
-  gap: 22px;
-  align-items: start;
+  grid-template-columns: minmax(0, 1.9fr) minmax(300px, 0.9fr);
+  gap: 18px;
+  align-items: stretch;
 }
 .hub-home-main-column,
 .hub-home-side-column {
@@ -5702,30 +5450,31 @@ h6,
   gap: 22px;
 }
 .hub-home-hero-card,
+.hub-home-today-card,
 .hub-home-todo-card,
 .hub-home-calendar-card {
-  border: 1px solid rgba(224, 226, 236, 0.78);
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow: 0 18px 48px rgba(35, 39, 84, 0.06);
-  backdrop-filter: blur(18px) saturate(1.25);
-  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  border: 1px solid rgba(218, 225, 240, 0.82);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 48px rgba(35, 52, 98, 0.065);
 }
 .hub-home-hero-card {
   position: relative;
-  min-height: 240px;
-  padding: 30px;
+  min-height: 320px;
+  padding: clamp(28px, 3vw, 42px);
   overflow: hidden;
-  border-color: rgba(255, 255, 255, 0.62);
-  color: #ffffff;
+  display: flex;
+  align-items: center;
+  color: #07133f;
+  border-color: rgba(214, 225, 241, 0.7);
   background:
-    radial-gradient(circle at 80% 8%, rgba(196, 122, 255, 0.58), transparent 28%),
-    radial-gradient(circle at 91% 80%, rgba(139, 165, 255, 0.58), transparent 34%),
-    radial-gradient(circle at 11% 12%, rgba(255, 187, 101, 0.76), transparent 38%),
-    linear-gradient(128deg, #ffb766 0%, #ff8d8f 34%, #ed69bd 62%, #91a9ff 100%);
+    linear-gradient(90deg, rgba(246, 250, 255, 0.96) 0%, rgba(242, 248, 255, 0.84) 32%, rgba(235, 246, 255, 0.34) 57%, rgba(224, 241, 255, 0.04) 76%),
+    var(--hub-home-hero-image);
+  background-position: center;
+  background-size: cover;
   box-shadow:
-    0 24px 58px -30px rgba(63, 45, 112, 0.36),
-    inset 0 1px 0 rgba(255, 255, 255, 0.48);
+    0 22px 52px -30px rgba(26, 57, 110, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 .hub-home-hero-flow {
   position: absolute;
@@ -5764,24 +5513,60 @@ h6,
 .hub-home-hero-copy {
   position: relative;
   z-index: 1;
-  max-width: 670px;
+  max-width: min(590px, 68%);
+}
+.hub-home-welcome-label {
+  display: block;
+  margin-bottom: 16px;
+  color: #17275c;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
 }
 .hub-home-hero-copy h1 {
   margin: 0;
-  color: #ffffff;
+  color: #07133f;
   font-family: "Outfit", sans-serif;
-  font-size: clamp(38px, 4.2vw, 54px);
+  font-size: clamp(40px, 3.7vw, 56px);
   font-weight: 900;
-  line-height: 0.96;
-  letter-spacing: 0;
-  text-shadow: 0 14px 30px rgba(88, 54, 114, 0.16);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
 }
 .hub-home-hero-copy p {
-  max-width: 610px;
-  margin: 32px 0 0;
-  color: rgba(255, 255, 255, 0.95);
-  font-size: 16px;
-  line-height: 1.48;
+  max-width: 460px;
+  margin: 16px 0 0;
+  color: #53699f;
+  font-size: clamp(16px, 1.45vw, 20px);
+  line-height: 1.38;
+}
+.hub-home-explore-button {
+  width: fit-content;
+  min-height: 50px;
+  margin-top: 24px;
+  padding: 0 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 14px;
+  background: #123cf3;
+  box-shadow: 0 15px 30px -17px rgba(18, 60, 243, 0.72);
+  font-family: "Outfit", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+.hub-home-explore-button:hover {
+  color: #ffffff;
+  background: #0d32df;
+  box-shadow: 0 18px 32px -16px rgba(18, 60, 243, 0.78);
+  transform: translateY(-1px);
+}
+.hub-home-explore-button svg:last-child {
+  margin-left: 8px;
 }
 .hub-home-hero-actions {
   margin-top: 18px;
@@ -6238,8 +6023,143 @@ h6,
   background: linear-gradient(135deg, #6d5cff, #8b5cf6);
   box-shadow: 0 14px 28px -18px rgba(93, 72, 255, 0.72);
 }
+.hub-home-today-card {
+  min-width: 0;
+  min-height: 320px;
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+}
+.hub-home-today-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 0 2px 14px;
+}
+.hub-home-today-header h2 {
+  margin: 0;
+  color: #08143f;
+  font-family: "Outfit", sans-serif;
+  font-size: 31px;
+  font-weight: 850;
+  letter-spacing: -0.035em;
+}
+.hub-home-today-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.hub-home-today-title > span {
+  padding: 4px 8px;
+  color: #5748ef;
+  border-radius: 999px;
+  background: #f0efff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.hub-home-today-header time {
+  color: #6173aa;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.hub-home-schedule-list {
+  overflow: hidden;
+  flex: 1;
+  border: 1px solid #e4e9f3;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.7);
+}
+.hub-home-schedule-row {
+  min-height: 62px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 9px 64px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 9px;
+  color: #0a153d;
+  border-bottom: 1px solid #e8ecf4;
+  transition: background 160ms ease, color 160ms ease;
+}
+.hub-home-schedule-row:last-child {
+  border-bottom: 0;
+}
+.hub-home-schedule-row:hover {
+  color: #123cf3;
+  background: #f7f9ff;
+}
+.hub-home-schedule-row > time {
+  color: #6173aa;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.hub-home-schedule-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #8b5cf6;
+}
+.hub-home-schedule-dot.is-blue { background: #3b82f6; }
+.hub-home-schedule-dot.is-pink { background: #ec4899; }
+.hub-home-schedule-dot.is-mint { background: #34d399; }
+.hub-home-schedule-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.hub-home-schedule-copy strong,
+.hub-home-schedule-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hub-home-schedule-copy strong {
+  font-size: 13px;
+  font-weight: 750;
+}
+.hub-home-schedule-copy small {
+  color: #6173aa;
+  font-size: 11px;
+}
+.hub-home-schedule-empty {
+  min-height: 190px;
+  padding: 24px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  color: #72809f;
+  border: 1px dashed #dbe2ef;
+  border-radius: 16px;
+  background: #fbfcff;
+  font-size: 13px;
+  text-align: center;
+}
+.hub-home-schedule-empty p {
+  margin: 0;
+  color: #354263;
+  font-weight: 700;
+}
+.hub-home-schedule-empty a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #123cf3;
+  font-size: 12px;
+  font-weight: 700;
+}
 .hub-home-calendar-card {
-  padding: 20px;
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding: 18px 20px 20px;
+}
+.hub-home-calendar-viewport {
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
 .hub-home-calendar-title,
 .hub-home-calendar-tools,
@@ -6266,6 +6186,8 @@ h6,
 }
 .hub-home-calendar-nav button {
   width: 36px;
+  padding: 0;
+  cursor: pointer;
 }
 .hub-home-calendar-today,
 .hub-home-calendar-mode,
@@ -6281,23 +6203,23 @@ h6,
   grid-template-columns: repeat(7, minmax(0, 1fr));
   overflow: hidden;
   border: 1px solid #e7e9f2;
-  border-radius: 14px;
+  min-width: 680px;
+  border-radius: 13px;
   background: rgba(255, 255, 255, 0.56);
 }
 .hub-home-calendar-weekday {
-  height: 28px;
+  height: 31px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #6d7488;
   border-bottom: 1px solid #e7e9f2;
-  font-size: 10px;
-  font-weight: 850;
-  letter-spacing: 0.04em;
+  font-size: 11px;
+  font-weight: 700;
 }
 .hub-home-calendar-day {
   position: relative;
-  min-height: 58px;
+  min-height: 60px;
   padding: 7px;
   display: flex;
   flex-direction: column;
@@ -6332,8 +6254,12 @@ h6,
 }
 .hub-home-calendar-event {
   max-width: 100%;
-  padding: 3px 6px;
+  min-height: 18px;
+  padding: 3px 7px;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 5px;
   border-radius: 6px;
   color: #3d455c;
   font-size: 10px;
@@ -6342,12 +6268,10 @@ h6,
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.hub-home-calendar-event::after {
-  content: "";
-  display: block;
-  width: 3px;
-  height: 3px;
-  margin-top: 4px;
+.hub-home-calendar-event > span {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
   border-radius: 999px;
   background: currentColor;
 }
@@ -6377,6 +6301,65 @@ h6,
   color: #778095;
   font-size: 10px;
   font-weight: 750;
+}
+@media (min-width: 961px) {
+  .hub-home-grid {
+    gap: 14px;
+  }
+  .hub-home-main-column,
+  .hub-home-side-column {
+    gap: 16px;
+  }
+  .hub-home-hero-card,
+  .hub-home-today-card {
+    min-height: 272px;
+  }
+  .hub-home-hero-card {
+    padding: clamp(24px, 2.35vw, 34px);
+  }
+  .hub-home-welcome-label {
+    margin-bottom: 12px;
+  }
+  .hub-home-hero-copy h1 {
+    font-size: clamp(36px, 3.25vw, 48px);
+  }
+  .hub-home-hero-copy p {
+    margin-top: 12px;
+    font-size: clamp(15px, 1.2vw, 18px);
+  }
+  .hub-home-explore-button {
+    min-height: 44px;
+    margin-top: 18px;
+    padding-inline: 19px;
+  }
+  .hub-home-today-card {
+    padding: 17px 16px;
+  }
+  .hub-home-today-header {
+    padding-bottom: 10px;
+  }
+  .hub-home-today-header h2 {
+    font-size: 26px;
+  }
+  .hub-home-schedule-row {
+    min-height: 52px;
+    padding: 8px 10px;
+    grid-template-columns: 8px 58px minmax(0, 1fr) 16px;
+    gap: 8px;
+  }
+  .hub-home-calendar-card {
+    padding: 14px 16px 16px;
+  }
+  .hub-home-calendar-grid {
+    margin-top: 10px;
+  }
+  .hub-home-calendar-weekday {
+    height: 28px;
+  }
+  .hub-home-calendar-day {
+    min-height: 52px;
+    padding: 5px 6px;
+  }
 }
 .hub-home-hero {
   display: grid;
@@ -6709,8 +6692,8 @@ h6,
 }
 @media (max-width: 1280px) {
   .hub-home-grid {
-    grid-template-columns: minmax(0, 1fr) minmax(320px, 360px);
-    gap: 18px;
+    grid-template-columns: minmax(0, 1.7fr) minmax(285px, 0.9fr);
+    gap: 16px;
   }
   .hub-home-main-column,
   .hub-home-side-column {
@@ -6723,7 +6706,7 @@ h6,
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
-@media (max-width: 860px) {
+@media (max-width: 1100px) {
   .hub-home-grid {
     grid-template-columns: 1fr;
   }
@@ -6734,6 +6717,9 @@ h6,
   .hub-home-hero-card {
     order: 1;
   }
+  .hub-home-today-card {
+    order: 2;
+  }
   .hub-home-todo-card {
     order: 2;
   }
@@ -6743,9 +6729,13 @@ h6,
   .hub-home-hero-card {
     min-height: 280px;
     padding: 26px;
+    background-position: 60% center;
   }
   .hub-home-hero-copy h1 {
     max-width: 520px;
+  }
+  .hub-home-today-card {
+    min-height: auto;
   }
   .hub-home-calendar-header {
     align-items: flex-start;
@@ -6766,16 +6756,26 @@ h6,
 }
 @media (max-width: 560px) {
 .hub-home-hero-card,
+.hub-home-today-card,
 .hub-home-todo-card,
 .hub-home-calendar-card {
   border-radius: 24px;
 }
   .hub-home-hero-card {
     min-height: 330px;
+    background-position: 68% center;
+  }
+  .hub-home-today-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
   }
   .hub-home-hero-copy h1 {
-    padding-right: 72px;
-    font-size: 34px;
+    padding-right: 0;
+    font-size: 38px;
+  }
+  .hub-home-hero-copy {
+    max-width: 94%;
   }
   .hub-home-hero-copy p {
     margin-top: 24px;
@@ -6788,14 +6788,13 @@ h6,
   .hub-home-history-button {
     width: 100%;
   }
-  .hub-home-calendar-card {
-    overflow-x: auto;
-  }
   .hub-home-calendar-header {
-    min-width: 620px;
+    min-width: 0;
+    align-items: center;
+    flex-direction: row;
   }
   .hub-home-calendar-grid {
-    min-width: 620px;
+    min-width: 680px;
   }
   .hub-home-category-grid {
     grid-template-columns: 1fr;
@@ -6816,11 +6815,11 @@ h6,
   --sidebar-motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   top: auto;
-  width: 212px;
+  width: 184px;
   height: 100%;
   max-height: 100%;
   margin: 0;
-  padding: 12px 8px 52px;
+  padding: 10px 7px 48px;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   color: #646474;
@@ -6869,7 +6868,7 @@ h6,
 .hub-sidebar-nav {
   position: relative;
   min-height: 0;
-  margin-top: 10px;
+  margin-top: 7px;
   margin-bottom: 0;
   padding-right: 2px;
   display: flex;
@@ -7249,10 +7248,10 @@ h6,
   width: auto;
   height: var(--hub-topbar-height);
   margin: 0 var(--hub-topbar-right-inset) 0 var(--hub-topbar-frame-start);
-  padding: 0 18px 0 20px;
+  padding: 0 15px 0 17px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  column-gap: clamp(14px, 1.85vw, 28px);
+  column-gap: clamp(12px, 1.5vw, 22px);
   align-items: center;
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 999px;
@@ -7343,7 +7342,7 @@ h6,
   content: none;
 }
 .hub-topbar-brand, .hub-topbar-actions, .hub-topbar-brand nav { display: flex; align-items: center; }
-.hub-topbar-brand { gap: clamp(20px, 3.2vw, 40px); min-width: 0; }
+.hub-topbar-brand { gap: clamp(16px, 2.5vw, 30px); min-width: 0; }
 .hub-topbar-brand nav { gap: 6px; }
 .hub-topbar-brand nav a,
 .hub-topbar-brand nav button {
@@ -7366,6 +7365,15 @@ h6,
     border-color 160ms ease,
     color 160ms ease,
     box-shadow 160ms ease;
+}
+.hub-topbar-update-dot {
+  width: 6px;
+  height: 6px;
+  margin-left: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #123cf3;
+  box-shadow: 0 0 0 3px rgba(18, 60, 243, 0.08);
 }
 .hub-topbar-brand nav a:hover,
 .hub-topbar-brand nav button:hover,
@@ -7523,10 +7531,12 @@ h6,
     padding-inline: 10px;
   }
   .hub-app-column { height: auto; max-height: none; overflow: visible; background: transparent; }
+  .hub-content-stage { --clinician-page-pad-y: 1.65rem; }
+  .hub-content-stage .clinician-page.is-compact { --clinician-page-pad-y: 1.5rem; }
   .hub-sidebar {
-    position: relative; width: 100%; height: auto; min-height: 76px; max-height: none; padding: 18px 18px 0; border-right: 1px solid rgba(255, 255, 255, 0.72); border-bottom: 1px solid rgba(255, 255, 255, 0.72); border-radius: 26px; overflow: visible;
+    position: relative; width: 100%; height: auto; min-height: 76px; max-height: none; padding: 18px 18px 60px; border-right: 1px solid rgba(255, 255, 255, 0.72); border-bottom: 1px solid rgba(255, 255, 255, 0.72); border-radius: 26px; overflow: visible;
   }
-  .hub-sidebar-nav { grid-template-columns: repeat(2, minmax(0,1fr)); max-height: 250px; }
+  .hub-sidebar-nav { margin-top: 10px; grid-template-columns: repeat(2, minmax(0,1fr)); max-height: 250px; }
   .hub-sidebar.is-collapsed { width: 100%; margin-right: 0; transform: none; }
   .hub-sidebar.is-collapsed .hub-sidebar-nav { display: none; }
   html:has(.hub-app-shell),
